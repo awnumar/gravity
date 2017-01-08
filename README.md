@@ -16,7 +16,7 @@ This means that the brute-force attack described above becomes infeasable for an
 
 ### Encryption
 
-Rolling your own crypto is bad. That's why Pocket uses the excellent NaCl library's symmetric encryption functions. That's `xSalsa20` with a `Poly1305 MAC` for authenticity and integrity.
+Rolling your own crypto is bad. That's why Pocket uses the excellent NaCl library's symmetric encryption functions. That's `xSalsa20` with a `Poly1305 MAC` for confidentiality, authenticity, and integrity.
 
 ## Installation and Usage
 
