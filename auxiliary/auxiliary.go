@@ -29,19 +29,19 @@ func Setup() error {
 	}
 
 	// Check if we've done this before.
-	if _, err = os.Stat("./.envelope/secrets"); err == nil {
+	if _, err = os.Stat("./.pocket/secrets"); err == nil {
 		// Apparently we have.
 		return nil
 	}
 
 	// Create a directory to store our stuff in.
-	err = os.Mkdir("./.envelope", 0700)
+	err = os.Mkdir("./.pocket", 0700)
 	if err != nil && !os.IsExist(err) {
 		log.Fatalln(err)
 	}
 
 	// Create an empty storage file for the secrets.
-	err = ioutil.WriteFile("./.envelope/secrets", []byte(""), 0700)
+	err = ioutil.WriteFile("./.pocket/secrets", []byte(""), 0700)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -90,13 +90,13 @@ func SaveSecrets(secrets map[string]interface{}) {
 
 	// Write the JSON to the disk.
 	data := base64.StdEncoding.EncodeToString([]byte(jsonFormattedSecrets))
-	ioutil.WriteFile("./.envelope/secrets", []byte(data), 0700)
+	ioutil.WriteFile("./.pocket/secrets", []byte(data), 0700)
 }
 
 // RetrieveSecrets retrieves the secrets from the disk.
 func RetrieveSecrets() map[string]interface{} {
 	// Read the raw JSON from the disk.
-	jsonFormattedSecrets, err := ioutil.ReadFile("./.envelope/secrets")
+	jsonFormattedSecrets, err := ioutil.ReadFile("./.pocket/secrets")
 	if err != nil {
 		log.Fatalln(err)
 	}

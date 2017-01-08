@@ -4,8 +4,8 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/libeclipse/envelope/auxiliary"
-	"github.com/libeclipse/envelope/crypto"
+	"github.com/libeclipse/pocket/auxiliary"
+	"github.com/libeclipse/pocket/crypto"
 )
 
 var (
@@ -99,7 +99,7 @@ func forget() {
 	if secretData[identifier] != nil {
 		// Decryption here serves no cryptographic purpose. The reason for it is
 		// so that deleting the entry through the application isn't trivial. Of
-		// course the attacker could still simply just `rm -rf ~/.envelope/secrets`
+		// course the attacker could still simply just `rm -rf ~/.pocket/secrets`
 		crypto.Decrypt(secretData[identifier].(string), key)
 
 		// Delete the entry. This code will never be reached if the decryption failed.
