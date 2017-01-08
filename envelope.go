@@ -61,11 +61,15 @@ func retrieve() {
 
 func store() {
 	secret := auxiliary.Input("[-] secret: ")
-	// TODO: check if secret exists before overwriting.
-	secretData[string(identifier)] = secret
-	auxiliary.SaveSecrets(secretData)
+	if secretData[string(identifier)] == nil {
+		secretData[string(identifier)] = secret
+		auxiliary.SaveSecrets(secretData)
+	} else {
+		fmt.Println("[!] cannot overwrite existing entry")
+	}
 }
 
 func forget() {
-	fmt.Println("[+] ready to forget secret")
+	delete(secretData, string(identifier))
+	auxiliary.SaveSecrets(secretData)
 }
