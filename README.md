@@ -12,7 +12,7 @@ This ensures that even in the event of the password being compromised, an advers
 
 The `Scrypt` key deriviation function is used - with `N = 2^20` for the encryption key and `N = 2^18` for hashing the identifier.
 
-This means that the brute-force attack described above becomes infeasable for any non-trivial identifier.
+This means that the brute-force attack described above becomes infeasible for any non-trivial identifier.
 
 ### Encryption
 
@@ -26,7 +26,7 @@ To compile the program, simply run:
 
 This will create a binary in the current directory called `pocket`.
 
-Optionally for ease of use, you can then create a soft link to a directory that's in your path:
+Optionally (for ease of use) you can then create a soft link to a directory that's in your path:
 
 `~ >> ln -s /path/to/pocket /usr/bin/pocket`
 
