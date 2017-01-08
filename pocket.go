@@ -1,19 +1,15 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"os"
 
 	"github.com/libeclipse/pocket/auxiliary"
 	"github.com/libeclipse/pocket/crypto"
 )
 
 var (
-	// This stores the mode that we're running in.
-	// 0 => Retrieve secret.
-	// 1 => Store secret.
-	// 2 => Forget secret.
-	mode int
+	mode string
 
 	key        []byte
 	identifier string
@@ -22,15 +18,24 @@ var (
 )
 
 func main() {
-	// Command line flag to determine mode at runtime.
-	flag.IntVar(&mode, "m", 0, "specify mode: 0 => retrieve (default); 1 => store; 2 => forget")
+	// Parse command line flags.
+	if len(os.Args) < 1 {
+		fmt.Println("[!] mode not specified; use -h for help")
+		os.Exit(1)
+	}
 
-	// Parse the flags.
-	flag.Parse()
+	argument := os.Args[1]
+	if argument == "-h" || argument == "--help" {
+		fmt.Printf("Usage: %s [get|store|forget]\n", os.Args[0])
+		os.Exit(2)
+	} else {
+		mode = argument
+	}
 
-	// Verify mode is valid.
-	if mode > 2 || mode < 0 {
+	// Verify that mode is valid.
+	if mode != "get" && mode != "store" && mode != "forget" {
 		fmt.Println("[!] invalid mode; use -h for help")
+		os.Exit(1)
 	}
 
 	// Run setup.
@@ -55,11 +60,11 @@ func main() {
 
 	// Launch appropriate function for run-mode.
 	switch mode {
-	case 0:
+	case "get":
 		retrieve()
-	case 1:
+	case "store":
 		store()
-	case 2:
+	case "forget":
 		forget()
 	}
 
@@ -69,7 +74,6 @@ func main() {
 }
 
 func retrieve() {
-
 	secret := secretData[identifier]
 	if secret != nil {
 		fmt.Println("[+] secret:", crypto.Decrypt(secret.(string), key))
@@ -87,6 +91,8 @@ func store() {
 		// Store and save the id/secret pair.
 		secretData[identifier] = crypto.Encrypt(secret, key)
 		auxiliary.SaveSecrets(secretData)
+
+		fmt.Println("[+] ok, i'll remember that")
 	} else {
 		// Warn that there is already data here.
 		fmt.Println("[!] cannot overwrite existing entry")
@@ -104,5 +110,9 @@ func forget() {
 		// Delete the entry. This code will never be reached if the decryption failed.
 		delete(secretData, string(identifier))
 		auxiliary.SaveSecrets(secretData)
+
+		fmt.Println("[+] it is forgotten")
+	} else {
+		fmt.Println("[+] nothing to do")
 	}
 }
