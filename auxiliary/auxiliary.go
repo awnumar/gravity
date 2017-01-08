@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
 	"syscall"
@@ -18,41 +19,51 @@ func Setup() error {
 	// Get the current user.
 	user, err := user.Current()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	// Change the working directory to the user's home.
 	err = os.Chdir(user.HomeDir)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	// Check if we've done this before.
-	if _, err = os.Stat("./.envelope"); err == nil {
+	if _, err = os.Stat("./.envelope/secrets"); err == nil {
 		// Apparently we have.
 		return nil
 	}
 
 	// Create a directory to store our stuff in.
 	err = os.Mkdir("./.envelope", 0700)
+	if err != nil && !os.IsExist(err) {
+		log.Fatalln(err)
+	}
+
+	// Create an empty storage file for the secrets.
+	err = ioutil.WriteFile("./.envelope/secrets", []byte(""), 0700)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	return nil
 }
 
 // GetPass prompts for input without echo.
-func GetPass() []byte {
+func GetPass(prompt string) []byte {
+	// Output prompt.
+	fmt.Print(prompt)
+
+	// Get input without echoing back.
 	input, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
+
+	// Output a newline for formatting.
 	fmt.Println()
+
+	// Return password.
 	return input
 }
 
@@ -80,30 +91,24 @@ func SaveSecrets(secrets map[string]interface{}) {
 	// Convert interface{} into raw JSON.
 	jsonFormattedSecrets, err := json.Marshal(secrets)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	// Write the JSON to the disk.
-	ioutil.WriteFile("./.envelope/secrets.enc", []byte(jsonFormattedSecrets), 0700)
+	ioutil.WriteFile("./.envelope/secrets", []byte(jsonFormattedSecrets), 0700)
 }
 
 // RetrieveSecrets retrieves the secrets from the disk.
 func RetrieveSecrets() map[string]interface{} {
 	// Read the raw JSON from the disk.
-	jsonFormattedSecrets, err := ioutil.ReadFile("./.envelope/secrets.enc")
+	jsonFormattedSecrets, err := ioutil.ReadFile("./.envelope/secrets")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	// Convert the JSON into an interface{} type.
 	secrets := make(map[string]interface{})
-	err = json.Unmarshal(jsonFormattedSecrets, &secrets)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	json.Unmarshal(jsonFormattedSecrets, &secrets)
 
 	// Return the secrets.
 	return secrets

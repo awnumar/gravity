@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
 
 	"github.com/libeclipse/envelope/auxiliary"
 )
@@ -23,28 +22,19 @@ var (
 
 func main() {
 	// Command line flag to determine mode at runtime.
-	flag.IntVar(&mode, "m", 0, "specify mode. 0 => retrieve secret (default); 1 => store secret; 2 => forget secret\n")
-
-	// Specify the string that identifies the secret that we'll retrieve/store.
-	id := flag.String("i", "", "identifies the entry that we'll store/retrieve; in case of your master password leaking, a strong id here may still protect your data\n")
+	flag.IntVar(&mode, "m", 0, "specify mode: 0 => retrieve (default); 1 => store; 2 => forget")
 
 	// Parse the flags.
 	flag.Parse()
 
-	// Verify that an identifier was specified.
-	if len(*id) != 0 {
-		identifier = []byte(*id)
-	} else {
-		fmt.Println("[!] id not specified; use -h for help")
-		os.Exit(1)
-	}
-
 	// Run setup.
 	auxiliary.Setup()
 
-	// Prompt user for masterPassword.
-	fmt.Print("[-] master password: ")
-	masterPassword = auxiliary.GetPass()
+	// Prompt user for the master password.
+	masterPassword = auxiliary.GetPass("[-] master password: ")
+
+	// Prompt user for identifier.
+	identifier = []byte(auxiliary.Input("[-] identifier: "))
 
 	// Grab pre-saved secrets.
 	secretData = auxiliary.RetrieveSecrets()
@@ -61,13 +51,15 @@ func main() {
 }
 
 func retrieve() {
-	fmt.Println("[+] retrieving secret...")
 	secret := secretData[string(identifier)]
-	fmt.Println("[+] secret:", secret)
+	if secret != nil {
+		fmt.Println("[+] secret:", secret)
+	} else {
+		fmt.Println("[+] nothing to see here")
+	}
 }
 
 func store() {
-	fmt.Println("[+] storing another secret...")
 	secret := auxiliary.Input("[-] secret: ")
 	// TODO: check if secret exists before overwriting.
 	secretData[string(identifier)] = secret
