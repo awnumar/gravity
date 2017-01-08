@@ -20,7 +20,7 @@ var (
 func main() {
 	// Parse command line flags.
 	if len(os.Args) < 2 {
-		fmt.Println("[!] mode not specified; use -h for help")
+		fmt.Println("[!] mode not specified; use `pocket help`")
 		os.Exit(1)
 	}
 
@@ -34,7 +34,7 @@ func main() {
 
 	// Verify that mode is valid.
 	if mode != "get" && mode != "store" && mode != "forget" {
-		fmt.Println("[!] invalid mode; use -h for help")
+		fmt.Println("[!] invalid mode; use `pocket help`")
 		os.Exit(1)
 	}
 
