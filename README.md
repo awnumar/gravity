@@ -12,7 +12,7 @@ Another side-effect of this arrangement is that it doesn't disallow you from usi
 
 ### Hash Function
 
-The `Scrypt` key deriviation function is used - with `N = 2^20` for the encryption key and `N = 2^18` for hashing the identifier.
+The `Scrypt` key deriviation function is used with `N = 2^20`.
 
 This means that the brute-force attack described above becomes infeasible for any non-trivial identifier.
 

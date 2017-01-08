@@ -72,7 +72,7 @@ func Decrypt(base64EncodedCiphertext string, key []byte) string {
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
 func DeriveKey(password, identifier []byte) []byte {
-	derivedKey, _ := scrypt.Key(password, identifier, 1<<20, 8, 1, 32)
+	derivedKey, _ := scrypt.Key(password, identifier, 1<<18, 8, 1, 32)
 	return derivedKey
 }
 
