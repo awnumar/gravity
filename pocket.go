@@ -25,7 +25,7 @@ func main() {
 	}
 
 	argument := os.Args[1]
-	if argument == "-h" || argument == "--help" {
+	if argument == "-h" || argument == "--help" || argument == "help" {
 		fmt.Printf("Usage: %s [get|store|forget]\n", os.Args[0])
 		os.Exit(2)
 	} else {
