@@ -12,6 +12,8 @@ This ensures that even in the event of the password being compromised, an advers
 
 The `Scrypt` key deriviation function is used - with `N = 2^20` for the encryption key and `N = 2^18` for hashing the identifier.
 
+This means that the brute-force attack described above becomes infeasable for any non-trivial identifier.
+
 ### Encryption
 
 Rolling your own crypto is bad. That's why Pocket uses the excellent NaCl library's symmetric encryption functions. That's `xSalsa20` with a `Poly1305 MAC` for authenticity and integrity.
