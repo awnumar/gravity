@@ -2,11 +2,11 @@
 
 Protect super secret passwords and sketchy snippets - even in the case of your password being leaked.
 
-Each secret is encrypted with its own individual encryption key, derived from the password supplied and a string that identifies the secret. The secret is then stored as a `hashed identifier`: `encrypted secret` pair.
+Each secret is encrypted with its own individual encryption key, derived from the password supplied and a string that identifies the secret. The secret is then stored as a `hashed identifier`:`encrypted secret` pair.
 
 This ensures that even in the event of the password being compromised, an adversary would be unable to decrypt the secret, and would instead have to resort to brute-forcing the identifier.
 
-Another side-effect of this arrangement is that it doesn't disallow you from using multiple passwords. So if you felt like it, you could use separate passwords for different secrets, and no one even would know.
+Another side-effect of this arrangement is that it doesn't disallow you from using multiple passwords. So (if you felt like it) you could use separate passwords for different secrets, and no one would ever know.
 
 ## Technical Information
 
