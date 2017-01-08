@@ -11,7 +11,6 @@ import (
 	"os/user"
 	"syscall"
 
-	"golang.org/x/crypto/scrypt"
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -66,12 +65,6 @@ func GetPass(prompt string) []byte {
 
 	// Return password.
 	return input
-}
-
-// DeriveKey derives a 32 byte encryption key from a masterPassword and identifier.
-func DeriveKey(masterPassword, identifier []byte, N uint) []byte {
-	dk, _ := scrypt.Key(masterPassword, identifier, 1<<N, 8, 1, 32)
-	return dk
 }
 
 // Input takes input from the user.
