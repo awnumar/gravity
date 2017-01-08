@@ -2,6 +2,7 @@ package auxiliary
 
 import (
 	"bufio"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -95,7 +96,8 @@ func SaveSecrets(secrets map[string]interface{}) {
 	}
 
 	// Write the JSON to the disk.
-	ioutil.WriteFile("./.envelope/secrets", []byte(jsonFormattedSecrets), 0700)
+	data := base64.StdEncoding.EncodeToString([]byte(jsonFormattedSecrets))
+	ioutil.WriteFile("./.envelope/secrets", []byte(data), 0700)
 }
 
 // RetrieveSecrets retrieves the secrets from the disk.
@@ -106,7 +108,14 @@ func RetrieveSecrets() map[string]interface{} {
 		log.Fatalln(err)
 	}
 
-	// Convert the JSON into an interface{} type.
+	// Convert the secrets from base64.
+	jsonFormattedSecrets, err = base64.StdEncoding.DecodeString(string(jsonFormattedSecrets))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Convert JSON to map[string]interface{} type.
 	secrets := make(map[string]interface{})
 	json.Unmarshal(jsonFormattedSecrets, &secrets)
 
