@@ -66,7 +66,6 @@ func main() {
 	// Clear sensitive data from memory. (Probably not secure, but good enough.)
 	key = []byte("")
 	identifier = ""
-	secretData = make(map[string]interface{})
 }
 
 func retrieve() {
