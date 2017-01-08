@@ -19,7 +19,7 @@ var (
 
 func main() {
 	// Parse command line flags.
-	if len(os.Args) < 1 {
+	if len(os.Args) < 2 {
 		fmt.Println("[!] mode not specified; use -h for help")
 		os.Exit(1)
 	}
