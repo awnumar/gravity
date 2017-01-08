@@ -1,5 +1,18 @@
 # pocket
-Protect your secrets - even if your password is leaked.
+
+Protect super secret passwords and sketchy snippets - even in the case of your password being leaked.
+
+Each secret is encrypted with its own individual encryption key, derived from the password supplied and a string that identifies the secret. The secret is then stored as a `hashed identifier`: `encrypted secret` pair. This ensures that even in the event of the password being compromised, an adversary would be unable to decrypt the secret, and would instead have to resort to brute-forcing the identifier.
+
+## Technical Information
+
+### Hash Function
+
+The `Scrypt` key deriviation function is used - with `N = 2^20` for the encryption key and `N = 2^18` for hashing the identifier.
+
+### Encryption
+
+Rolling your own crypto is bad. That's why Pocket uses the excellent NaCl library's symmetric encryption functions. That's `xSalsa20` with a `Poly1305 MAC` for authenticity and integrity.
 
 ## Installation and Usage
 
