@@ -1,1 +1,9 @@
-language: go
+language:
+    go
+
+notifications:
+    email:
+        false
+    slack:
+        rooms:
+            secure: a7R2yu1BW5ujkRkO3H6eKW2Hog9pasTtPto6Rk7GTtMNxEKfAbND7G1bywe1nkd9IWanPgf2ZIoUlVjsx1MNIIEM9R0SmWFopN5oKZMpat6PJqbV2yDMc8Hjh4u2lzDr4ycFKJWgNlIAbcuSoub1GoWyUJsgkQvRM9eeAnnFODQEhSRc02DVVrByfq2OYP9NpbB3ull6Bo5lDNX7qSyhLpKmX3Om8Wt2uH55GcrN6KEMRxonjDWbjfTPSGxS6JMaleHeMYDNWOCA8Yp6Hruzw1QvwgSMobga3yw0D+vfaAoKkRftW6h8WnXEddNDAimKr5VCMp+A43op9jqYULE6hsu7WgWQCqTz+puBOeAvaUnAjKVEAsWTuVnyDozPhS2fOCDxHdxAhMl+9q8fl+InE8N9kkHv429sAb9ZSfQ7eBLpEEuWRJ29lWhPwEEewE1eEX8wTIrOCqZZ4/caafYP7qRqxwujrKcwsg853jjd44s314biiXDh7MXivEvk9h1pxQO5gG027rolsg5RL83rSV/2vZg/D7hsjn3GReKcXlsGA6purV9eM3a1UNToZp8yI+ChN2tg/k3fduvEuxqrHgF2yMd0ro66UmbbR/ck7bnhFXU1VKhOvVTx4hwu7kcw2pxeAzrFt41wO7yXeCEt222JdOGCCPv+KTOENHciKfI=
