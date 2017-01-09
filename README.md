@@ -26,8 +26,6 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 `~ >> pocket`
 
-## Usage
+## Credits
 
-### `pocket add`
-
-This mode is for adding new secrets.
+- [@dotcppfile](https://github.com/dotcppfile) - Came up with ideas and always there to brainstorm and bounce thoughts off. Truly invaluable to the project. 
