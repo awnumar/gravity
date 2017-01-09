@@ -6,13 +6,13 @@ Protect super secret passwords and sketchy snippets - even in the case of your p
 
 ## Features
 
-*All of these features have not yet been implemented.*
+**_All of these features have not yet been implemented._**
 
-* Multi-layer security - the password alone isn't enough to compromise your secrets.
-* Multiple password support - you're free to use different passwords for different entries, and no one would ever know that you did.
-* Deniability - _pocket_ will randomly add decoy entries so in the event of rubber-hose cryptnalysis, you can claim that some/all the entries are decoys.
-* Hidden entry identifiers - the entry identifiers are hashed so that an attacker cannot even tell what type of data is stored. There have been many cases where users have encrypted their data, but file names have still given them away. In _pocket_, this is mitigated.
-* Hidden data length - every entry is padded to a fixed length so that it is impossible to determine the length of the secret.
+* **Multi-layer security** - the password alone isn't enough to compromise your secrets.
+* **Multiple password support** - you're free to use different passwords for different entries, and no one would ever know that you did.
+* **Deniability** - _pocket_ will randomly add decoy entries so in the event of rubber-hose cryptnalysis, you can claim that some/all the entries are decoys.
+* **Hidden entry identifiers** - the entry identifiers are hashed so that an attacker cannot even tell what type of data is stored. There have been many cases where users have encrypted their data, but file names have still given them away. In _pocket_, this is mitigated.
+* **Hidden data length** - every entry is padded to a fixed length so that it is impossible to determine the length of the secret.
 
 ## Installation
 
