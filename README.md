@@ -1,5 +1,9 @@
 # pocket
 
+<a href="https://github.com/spaceshuttl/pocket/">
+  <img src="https://spaceshuttl.io/pocket.svg" width="100%" height="144">
+</a>
+
 [![license](https://img.shields.io/github/license/libeclipse/pocket.svg)](https://raw.githubusercontent.com/libeclipse/pocket/master/LICENSE) [![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
@@ -28,4 +32,4 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 ## Credits
 
-- [@dotcppfile](https://github.com/dotcppfile) - Came up with ideas and always there to brainstorm and bounce thoughts off. Truly invaluable to the project. 
+- [@dotcppfile](https://github.com/dotcppfile) - Came up with ideas and always there to brainstorm and bounce thoughts off. Truly invaluable to the project.
