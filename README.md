@@ -22,28 +22,10 @@ Rolling your own crypto is bad. That's why Pocket uses the excellent NaCl librar
 
 ## Installation and Usage
 
-### Option One
-
 Simply run:
 
 `~ >> go get github.com/libeclipse/pocket`
 
 This will fetch, compile, and install Pocket automatically. An added bonus is that it should now be in your PATH so you can call the program from anywhere with a simple:
-
-`~ >> pocket`
-
-### Option Two
-
-To compile the program, simply run:
-
-`~ >> go build ./pocket.go`
-
-This will create a binary in the current directory called `pocket`.
-
-Optionally (for ease of use) you can then create a soft link to a directory that's in your PATH:
-
-`~ >> ln -s /path/to/pocket /usr/bin/pocket`
-
-This will allow you to call the program from anywhere with a simple:
 
 `~ >> pocket`
