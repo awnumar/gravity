@@ -1,5 +1,7 @@
 # pocket
 
+[![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket)
+
 Protect super secret passwords and sketchy snippets - even in the case of your password being leaked.
 
 Each secret is encrypted with its own individual encryption key, derived from the password supplied and a string that identifies the secret. The secret is then stored as a `hashed identifier`:`encrypted secret` pair.
