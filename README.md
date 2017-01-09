@@ -2,7 +2,7 @@
 
 [![license](https://img.shields.io/github/license/libeclipse/pocket.svg)](https://raw.githubusercontent.com/libeclipse/pocket/master/LICENSE) [![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
 
-<a href="https://github.com/spaceshuttl/pocket/">
+<a style="float: right;" href="https://github.com/spaceshuttl/pocket/">
   <img src="https://spaceshuttl.io/pocket.svg" width="100%" height="144">
 </a>
 
