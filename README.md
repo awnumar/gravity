@@ -2,11 +2,13 @@
 
 [![license](https://img.shields.io/github/license/libeclipse/pocket.svg)](https://raw.githubusercontent.com/libeclipse/pocket/master/LICENSE) [![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
 
+***Note: Still in alpha stages. Should not (yet) be used seriously.***
+
 Protect super secret passwords and sketchy snippets - even in the case of your password being leaked.
 
 ## Features
 
-**_All of these features have not yet been implemented._**
+***All of these features have not yet been implemented.***
 
 * ***Multi-layer security*** - the password alone isn't enough to compromise your secrets.
 * ***Multiple password support*** - you're free to use different passwords for different entries, and no one would ever know that you did.
@@ -23,3 +25,9 @@ Simply run:
 This will fetch, compile, and install *pocket* automatically. An added bonus is that it should now be in your PATH so you can call the program from anywhere with a simple:
 
 `~ >> pocket`
+
+## Usage
+
+### `pocket add`
+
+This mode is for adding new secrets.

@@ -26,14 +26,14 @@ func main() {
 
 	argument := os.Args[1]
 	if argument == "-h" || argument == "--help" || argument == "help" || argument == "-help" {
-		fmt.Printf("Usage: %s [get|store|forget]\n", os.Args[0])
+		fmt.Printf("Usage: %s [get|add|forget]\n", os.Args[0])
 		os.Exit(2)
 	} else {
 		mode = argument
 	}
 
 	// Verify that mode is valid.
-	if mode != "get" && mode != "store" && mode != "forget" {
+	if mode != "get" && mode != "add" && mode != "forget" {
 		fmt.Println("[!] invalid mode; use `pocket help`")
 		os.Exit(1)
 	}
@@ -62,8 +62,8 @@ func main() {
 	switch mode {
 	case "get":
 		retrieve()
-	case "store":
-		store()
+	case "add":
+		add()
 	case "forget":
 		forget()
 	}
@@ -82,7 +82,7 @@ func retrieve() {
 	}
 }
 
-func store() {
+func add() {
 	// Prompt the user for the secret that we'll store.
 	secret := auxiliary.Input("[-] secret: ")
 
