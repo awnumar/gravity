@@ -10,6 +10,5 @@ test:
 
 build:
 	go build .
-	rm -rf ./pocket
 
 all: deps test build
