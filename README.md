@@ -30,4 +30,4 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 ## Credits
 
-- [@dotcppfile](https://twitter.com/dotcppfile) - Came up with ideas and always there to brainstorm and bounce thoughts off. Truly invaluable to the project.
+- [@dotcppfile](https://twitter.com/dotcppfile) - Brainstormed ideas with me and was always there to bounce thoughts off. Truly invaluable.
