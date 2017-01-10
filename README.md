@@ -22,7 +22,7 @@ Protect super secret passwords and sketchy snippets - even in the case of your p
 
 Simply run:
 
-`~ >> go get github.com/libeclipse/pocket`
+`~ >> go get -u github.com/libeclipse/pocket`
 
 This will fetch, compile, and install *pocket* automatically. An added bonus is that it should now be in your PATH so you can call the program from anywhere with a simple:
 
