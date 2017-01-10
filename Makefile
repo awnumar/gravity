@@ -9,6 +9,6 @@ test:
 	go test -v ./...
 
 build:
-	go build .
+	go build -v .
 
 all: deps test build
