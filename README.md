@@ -31,3 +31,4 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 ## Credits
 
 - [@dotcppfile](https://twitter.com/dotcppfile) - Brainstormed ideas with me and was always there to bounce thoughts off. Truly invaluable.
+- [@mnzt](https://github.com/mnzt) - Massive annoyance (in a good way). Keeps pestering me to include good-practice things and thereby improves the general quality of the project. (Also he said mean things to me until I put him here.)
