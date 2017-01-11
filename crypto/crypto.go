@@ -3,6 +3,7 @@ package crypto
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -85,4 +86,44 @@ func DeriveKey(password, identifier []byte) []byte {
 func DeriveID(identifier []byte) string {
 	dk, _ := scrypt.Key(identifier, []byte(""), 1<<18, 8, 1, 32)
 	return base64.StdEncoding.EncodeToString(dk)
+}
+
+// Pad implements PKCS#7 as described in RFC 5652.
+func Pad(text []byte, padTo int) ([]byte, error) {
+	// Check if input is even valid.
+	if len(text) > padTo {
+		return nil, errors.New("pad: input length greater than padTo length")
+	}
+
+	// Add the padding.
+	padLen := padTo - len(text)
+	for c := 1; c <= padLen; c++ {
+		text = append(text, []byte(string(padLen))...)
+	}
+
+	// Return padded byte slice.
+	return text, nil
+}
+
+// Unpad reverses PKCS#7 as described in RFC 5652.
+func Unpad(text []byte) []byte {
+	// Get the supposed length of the padding.
+	padLen := int(text[len(text)-1])
+
+	// If the length is more than the size of
+	// the text, there's obviously no padding.
+	if padLen > len(text) {
+		return text
+	}
+
+	// Check if all the padding bytes are the same.
+	for i := len(text) - 1; i >= len(text)-padLen; i-- {
+		if text[i] != text[len(text)-1] {
+			// This isn't padding that we're looking at.
+			return text
+		}
+	}
+
+	// Return everything except the padding.
+	return text[:len(text)-padLen]
 }
