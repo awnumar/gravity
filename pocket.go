@@ -89,7 +89,7 @@ func add() {
 	// Check if there's a secret there already so we don't overwrite it.
 	if secretData[identifier] == nil {
 		// Store and save the id/secret pair.
-		secretData[identifier] = crypto.Encrypt(secret, key)
+		secretData[identifier] = crypto.Encrypt([]byte(secret), key)
 		auxiliary.SaveSecrets(secretData)
 
 		fmt.Println("[+] ok, i'll remember that")

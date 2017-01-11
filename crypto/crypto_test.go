@@ -42,7 +42,7 @@ func TestPad(t *testing.T) {
 	// Test when padTo < len(text)
 	padded, err := Pad(text, 15)
 	if err == nil {
-		t.Error("Expected en error since inputs are invalid.")
+		t.Error("Expected an error since inputs are invalid.")
 	}
 
 	// Test when padTo == len(text)

@@ -28,7 +28,7 @@ func generateRandomBytes(n int) []byte {
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
-func Encrypt(plaintext string, key []byte) string {
+func Encrypt(plaintext []byte, key []byte) string {
 	// Generate a random nonce.
 	nonceSlice := generateRandomBytes(24)
 
@@ -41,7 +41,7 @@ func Encrypt(plaintext string, key []byte) string {
 	copy(secretKey[:], key)
 
 	// Encrypt the plaintext.
-	ciphertext := secretbox.Seal(nonce[:], []byte(plaintext), &nonce, &secretKey)
+	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, &secretKey)
 
 	// Return the base64 encoded ciphertext.
 	return base64.StdEncoding.EncodeToString(ciphertext)
@@ -98,7 +98,7 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 	// Add the padding.
 	padLen := padTo - len(text)
 	for c := 1; c <= padLen; c++ {
-		text = append(text, []byte(string(padLen))...)
+		text = append(text, byte(padLen))
 	}
 
 	// Return padded byte slice.
