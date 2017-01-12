@@ -44,9 +44,17 @@ func main() {
 
 	// Prompt user for the password without echoing back.
 	password := auxiliary.GetPass("[-] password: ")
+	if len(password) < 1 {
+		fmt.Println("[!] length of password must be non-zero")
+		os.Exit(1)
+	}
 
 	// Prompt user for identifier.
 	id := []byte(auxiliary.Input("[-] identifier: "))
+	if len(id) < 1 {
+		fmt.Println("[!] length of identifier must be non-zero")
+		os.Exit(1)
+	}
 
 	// Derive and store encryption key.
 	fmt.Println("[+] deriving encryption key...")
