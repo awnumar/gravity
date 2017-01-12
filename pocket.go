@@ -58,11 +58,11 @@ func main() {
 
 	// Derive and store encryption key.
 	fmt.Println("[+] deriving encryption key...")
-	key = crypto.DeriveKey(password, id)
+	key = crypto.DeriveKey(password, id, 18)
 
 	// Derive and store identifier.
 	fmt.Println("[+] deriving secure identifier...")
-	identifier = crypto.DeriveID(id)
+	identifier = crypto.DeriveID(id, 18)
 
 	// Grab pre-saved secrets.
 	secretData = auxiliary.RetrieveSecrets()

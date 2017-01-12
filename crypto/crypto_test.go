@@ -23,14 +23,14 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestDeriveKey(t *testing.T) {
-	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier")))
+	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier"), 18))
 	if derivedKey != "rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=" {
 		t.Error("Expected `rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=`; got", derivedKey)
 	}
 }
 
 func TestDeriveID(t *testing.T) {
-	derivedKey := DeriveID([]byte("identifier"))
+	derivedKey := DeriveID([]byte("identifier"), 18)
 	if derivedKey != "HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=" {
 		t.Error("Expected `HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=`; got", derivedKey)
 	}
