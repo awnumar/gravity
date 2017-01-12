@@ -10,127 +10,104 @@ import (
 )
 
 var (
-	mode string
-
-	key        []byte
-	identifier string
-
 	secretData = make(map[string]interface{})
 )
 
 func main() {
 	// Parse command line flags.
-	if len(os.Args) < 2 {
-		fmt.Println("[!] mode not specified; use `pocket help`")
-		os.Exit(1)
-	}
-
-	argument := os.Args[1]
-	if argument == "-h" || argument == "--help" || argument == "help" || argument == "-help" {
-		fmt.Printf("Usage: %s [get|add|forget]\n", os.Args[0])
-		os.Exit(2)
-	} else {
-		mode = argument
-	}
-
-	// Verify that mode is valid.
-	if mode != "get" && mode != "add" && mode != "forget" {
-		fmt.Println("[!] invalid mode; use `pocket help`")
-		os.Exit(1)
+	mode, err := auxiliary.ParseArgs(os.Args)
+	if err != nil {
+		if err.Error() == "help" {
+			os.Exit(0)
+		} else {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	}
 
 	// Run setup.
 	auxiliary.Setup()
-
-	// Prompt user for the password without echoing back.
-	password := auxiliary.GetPass("[-] password: ")
-	if len(password) < 1 {
-		fmt.Println("[!] length of password must be non-zero")
-		os.Exit(1)
-	}
-
-	// Prompt user for identifier.
-	id := []byte(auxiliary.Input("[-] identifier: "))
-	if len(id) < 1 {
-		fmt.Println("[!] length of identifier must be non-zero")
-		os.Exit(1)
-	}
-
-	// Derive and store encryption key.
-	fmt.Println("[+] deriving encryption key...")
-	key = crypto.DeriveKey(password, id)
-
-	// Derive and store identifier.
-	fmt.Println("[+] deriving secure identifier...")
-	identifier = crypto.DeriveID(id)
 
 	// Grab pre-saved secrets.
 	secretData = auxiliary.RetrieveSecrets()
 
 	// Launch appropriate function for run-mode.
 	switch mode {
-	case "get":
+	case "get": // id pass
 		retrieve()
-	case "add":
+	case "add": // id pass secret
 		add()
-	case "forget":
+	case "forget": // id
 		forget()
 	}
-
-	// Clear sensitive data from memory. (Probably not secure, but good enough.)
-	key = []byte("")
-	identifier = ""
 }
 
 func retrieve() {
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"password", "identifier"})
+
+	// Derive and store identifier.
+	fmt.Println("[+] Deriving secure identifier...")
+	identifier := crypto.DeriveID([]byte(values[1]))
+
+	// Derive and store encryption key.
+	fmt.Println("[+] Deriving encryption key...")
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]))
+
 	secret := secretData[identifier]
 	if secret != nil {
 		secret := crypto.Unpad(crypto.Decrypt(secret.(string), key))
-		fmt.Println("[+] secret:", string(secret))
+		fmt.Println("[+] Secret:", string(secret))
 	} else {
-		fmt.Println("[+] nothing to see here")
+		fmt.Println("[+] There's nothing to see here.")
 	}
 }
 
 func add() {
-	// Prompt the user for the secret that we'll store.
-	secret := auxiliary.Input("[-] secret: ")
-	if len(secret) < 1 || len(secret) > 1024 {
-		fmt.Println("[!] length of secret must be between 1-1024 bytes")
-		os.Exit(1)
-	}
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"password", "identifier", "secret"})
+
+	// Derive and store identifier.
+	fmt.Println("[+] Deriving secure identifier...")
+	identifier := crypto.DeriveID([]byte(values[1]))
+
+	// Derive and store encryption key.
+	fmt.Println("[+] Deriving encryption key...")
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]))
 
 	// Check if there's a secret there already so we don't overwrite it.
 	if secretData[identifier] == nil {
 		// Store and save the id/secret pair.
-		paddedSecret, err := crypto.Pad([]byte(secret), 1025)
+		paddedSecret, err := crypto.Pad([]byte(values[2]), 1025)
 		if err != nil {
 			log.Fatalln(err)
 		}
 		secretData[identifier] = crypto.Encrypt(paddedSecret, key)
 		auxiliary.SaveSecrets(secretData)
 
-		fmt.Println("[+] ok, i'll remember that")
+		fmt.Println("[+] Okay, I'll remember that.")
 	} else {
 		// Warn that there is already data here.
-		fmt.Println("[!] cannot overwrite existing entry")
+		fmt.Println("[!] Cannot overwrite existing entry.")
 	}
 }
 
 func forget() {
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"identifier"})
+
+	// Derive and store identifier.
+	fmt.Println("[+] Deriving secure identifier...")
+	identifier := crypto.DeriveID([]byte(values[0]))
+
 	// Check if there's actually something there.
 	if secretData[identifier] != nil {
-		// Decryption here serves no cryptographic purpose. The reason for it is
-		// so that deleting the entry through the application isn't trivial. Of
-		// course the attacker could still simply just `rm -rf ~/.pocket/secrets`
-		crypto.Decrypt(secretData[identifier].(string), key)
-
 		// Delete the entry. This code will never be reached if the decryption failed.
 		delete(secretData, string(identifier))
 		auxiliary.SaveSecrets(secretData)
 
-		fmt.Println("[+] it is forgotten")
+		fmt.Println("[+] It is forgotten.")
 	} else {
-		fmt.Println("[+] nothing to do")
+		fmt.Println("[+] Nothing to do.")
 	}
 }

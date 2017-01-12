@@ -68,7 +68,7 @@ func Decrypt(base64EncodedCiphertext string, key []byte) []byte {
 	// Decrypt the ciphertext and store the result.
 	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, &secretKey)
 	if !okay {
-		fmt.Println("[!] decryption failed")
+		fmt.Println("[!] Decryption failed")
 		os.Exit(1)
 	}
 
