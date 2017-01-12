@@ -14,7 +14,7 @@ func TestParseArgs(t *testing.T) {
 
 	args = []string{"./pocket", "help"}
 	mode, err = ParseArgs(args)
-	if err.Error() != "[!] The help command requires an argument" {
+	if err.Error() != "[!] Invalid arguments" {
 		t.Error("Expected error; got ", err)
 	}
 	if mode != "" {
@@ -35,7 +35,7 @@ func TestParseArgs(t *testing.T) {
 
 	args = []string{"./pocket", "help", "test"}
 	mode, err = ParseArgs(args)
-	if err.Error() != "[!] Invalid argument to help" {
+	if err.Error() != "[!] Invalid arguments" {
 		t.Error("Expected error; got ", err)
 	}
 	if mode != "" {
@@ -56,7 +56,7 @@ func TestParseArgs(t *testing.T) {
 
 	args = []string{"./pocket", "test"}
 	mode, err = ParseArgs(args)
-	if err.Error() != "[!] Invalid argument" {
+	if err.Error() != "[!] Invalid arguments" {
 		t.Error("Expected error; got ", err)
 	}
 	if mode != "" {

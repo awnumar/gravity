@@ -14,6 +14,13 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+var (
+	// ErrHelp is for when the user just wanted help.
+	ErrHelp = errors.New("help")
+	// ErrInvalid is when the user-supplied arguments are invalid.
+	ErrInvalid = errors.New("[!] Invalid arguments")
+)
+
 // ParseArgs parses the command line arguments and returns the
 // user's configuration options for the caller to then use.
 func ParseArgs(args []string) (string, error) {
@@ -27,13 +34,13 @@ func ParseArgs(args []string) (string, error) {
 
 	if len(args) < 2 {
 		fmt.Println(helpMessage)
-		return "", errors.New("help")
+		return "", ErrHelp
 	}
 
 	switch args[1] {
 	case "help":
 		if len(args) < 3 {
-			return "", errors.New("[!] The help command requires an argument")
+			return "", ErrInvalid
 		}
 
 		switch args[2] {
@@ -83,13 +90,13 @@ func ParseArgs(args []string) (string, error) {
     that you mean it.
 `, args[0])
 		default:
-			return "", errors.New("[!] Invalid argument to help")
+			return "", ErrInvalid
 		}
-		return "", errors.New("help")
+		return "", ErrHelp
 	case "add", "get", "forget":
 		return args[1], nil
 	default:
-		return "", errors.New("[!] Invalid argument")
+		return "", ErrInvalid
 	}
 }
 
