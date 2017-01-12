@@ -14,12 +14,11 @@ Protect super secret passwords and sketchy snippets - even in the case of your p
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your secrets.
 * ***Multiple password support*** - You're free to use different passwords for different entries, and no one would ever know that you did.
-* ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that only `n` of the entries are real and the rest are decoys, where `n >= 0`.
+* ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that `n` of the entries are real and the rest are decoys, where `n >= 0`.
 * ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them are random decoys added by the program.
 * ***Hidden entry identifiers*** - The entry identifiers are hashed so that an attacker cannot even tell what type of data is stored. There have been many cases where users have encrypted their data, but file names have still given them away. In *pocket*, this is mitigated.
 * ***Hidden data length*** - Every entry is padded to a fixed length so that it is impossible to determine the length of the secret.
-* ***Cleared access logs*** - Any occurrence of you using the program will be cleared from your bash history. This will prevent anyone from correlating the logs to any entries.
-* ***Modified file access date*** - Metadata in the secrets file that would reveal any dates/times is set to, and kept at, `January 1, 1970`. This will hide the fact that you've used the application at all, further backing up the claim that some/all of the entries are decoys.
+* ***Cleared logs and metadata*** - Any occurrence of *pocket* will be cleared from your bash history, and metadata in the secrets file that would reveal any dates/times will set to (and kept at) `January 1, 1970`. These measures will prevent anyone from correlating the logs to any entries, and will also hide the fact that you've used the application at all, further backing up the claim that some/all of the entries are decoys.
 
 ## Installation
 
