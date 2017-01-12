@@ -10,10 +10,6 @@ import (
 )
 
 var (
-	mode string
-
-	identifier []byte
-
 	secretData = make(map[string]interface{})
 )
 
@@ -32,53 +28,33 @@ func main() {
 	// Run setup.
 	auxiliary.Setup()
 
-	// Prompt user for identifier.
-	identifier = []byte(auxiliary.Input("[-] Identifier: "))
-	if len(identifier) < 1 {
-		fmt.Println("[!] Length of identifier must be non-zero.")
-		os.Exit(1)
-	}
-
 	// Grab pre-saved secrets.
 	secretData = auxiliary.RetrieveSecrets()
 
 	// Launch appropriate function for run-mode.
 	switch mode {
 	case "get": // id pass
-		// Prompt user for the password without echoing back.
-		password := auxiliary.GetPass("[-] Password: ")
-		if len(password) < 1 {
-			fmt.Println("[!] Length of password must be non-zero.")
-			os.Exit(1)
-		}
-		retrieve(password)
+		retrieve()
 	case "add": // id pass secret
-		// Prompt user for the password without echoing back.
-		password := auxiliary.GetPass("[-] Password: ")
-		if len(password) < 1 {
-			fmt.Println("[!] Length of password must be non-zero.")
-			os.Exit(1)
-		}
-		add(password)
+		add()
 	case "forget": // id
 		forget()
 	}
-
-	// Clear sensitive data from memory.
-	// (Probably not secure, but good enough.)
-	identifier = []byte("")
 }
 
-func retrieve(password []byte) {
+func retrieve() {
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"password", "identifier"})
+
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	id := crypto.DeriveID(identifier)
+	identifier := crypto.DeriveID([]byte(values[1]))
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey(password, identifier)
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]))
 
-	secret := secretData[id]
+	secret := secretData[identifier]
 	if secret != nil {
 		secret := crypto.Unpad(crypto.Decrypt(secret.(string), key))
 		fmt.Println("[+] Secret:", string(secret))
@@ -87,30 +63,26 @@ func retrieve(password []byte) {
 	}
 }
 
-func add(password []byte) {
+func add() {
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"password", "identifier", "secret"})
+
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	id := crypto.DeriveID(identifier)
+	identifier := crypto.DeriveID([]byte(values[1]))
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey(password, identifier)
-
-	// Prompt the user for the secret that we'll store.
-	secret := auxiliary.Input("[-] Input secret: ")
-	if len(secret) < 1 || len(secret) > 1024 {
-		fmt.Println("[!] Length of secret must be between 1-1024 bytes.")
-		os.Exit(1)
-	}
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]))
 
 	// Check if there's a secret there already so we don't overwrite it.
-	if secretData[id] == nil {
+	if secretData[identifier] == nil {
 		// Store and save the id/secret pair.
-		paddedSecret, err := crypto.Pad([]byte(secret), 1025)
+		paddedSecret, err := crypto.Pad([]byte(values[2]), 1025)
 		if err != nil {
 			log.Fatalln(err)
 		}
-		secretData[id] = crypto.Encrypt(paddedSecret, key)
+		secretData[identifier] = crypto.Encrypt(paddedSecret, key)
 		auxiliary.SaveSecrets(secretData)
 
 		fmt.Println("[+] Okay, I'll remember that.")
@@ -121,12 +93,15 @@ func add(password []byte) {
 }
 
 func forget() {
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"identifier"})
+
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	id := crypto.DeriveID(identifier)
+	identifier := crypto.DeriveID([]byte(values[0]))
 
 	// Check if there's actually something there.
-	if secretData[id] != nil {
+	if secretData[identifier] != nil {
 		// Delete the entry. This code will never be reached if the decryption failed.
 		delete(secretData, string(identifier))
 		auxiliary.SaveSecrets(secretData)

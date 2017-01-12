@@ -100,6 +100,38 @@ func ParseArgs(args []string) (string, error) {
 	}
 }
 
+// GetInputs takes a slice of required inputs,
+// asks the user for them, and returns them in
+// the same order.
+func GetInputs(required []string) []string {
+	for i, input := range required {
+		switch input {
+		case "password":
+			password := GetPass("[-] Password: ")
+			if len(password) < 1 {
+				fmt.Println("[!] Length of password must be non-zero.")
+				os.Exit(1)
+			}
+			required[i] = string(password)
+		case "identifier":
+			identifier := Input("[-] Identifier: ")
+			if len(identifier) < 1 {
+				fmt.Println("[!] Length of identifier must be non-zero.")
+				os.Exit(1)
+			}
+			required[i] = identifier
+		case "secret":
+			secret := Input("[-] Secret: ")
+			if len(secret) < 1 || len(secret) > 1024 {
+				fmt.Println("[!] Length of secret must be between 1-1024 bytes.")
+				os.Exit(1)
+			}
+			required[i] = secret
+		}
+	}
+	return required
+}
+
 // Setup sets up the environment.
 func Setup() error {
 	// Get the current user.
