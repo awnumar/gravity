@@ -30,11 +30,6 @@ func ParseArgs(args []string) (string, error) {
 		return "", errors.New("help")
 	}
 
-	if args[1] == "help" && len(args) == 2 {
-		fmt.Println(helpMessage)
-		return "", errors.New("help")
-	}
-
 	switch args[1] {
 	case "help":
 		if len(args) < 3 {
