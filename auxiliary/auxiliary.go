@@ -3,6 +3,7 @@ package auxiliary
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,6 +13,90 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 )
+
+// ParseArgs parses the command line arguments and returns the
+// user's configuration options for the caller to then use.
+func ParseArgs(args []string) (string, error) {
+	helpMessage := fmt.Sprintf(`Usage: %s [arguments]
+
+    help [mode] - Print detailed help regarding a mode.
+
+    add 	- Add a new secure secret to storage.
+    get 	- Retrieve a previously stored secret.
+    forget 	- Remove a previously stored secret.`, args[0])
+
+	if len(args) < 2 {
+		fmt.Println(helpMessage)
+		return "", errors.New("help")
+	}
+
+	if args[1] == "help" && len(args) == 2 {
+		fmt.Println(helpMessage)
+		return "", errors.New("help")
+	}
+
+	switch args[1] {
+	case "help":
+		if len(args) < 3 {
+			return "", errors.New("[!] The help command requires an argument")
+		}
+
+		switch args[2] {
+		case "add":
+			fmt.Printf(`Usage: %s add
+
+    This mode is used for adding new secrets to the store.
+
+    You'll be prompted to enter a password and an identifier. Both of those things
+    together are used to derive the encryption key that protects your secrets, so
+    a strong password is recommended. For the identifier, you should aim to use a
+    phrase like 'l33t encryption key for them thingz init' instead of something like
+    'encryption key' which could easily be guessed. There's also nothing stopping you
+    from using random values for both fields, assuming that you can remember them.
+
+    Speaking of not stopping you from doing things, you're also free to use different
+    passwords for different entries. Aside from increasing security, this also has the
+    side effect of allowing deniable encryption. Simply add a few legit-looking secrets
+    with a decoy key and if you're ever forced to disclose your keys, just give up the
+    decoys. The program adds its own decoys so you can claim that the other encrypted
+    entries are just that: decoys.
+
+    It should be noted that pocket will not ask you for a password confirmation, so
+    make sure to try and retrieve the secrets you store, just to check that you entered
+    everything correctly. This way you won't be sorry later when you can't decrypt
+    what you added.
+`, args[0])
+		case "get":
+			fmt.Printf(`Usage: %s get
+
+    This mode is used for retrieving secrets from the store.
+
+    You'll be prompted to enter a password and an identifier. The program will then
+    derive the secure identifier and encryption key from both of these pieces of
+    information, find and decrypt the secret, and then output it.
+`, args[0])
+		case "forget":
+			fmt.Printf(`Usage: %s forget
+
+    This mode is used for removing secrets from the store.
+
+    You'll just need to enter the identifier for the entry and the program
+    will derive the secure identifier, locate the entry, and remove it from
+    the store.
+
+    You won't be asked for a confirmation, so when you run forget, make sure
+    that you mean it.
+`, args[0])
+		default:
+			return "", errors.New("[!] Invalid argument to help")
+		}
+		return "", errors.New("help")
+	case "add", "get", "forget":
+		return args[1], nil
+	default:
+		return "", errors.New("[!] Invalid argument")
+	}
+}
 
 // Setup sets up the environment.
 func Setup() error {
