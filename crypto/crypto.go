@@ -50,7 +50,7 @@ func Encrypt(plaintext []byte, key []byte) string {
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext. If the key is incorrect, decryption
 // fails and the program terminates with exit code 1.
-func Decrypt(base64EncodedCiphertext string, key []byte) string {
+func Decrypt(base64EncodedCiphertext string, key []byte) []byte {
 	// Decode base64 encoded ciphertext into bytes.
 	ciphertext, err := base64.StdEncoding.DecodeString(base64EncodedCiphertext)
 	if err != nil {
@@ -73,7 +73,7 @@ func Decrypt(base64EncodedCiphertext string, key []byte) string {
 	}
 
 	// Return the resulting plaintext.
-	return string(plaintext)
+	return plaintext
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
@@ -88,42 +88,43 @@ func DeriveID(identifier []byte) string {
 	return base64.StdEncoding.EncodeToString(dk)
 }
 
-// Pad implements PKCS#7 as described in RFC 5652.
+// Pad implements byte padding.
 func Pad(text []byte, padTo int) ([]byte, error) {
 	// Check if input is even valid.
-	if len(text) > padTo {
-		return nil, errors.New("pad: input length greater than padTo length")
+	if len(text) > padTo-1 {
+		return nil, errors.New("pad: text length must not exceed (padTo-1)")
 	}
 
-	// Add the padding.
+	// Add the compulsory byte of value `1`.
+	text = append(text, byte(1))
+
+	// Determine number of zeros to add.
 	padLen := padTo - len(text)
-	for c := 1; c <= padLen; c++ {
-		text = append(text, byte(padLen))
+
+	// Append the determined number of zeroes to the text.
+	for n := 1; n <= padLen; n++ {
+		text = append(text, byte(0))
 	}
 
 	// Return padded byte slice.
 	return text, nil
 }
 
-// Unpad reverses PKCS#7 as described in RFC 5652.
+// Unpad reverses byte padding.
 func Unpad(text []byte) []byte {
-	// Get the supposed length of the padding.
-	padLen := int(text[len(text)-1])
-
-	// If the length is more than the size of
-	// the text, there's obviously no padding.
-	if padLen > len(text) {
-		return text
-	}
-
-	// Check if all the padding bytes are the same.
-	for i := len(text) - 1; i >= len(text)-padLen; i-- {
-		if text[i] != text[len(text)-1] {
-			// This isn't padding that we're looking at.
-			return text
+	// Iterate over the text backwards,
+	// removing the appropriate padding bytes.
+	for i := len(text) - 1; i >= 0; i-- {
+		if text[i] == 0 {
+			text = text[:len(text)-1]
+			continue
+		}
+		if text[i] == 1 {
+			text = text[:len(text)-1]
+			break
 		}
 	}
 
-	// Return everything except the padding.
-	return text[:len(text)-padLen]
+	// That simple.  We're done.
+	return text
 }

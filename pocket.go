@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/libeclipse/pocket/auxiliary"
@@ -76,7 +77,8 @@ func main() {
 func retrieve() {
 	secret := secretData[identifier]
 	if secret != nil {
-		fmt.Println("[+] secret:", crypto.Decrypt(secret.(string), key))
+		secret := crypto.Unpad(crypto.Decrypt(secret.(string), key))
+		fmt.Println("[+] secret:", string(secret))
 	} else {
 		fmt.Println("[+] nothing to see here")
 	}
@@ -85,11 +87,19 @@ func retrieve() {
 func add() {
 	// Prompt the user for the secret that we'll store.
 	secret := auxiliary.Input("[-] secret: ")
+	if len(secret) < 1 || len(secret) > 1024 {
+		fmt.Println("[!] length of secret must be between 1-1024 bytes")
+		os.Exit(1)
+	}
 
 	// Check if there's a secret there already so we don't overwrite it.
 	if secretData[identifier] == nil {
 		// Store and save the id/secret pair.
-		secretData[identifier] = crypto.Encrypt([]byte(secret), key)
+		paddedSecret, err := crypto.Pad([]byte(secret), 1025)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		secretData[identifier] = crypto.Encrypt(paddedSecret, key)
 		auxiliary.SaveSecrets(secretData)
 
 		fmt.Println("[+] ok, i'll remember that")

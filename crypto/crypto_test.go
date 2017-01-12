@@ -16,7 +16,7 @@ func TestGenerateRandomBytes(t *testing.T) {
 func TestDecrypt(t *testing.T) {
 	key, _ := base64.StdEncoding.DecodeString("JNut6eJfb6ySwOac7FHe3bsSU75FpL/o776VD+oYWxk=")
 	ciphertext := "5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw="
-	plaintext := Decrypt(ciphertext, key)
+	plaintext := string(Decrypt(ciphertext, key))
 	if plaintext != "test" {
 		t.Error("Expected plaintext to be `test`; got", plaintext)
 	}
@@ -47,11 +47,8 @@ func TestPad(t *testing.T) {
 
 	// Test when padTo == len(text)
 	padded, err = Pad(text, 16)
-	if err != nil {
-		t.Error("Unexpected error:", err)
-	}
-	if len(padded) != len(text) {
-		t.Error("expected length of padded=length of input; got len(padded)=", len(padded))
+	if err == nil {
+		t.Error("Expected an error since inputs are invalid.")
 	}
 
 	// Test when padTo > len(text)
@@ -63,33 +60,37 @@ func TestPad(t *testing.T) {
 		t.Error("expected length of padded=32; got", len(padded))
 	}
 
-	// Check if all padding bytes are correct.
-	padLen := int(padded[len(padded)-1])
-	for i := len(padded) - 1; i >= len(padded)-padLen; i-- {
-		if padded[i] != padded[len(padded)-1] {
-			t.Error("padding is invalid")
-		}
+	// Test when padTo >> len(text)
+	padded, err = Pad(text, 4096)
+	if err != nil {
+		t.Error("Unexpected error:", err)
+	}
+	if len(padded) != 4096 {
+		t.Error("expected length of padded=32; got", len(padded))
 	}
 }
 
 func TestUnpad(t *testing.T) {
-	text := []byte("yellow submarine")
+	text := []byte("yellow submarine") // 16 bytes
 
 	// Test when len(text) == padTo
 	padded, err := Pad(text, 16)
-	if err != nil {
-		t.Error("Unexpected error:", err)
-	}
-	unpadded := Unpad(padded)
-	if !reflect.DeepEqual(padded, unpadded) {
-		t.Error("padded16 should equal unpadded")
-	}
-	if !reflect.DeepEqual(unpadded, text) {
-		t.Error("Unpad didn't work; got", unpadded)
+	if err == nil {
+		t.Error("Expected an error since inputs are invalid.")
 	}
 
 	// Test when len(text) < padTo
 	padded, err = Pad(text, 32)
+	if err != nil {
+		t.Error("Unexpected error:", err)
+	}
+	unpadded := Unpad(padded)
+	if !reflect.DeepEqual(unpadded, text) {
+		t.Error("Unpad didn't work; got", unpadded)
+	}
+
+	// Test when len(text) << padTo
+	padded, err = Pad(text, 4096)
 	if err != nil {
 		t.Error("Unexpected error:", err)
 	}
