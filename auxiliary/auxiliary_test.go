@@ -21,31 +21,16 @@ func TestParseArgs(t *testing.T) {
 		t.Error("Expected empty mode; got", mode)
 	}
 
-	args = []string{"./pocket", "help", "add"}
-	mode, err = ParseArgs(args)
-	if err.Error() != "help" {
-		t.Error("Expected error; got ", err)
-	}
-	if mode != "" {
-		t.Error("Expected empty mode; got", mode)
-	}
-
-	args = []string{"./pocket", "help", "get"}
-	mode, err = ParseArgs(args)
-	if err.Error() != "help" {
-		t.Error("Expected error; got ", err)
-	}
-	if mode != "" {
-		t.Error("Expected empty mode; got", mode)
-	}
-
-	args = []string{"./pocket", "help", "forget"}
-	mode, err = ParseArgs(args)
-	if err.Error() != "help" {
-		t.Error("Expected error; got ", err)
-	}
-	if mode != "" {
-		t.Error("Expected empty mode; got", mode)
+	args2 := []string{"add", "get", "forget"}
+	for _, arg := range args2 {
+		args = []string{"./pocket", "help", arg}
+		mode, err = ParseArgs(args)
+		if err.Error() != "help" {
+			t.Error("Expected error; got ", err)
+		}
+		if mode != "" {
+			t.Error("Expected empty mode; got", mode)
+		}
 	}
 
 	args = []string{"./pocket", "help", "test"}
@@ -57,31 +42,16 @@ func TestParseArgs(t *testing.T) {
 		t.Error("Expected empty mode; got", mode)
 	}
 
-	args = []string{"./pocket", "add"}
-	mode, err = ParseArgs(args)
-	if err != nil {
-		t.Error("Unexpected error; got", err)
-	}
-	if mode != "add" {
-		t.Error("Expected empty mode; got", mode)
-	}
-
-	args = []string{"./pocket", "get"}
-	mode, err = ParseArgs(args)
-	if err != nil {
-		t.Error("Unexpected error; got", err)
-	}
-	if mode != "get" {
-		t.Error("Expected empty mode; got", mode)
-	}
-
-	args = []string{"./pocket", "forget"}
-	mode, err = ParseArgs(args)
-	if err != nil {
-		t.Error("Unexpected error; got", err)
-	}
-	if mode != "forget" {
-		t.Error("Expected empty mode; got", mode)
+	args2 = []string{"add", "get", "forget"}
+	for _, arg := range args2 {
+		args = []string{"./pocket", arg}
+		mode, err = ParseArgs(args)
+		if err != nil {
+			t.Error("Unexpected error; got", err)
+		}
+		if mode != arg {
+			t.Error("Expected empty mode; got", mode)
+		}
 	}
 
 	args = []string{"./pocket", "test"}
