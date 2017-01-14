@@ -101,7 +101,7 @@ func forget() {
 
 	// Check if there's actually something there.
 	if secretData[identifier] != nil {
-		// Delete the entry. This code will never be reached if the decryption failed.
+		// Delete the entry.
 		delete(secretData, string(identifier))
 		auxiliary.SaveSecrets(secretData)
 
