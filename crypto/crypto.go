@@ -77,8 +77,8 @@ func Decrypt(base64EncodedCiphertext string, key []byte) []byte {
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
-func DeriveKey(password, identifier []byte, N uint) []byte {
-	derivedKey, _ := scrypt.Key(password, identifier, 1<<N, 8, 1, 32)
+func DeriveKey(password, identifier []byte, costFactor uint) []byte {
+	derivedKey, _ := scrypt.Key(password, identifier, 1<<costFactor, 8, 1, 32)
 	return derivedKey
 }
 
