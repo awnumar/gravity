@@ -125,6 +125,6 @@ func Unpad(text []byte) []byte {
 		}
 	}
 
-	// That simple.  We're done
+	// That simple.  We're done.
 	return text
 }
