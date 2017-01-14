@@ -83,8 +83,8 @@ func DeriveKey(password, identifier []byte, N uint) []byte {
 }
 
 // DeriveID hashes the identifier using Scrypt and returns a base64 encoded string.
-func DeriveID(identifier []byte, N uint) string {
-	dk, _ := scrypt.Key(identifier, []byte(""), 1<<N, 8, 1, 32)
+func DeriveID(identifier []byte, costFactor uint) string {
+	dk, _ := scrypt.Key(identifier, []byte(""), 1<<costFactor, 8, 1, 32)
 	return base64.StdEncoding.EncodeToString(dk)
 }
 

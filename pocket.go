@@ -27,9 +27,6 @@ func main() {
 		}
 	}
 
-	// Run setup.
-	auxiliary.Setup()
-
 	// Grab pre-saved secrets.
 	secretData = auxiliary.RetrieveSecrets()
 
