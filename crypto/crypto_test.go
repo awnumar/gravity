@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+var (
+	scryptCostFactor = map[string]int{"N": 18, "r": 8, "p": 1}
+)
+
 func TestGenerateRandomBytes(t *testing.T) {
 	randomBytes := generateRandomBytes(32)
 	if len(randomBytes) != 32 {
@@ -23,14 +27,14 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestDeriveKey(t *testing.T) {
-	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier"), 18))
+	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier"), scryptCostFactor))
 	if derivedKey != "rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=" {
 		t.Error("Expected `rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=`; got", derivedKey)
 	}
 }
 
 func TestDeriveID(t *testing.T) {
-	derivedKey := DeriveID([]byte("identifier"), 18)
+	derivedKey := DeriveID([]byte("identifier"), scryptCostFactor)
 	if derivedKey != "HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=" {
 		t.Error("Expected `HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=`; got", derivedKey)
 	}
@@ -42,13 +46,13 @@ func TestPad(t *testing.T) {
 	// Test when padTo < len(text)
 	padded, err := Pad(text, 15)
 	if err == nil {
-		t.Error("Expected an error since inputs are invalid.")
+		t.Error("Expected an error since inputs are invalid. padded =", padded)
 	}
 
 	// Test when padTo == len(text)
 	padded, err = Pad(text, 16)
 	if err == nil {
-		t.Error("Expected an error since inputs are invalid.")
+		t.Error("Expected an error since inputs are invalid. padded =", padded)
 	}
 
 	// Test when padTo > len(text)
@@ -76,7 +80,7 @@ func TestUnpad(t *testing.T) {
 	// Test when len(text) == padTo
 	padded, err := Pad(text, 16)
 	if err == nil {
-		t.Error("Expected an error since inputs are invalid.")
+		t.Error("Expected an error since inputs are invalid. padded =", padded)
 	}
 
 	// Test when len(text) < padTo

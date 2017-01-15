@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	scryptCostFactor uint = 18
-
-	secretData = make(map[string]interface{})
+	scryptCostFactor = map[string]int{"N": 18, "r": 8, "p": 1}
+	secretData       = make(map[string]interface{})
 )
 
 func main() {

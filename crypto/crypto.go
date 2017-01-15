@@ -77,15 +77,15 @@ func Decrypt(base64EncodedCiphertext string, key []byte) []byte {
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
-func DeriveKey(password, identifier []byte, costFactor uint) []byte {
-	derivedKey, _ := scrypt.Key(password, identifier, 1<<costFactor, 8, 1, 32)
+func DeriveKey(password, identifier []byte, costFactor map[string]int) []byte {
+	derivedKey, _ := scrypt.Key(password, identifier, 1<<uint(costFactor["N"]), costFactor["r"], costFactor["p"], 32)
 	return derivedKey
 }
 
 // DeriveID hashes the identifier using Scrypt and returns a base64 encoded string.
-func DeriveID(identifier []byte, costFactor uint) string {
-	dk, _ := scrypt.Key(identifier, []byte(""), 1<<costFactor, 8, 1, 32)
-	return base64.StdEncoding.EncodeToString(dk)
+func DeriveID(identifier []byte, costFactor map[string]int) string {
+	derivedKey, _ := scrypt.Key(identifier, []byte(""), 1<<uint(costFactor["N"]), costFactor["r"], costFactor["p"], 32)
+	return base64.StdEncoding.EncodeToString(derivedKey)
 }
 
 // Pad implements byte padding.
