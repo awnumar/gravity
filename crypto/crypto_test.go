@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	scryptCostFactor = map[string]int{"N": 18, "r": 8, "p": 1}
+	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
 )
 
 func TestGenerateRandomBytes(t *testing.T) {
@@ -27,14 +27,14 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestDeriveKey(t *testing.T) {
-	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier"), scryptCostFactor))
+	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier"), scryptCost))
 	if derivedKey != "rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=" {
 		t.Error("Expected `rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=`; got", derivedKey)
 	}
 }
 
 func TestDeriveID(t *testing.T) {
-	derivedKey := DeriveID([]byte("identifier"), scryptCostFactor)
+	derivedKey := DeriveID([]byte("identifier"), scryptCost)
 	if derivedKey != "HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=" {
 		t.Error("Expected `HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=`; got", derivedKey)
 	}
@@ -46,13 +46,22 @@ func TestPad(t *testing.T) {
 	// Test when padTo < len(text)
 	padded, err := Pad(text, 15)
 	if err == nil {
-		t.Error("Expected an error since inputs are invalid. padded =", padded)
+		t.Error("Expected an error since inputs are invalid; padded:", padded)
 	}
 
 	// Test when padTo == len(text)
 	padded, err = Pad(text, 16)
 	if err == nil {
-		t.Error("Expected an error since inputs are invalid. padded =", padded)
+		t.Error("Expected an error since inputs are invalid; padded:", padded)
+	}
+
+	// Test when padTo-1 = len(text)
+	padded, err = Pad(text, 17)
+	if err != nil {
+		t.Error("Unexpected error:", err)
+	}
+	if len(padded) != 17 {
+		t.Error("expected length of padded=32; got", len(padded))
 	}
 
 	// Test when padTo > len(text)
@@ -77,10 +86,14 @@ func TestPad(t *testing.T) {
 func TestUnpad(t *testing.T) {
 	text := []byte("yellow submarine") // 16 bytes
 
-	// Test when len(text) == padTo
-	padded, err := Pad(text, 16)
-	if err == nil {
-		t.Error("Expected an error since inputs are invalid. padded =", padded)
+	// Test when len(text) == padTo-1
+	padded, _ := Pad(text, 17)
+	unpadded, err := Unpad(padded)
+	if err != nil {
+		t.Error("Unexpected error:", err)
+	}
+	if !reflect.DeepEqual(unpadded, text) {
+		t.Error("Unpad didn't work; got", unpadded)
 	}
 
 	// Test when len(text) < padTo
@@ -88,7 +101,10 @@ func TestUnpad(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error:", err)
 	}
-	unpadded := Unpad(padded)
+	unpadded, err = Unpad(padded)
+	if err != nil {
+		t.Error("Unexpected error:", err)
+	}
 	if !reflect.DeepEqual(unpadded, text) {
 		t.Error("Unpad didn't work; got", unpadded)
 	}
@@ -98,8 +114,20 @@ func TestUnpad(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error:", err)
 	}
-	unpadded = Unpad(padded)
+	unpadded, err = Unpad(padded)
+	if err != nil {
+		t.Error("Unexpected error:", err)
+	}
 	if !reflect.DeepEqual(unpadded, text) {
 		t.Error("Unpad didn't work; got", unpadded)
+	}
+
+	// Test invalid padding.
+	unpadded, err = Unpad(text)
+	if err == nil {
+		t.Error("Expected an error since inputs are invalid; unpadded:", unpadded)
+	}
+	if !reflect.DeepEqual(unpadded, text) {
+		t.Error("Unpadded != text with invalid input; unpadded:", unpadded)
 	}
 }

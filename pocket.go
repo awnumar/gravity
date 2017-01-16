@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	scryptCostFactor = map[string]int{"N": 18, "r": 8, "p": 1}
-	secretData       = make(map[string]interface{})
+	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
+	secretData = make(map[string]interface{})
 )
 
 func main() {
@@ -46,11 +46,11 @@ func retrieve() {
 
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[1]), scryptCostFactor)
+	identifier := crypto.DeriveID([]byte(values[1]), scryptCost)
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCostFactor)
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
 	secret := secretData[identifier]
 	if secret != nil {
@@ -67,11 +67,11 @@ func add() {
 
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[1]), scryptCostFactor)
+	identifier := crypto.DeriveID([]byte(values[1]), scryptCost)
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCostFactor)
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
 	// Check if there's a secret there already so we don't overwrite it.
 	if secretData[identifier] == nil {
@@ -96,7 +96,7 @@ func forget() {
 
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[0]), scryptCostFactor)
+	identifier := crypto.DeriveID([]byte(values[0]), scryptCost)
 
 	// Check if there's actually something there.
 	if secretData[identifier] != nil {
