@@ -54,7 +54,11 @@ func retrieve() {
 
 	secret := secretData[identifier]
 	if secret != nil {
-		secret := crypto.Unpad(crypto.Decrypt(secret.(string), key))
+		secret, err := crypto.Unpad(crypto.Decrypt(secret.(string), key))
+		if err != nil {
+			// This should never happen.
+			fmt.Println("[!] Invalid padding on decrypted secret.")
+		}
 		fmt.Println("[+] Secret:", string(secret))
 	} else {
 		fmt.Println("[+] There's nothing to see here.")
