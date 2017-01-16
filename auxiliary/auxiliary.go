@@ -40,7 +40,8 @@ func ParseArgs(args []string) (string, error) {
 	switch args[1] {
 	case "help":
 		if len(args) < 3 {
-			return "", ErrInvalid
+			fmt.Println(helpMessage)
+			return "", ErrHelp
 		}
 
 		switch args[2] {
