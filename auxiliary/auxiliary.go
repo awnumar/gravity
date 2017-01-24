@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"strings"
 	"syscall"
 
 	"golang.org/x/crypto/ssh/terminal"
@@ -28,9 +29,14 @@ func ParseArgs(args []string) (string, error) {
 
     help [mode] - Print detailed help regarding a mode.
 
-    add 	- Add a new secure secret to storage.
-    get 	- Retrieve a previously stored secret.
-    forget 	- Remove a previously stored secret.`, args[0])
+    add 		- Add a new secure secret to storage.
+    get 		- Retrieve a previously stored secret.
+    forget 		- Remove a previously stored secret.
+
+	-c N,r,p 	- Cost factors for scrypt. If you don't
+				  understand this, leave it alone. Note
+				  that, if set, you'll have to specify
+				  these settings on every retrieval.`, args[0])
 
 	if len(args) < 2 {
 		fmt.Println(helpMessage)
@@ -96,6 +102,24 @@ func ParseArgs(args []string) (string, error) {
 		return "", ErrHelp
 	case "add", "get", "forget":
 		return args[1], nil
+	case "-c":
+		if len(args) < 3 {
+			return "", ErrInvalid
+		}
+
+		costFactorParams := strings.Split(args[2], ",")
+		if len(costFactorParams) != 3 {
+			return "", ErrInvalid
+		}
+
+		N := costFactorParams[0]
+		r := costFactorParams[1]
+		p := costFactorParams[2]
+
+		// TODO: Validate if parameters are integers and if they satisfy Scrypt's limits.
+
+		_, _, _ = N, r, p
+		return "", nil
 	default:
 		return "", ErrInvalid
 	}
