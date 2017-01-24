@@ -6,14 +6,14 @@
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
-Protect highly sensitive information completely, even in the case of your password being breached.
+Protect highly sensitive information, even in the case of your password being breached.
 
 ## Features
 
 ***Not all of these features have yet been implemented.***
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your secrets.
-* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This makes it impossible for an attacker to even determine the length of your data, whether it's a 2 GB file or a simple string.
+* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
 * ***Multiple password support*** - You're free to use different passwords for different entries, and no one would ever know that you did.
 * ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that `n` of the entries are real and the rest are decoys, where `n >= 0`.
 * ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them are random decoys added by the program.
