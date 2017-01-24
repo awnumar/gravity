@@ -6,14 +6,14 @@
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
-Protect super secret passwords and sketchy snippets - even in the case of your password being leaked.
+Protect highly sensitive information completely, even in the case of your password being breached.
 
 ## Features
 
 ***Not all of these features have yet been implemented.***
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your secrets.
-* ***Hidden data length*** - Every entry is padded to a fixed length so that it is impossible to determine the length of the secret.
+* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This makes it impossible for an attacker to even determine the length of your data, whether it's a 2 GB file or a simple string.
 * ***Multiple password support*** - You're free to use different passwords for different entries, and no one would ever know that you did.
 * ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that `n` of the entries are real and the rest are decoys, where `n >= 0`.
 * ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them are random decoys added by the program.
@@ -32,5 +32,5 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 ## Credits
 
-- [@dotcppfile](https://twitter.com/dotcppfile) - Brainstormed ideas with me and was always there to bounce thoughts off. Truly invaluable.
-- [@mnzt](https://github.com/mnzt) - Massive annoyance. Keeps pestering me to include good-practice things (thereby improving the general quality of the project). Also a big help as a reviewer and as a second pair of eyes.
+- [@dotcppfile](https://twitter.com/dotcppfile)
+- [@mnzt](https://github.com/mnzt)
