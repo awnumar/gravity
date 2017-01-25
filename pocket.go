@@ -16,7 +16,7 @@ var (
 
 func main() {
 	// Parse command line flags.
-	mode, err := auxiliary.ParseArgs(os.Args)
+	mode, sc, err := auxiliary.ParseArgs(os.Args)
 	if err != nil {
 		if err.Error() == "help" {
 			os.Exit(0)
@@ -25,6 +25,14 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
+	if sc != nil {
+		scryptCost = sc
+		fmt.Println(scryptCost)
+	}
+
+	// Run setup.
+	auxiliary.Setup()
 
 	// Grab pre-saved secrets.
 	secretData = auxiliary.RetrieveSecrets()

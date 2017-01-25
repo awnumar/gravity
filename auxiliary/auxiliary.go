@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"strconv"
 	"strings"
 	"syscall"
 
@@ -18,36 +19,34 @@ import (
 var (
 	// ErrHelp is for when the user just wanted help.
 	ErrHelp = errors.New("help")
-	// ErrInvalid is when the user-supplied arguments are invalid.
-	ErrInvalid = errors.New("[!] Invalid arguments")
 )
 
 // ParseArgs parses the command line arguments and returns the
 // user's configuration options for the caller to then use.
-func ParseArgs(args []string) (string, error) {
-	helpMessage := fmt.Sprintf(`Usage: %s [arguments]
+func ParseArgs(args []string) (string, map[string]int, error) {
+	helpMessage := fmt.Sprintf(`Usage: %s [mode] [options]
 
     help [mode] - Print detailed help regarding a mode.
 
-    add 		- Add a new secure secret to storage.
-    get 		- Retrieve a previously stored secret.
-    forget 		- Remove a previously stored secret.
+    add 	- Add a new secure secret to storage.
+    get 	- Retrieve a previously stored secret.
+    forget 	- Remove a previously stored secret.
 
-	-c N,r,p 	- Cost factors for scrypt. If you don't
-				  understand this, leave it alone. Note
-				  that, if set, you'll have to specify
-				  these settings on every retrieval.`, args[0])
+    -c N,r,p	- Cost factors for scrypt. If you don't
+                  understand this, leave it alone. Note
+                  that, if set, you'll have to specify
+                  these settings on every retrieval.`, args[0])
 
 	if len(args) < 2 {
 		fmt.Println(helpMessage)
-		return "", ErrHelp
+		return "", nil, ErrHelp
 	}
 
 	switch args[1] {
 	case "help":
 		if len(args) < 3 {
 			fmt.Println(helpMessage)
-			return "", ErrHelp
+			return "", nil, ErrHelp
 		}
 
 		switch args[2] {
@@ -97,31 +96,44 @@ func ParseArgs(args []string) (string, error) {
     that you mean it.
 `, args[0])
 		default:
-			return "", ErrInvalid
+			return "", nil, errors.New("[!] Invalid mode passed to help")
 		}
-		return "", ErrHelp
+		return "", nil, ErrHelp
 	case "add", "get", "forget":
-		return args[1], nil
-	case "-c":
-		if len(args) < 3 {
-			return "", ErrInvalid
+		if len(args) > 2 && args[2] == "-c" {
+			if len(args) < 4 {
+				return "", nil, errors.New("[!] Nothing passed to -c")
+			}
+
+			costFactorParams := strings.Split(args[3], ",")
+			if len(costFactorParams) != 3 {
+				return "", nil, errors.New("[!] Invalid number of arguments passed to -c")
+			}
+
+			N, err := strconv.ParseInt(costFactorParams[0], 10, 64)
+			if err != nil {
+				return "", nil, errors.New("[!] Arguments to -c must be integers")
+			}
+			r, err := strconv.ParseInt(costFactorParams[1], 10, 64)
+			if err != nil {
+				return "", nil, errors.New("[!] Arguments to -c must be integers")
+			}
+			p, err := strconv.ParseInt(costFactorParams[2], 10, 64)
+			if err != nil {
+				return "", nil, errors.New("[!] Arguments to -c must be integers")
+			}
+
+			if !(N > 1) {
+				return "", nil, errors.New("[!] N must be more than 1")
+			}
+
+			scryptCost := map[string]int{"N": int(N), "r": int(r), "p": int(p)}
+
+			return args[1], scryptCost, nil
 		}
-
-		costFactorParams := strings.Split(args[2], ",")
-		if len(costFactorParams) != 3 {
-			return "", ErrInvalid
-		}
-
-		N := costFactorParams[0]
-		r := costFactorParams[1]
-		p := costFactorParams[2]
-
-		// TODO: Validate if parameters are integers and if they satisfy Scrypt's limits.
-
-		_, _, _ = N, r, p
-		return "", nil
+		return args[1], nil, nil
 	default:
-		return "", ErrInvalid
+		return "", nil, errors.New("[!] Invalid option")
 	}
 }
 
@@ -232,13 +244,13 @@ func SaveSecrets(secrets map[string]interface{}) {
 	}
 
 	// Write the JSON to the disk.
-	ioutil.WriteFile("./.pocket/secrets", []byte(jsonFormattedSecrets), 0700)
+	ioutil.WriteFile("/home/awn/.pocket/secrets", []byte(jsonFormattedSecrets), 0700)
 }
 
 // RetrieveSecrets retrieves the secrets from the disk.
 func RetrieveSecrets() map[string]interface{} {
 	// Read the raw JSON from the disk.
-	jsonFormattedSecrets, err := ioutil.ReadFile("./.pocket/secrets")
+	jsonFormattedSecrets, err := ioutil.ReadFile("/home/awn/.pocket/secrets")
 	if err != nil {
 		log.Fatalln(err)
 	}
