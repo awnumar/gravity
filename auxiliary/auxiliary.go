@@ -244,13 +244,13 @@ func SaveSecrets(secrets map[string]interface{}) {
 	}
 
 	// Write the JSON to the disk.
-	ioutil.WriteFile("/home/awn/.pocket/secrets", []byte(jsonFormattedSecrets), 0700)
+	ioutil.WriteFile("./.pocket/secrets", []byte(jsonFormattedSecrets), 0700)
 }
 
 // RetrieveSecrets retrieves the secrets from the disk.
 func RetrieveSecrets() map[string]interface{} {
 	// Read the raw JSON from the disk.
-	jsonFormattedSecrets, err := ioutil.ReadFile("/home/awn/.pocket/secrets")
+	jsonFormattedSecrets, err := ioutil.ReadFile("./.pocket/secrets")
 	if err != nil {
 		log.Fatalln(err)
 	}
