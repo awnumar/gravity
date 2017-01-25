@@ -32,5 +32,6 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 ## Credits
 
-- [@dotcppfile](https://twitter.com/dotcppfile)
-- [@mnzt](https://github.com/mnzt)
+- [@Alipha](https://github.com/alipha/) - Thought of the idea of how we'd link data together across multiple entries.
+- [@dotcppfile](https://twitter.com/dotcppfile) - Brainstormed ideas and suggested countless improvements.
+- [@mnzt](https://github.com/mnzt) - Hangs around and reviews stuff. :)
