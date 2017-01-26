@@ -28,8 +28,9 @@ func main() {
 
 	if sc != nil {
 		scryptCost = sc
-		fmt.Println(scryptCost)
 	}
+
+	fmt.Println(scryptCost)
 
 	// Run setup.
 	auxiliary.Setup()
@@ -66,8 +67,9 @@ func retrieve() {
 		if err != nil {
 			// This should never happen.
 			fmt.Println("[!] Invalid padding on decrypted secret.")
+		} else {
+			fmt.Println("[+] Secret:", string(secret))
 		}
-		fmt.Println("[+] Secret:", string(secret))
 	} else {
 		fmt.Println("[+] There's nothing to see here.")
 	}

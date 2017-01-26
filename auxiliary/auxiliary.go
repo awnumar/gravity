@@ -35,7 +35,8 @@ func ParseArgs(args []string) (string, map[string]int, error) {
     -c N,r,p	- Cost factors for scrypt. If you don't
                   understand this, leave it alone. Note
                   that, if set, you'll have to specify
-                  these settings on every retrieval.`, args[0])
+                  these settings on every retrieval and
+                  also every time you delete an entry.`, args[0])
 
 	if len(args) < 2 {
 		fmt.Println(helpMessage)
