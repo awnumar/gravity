@@ -36,7 +36,8 @@ func ParseArgs(args []string) (string, map[string]int, error) {
                   understand this, leave it alone. Note
                   that, if set, you'll have to specify
                   these settings on every retrieval and
-                  also every time you delete an entry.`, args[0])
+                  also every time you delete an entry.
+                  The defaults are '18,8,1'.`, args[0])
 
 	if len(args) < 2 {
 		fmt.Println(helpMessage)
