@@ -111,15 +111,15 @@ func ParseArgs(args []string) (string, map[string]int, error) {
 				return "", nil, errors.New("[!] Invalid number of arguments passed to -c")
 			}
 
-			N, err := strconv.ParseInt(costFactorParams[0], 10, 64)
+			N, err := strconv.ParseInt(costFactorParams[0], 10, 0)
 			if err != nil {
 				return "", nil, errors.New("[!] Arguments to -c must be integers")
 			}
-			r, err := strconv.ParseInt(costFactorParams[1], 10, 64)
+			r, err := strconv.ParseInt(costFactorParams[1], 10, 0)
 			if err != nil {
 				return "", nil, errors.New("[!] Arguments to -c must be integers")
 			}
-			p, err := strconv.ParseInt(costFactorParams[2], 10, 64)
+			p, err := strconv.ParseInt(costFactorParams[2], 10, 0)
 			if err != nil {
 				return "", nil, errors.New("[!] Arguments to -c must be integers")
 			}

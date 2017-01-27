@@ -30,8 +30,6 @@ func main() {
 		scryptCost = sc
 	}
 
-	fmt.Println(scryptCost)
-
 	// Run setup.
 	auxiliary.Setup()
 
