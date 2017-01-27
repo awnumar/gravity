@@ -77,15 +77,15 @@ func Decrypt(base64EncodedCiphertext string, key []byte) []byte {
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
-func DeriveKey(password, identifier []byte) []byte {
-	derivedKey, _ := scrypt.Key(password, identifier, 1<<18, 8, 1, 32)
+func DeriveKey(password, identifier []byte, cost map[string]int) []byte {
+	derivedKey, _ := scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
 	return derivedKey
 }
 
 // DeriveID hashes the identifier using Scrypt and returns a base64 encoded string.
-func DeriveID(identifier []byte) string {
-	dk, _ := scrypt.Key(identifier, []byte(""), 1<<18, 8, 1, 32)
-	return base64.StdEncoding.EncodeToString(dk)
+func DeriveID(identifier []byte, cost map[string]int) string {
+	derivedKey, _ := scrypt.Key(identifier, []byte(""), 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+	return base64.StdEncoding.EncodeToString(derivedKey)
 }
 
 // Pad implements byte padding.
@@ -111,20 +111,24 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 }
 
 // Unpad reverses byte padding.
-func Unpad(text []byte) []byte {
+func Unpad(text []byte) ([]byte, error) {
+	// Keep a copy of the original just in case.
+	var original = text
+
 	// Iterate over the text backwards,
 	// removing the appropriate padding bytes.
 	for i := len(text) - 1; i >= 0; i-- {
 		if text[i] == 0 {
 			text = text[:len(text)-1]
 			continue
-		}
-		if text[i] == 1 {
+		} else if text[i] == 1 {
 			text = text[:len(text)-1]
 			break
+		} else {
+			return original, errors.New("unpad: invalid padding")
 		}
 	}
 
 	// That simple.  We're done.
-	return text
+	return text, nil
 }
