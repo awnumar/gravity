@@ -40,7 +40,7 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 This mode outputs a basic help message outlining the different modes and arguments. For further and more in-depth usage information, this project-page (or the README file) should instead be consulted.
 
-##### :: `pocket add`
+##### :: `pocket add [-c N,r,p int]`
 
 The *add* mode is used to add new secrets to the store.
 
@@ -50,13 +50,13 @@ For the identifier, you should aim to use a phrase like `l33t encryption key for
 
 Speaking of not stopping you from doing things, you're also free to use different passwords for different entries. Aside from increasing security, this also has the side effect of allowing deniable encryption. Simply add a few legit-looking secrets with a decoy key and if you're ever forced to disclose your keys, just give up the decoys. The program adds its own decoys so you can claim that the other encrypted entries are just that: decoys.
 
-##### :: `pocket get`
+##### :: `pocket get [-c N,r,p int]`
 
 The *get* mode is used for retrieving secrets from the store.
 
 You'll be prompted to enter a password and an identifier. The program will then derive the secure identifier[s] and encryption key, and then retrieve, decrypt, and output the plaintext.
 
-##### :: `pocket forget`
+##### :: `pocket forget [-c N,r,p int]`
 
 The *forget* mode is used for removing secrets from the store.
 
