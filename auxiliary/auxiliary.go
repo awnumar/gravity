@@ -24,7 +24,7 @@ var (
 // ParseArgs parses the command line arguments and returns the
 // user's configuration options for the caller to then use.
 func ParseArgs(args []string) (string, map[string]int, error) {
-	helpMessage := fmt.Sprintf(`Usage: %s mode [-c N,r,p]
+	helpMessage := fmt.Sprintf(`Usage: %s mode [-c N,r,p int]
 
 :: Modes
 
