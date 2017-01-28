@@ -34,13 +34,9 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 *Pocket* can be launched in one of four modes:
 
-### Help
-
 ##### :: `pocket help`
 
 This mode outputs a basic help message outlining the different modes and arguments. This page should be consulted for further, more in-depth, usage information.
-
-### Add
 
 ##### :: `pocket add [-c N,r,p]`
 
@@ -52,15 +48,11 @@ For the identifier, you should aim to use a phrase like `l33t encryption key for
 
 Speaking of not stopping you from doing things, you're also free to use different passwords for different entries. Aside from increasing security, this also has the side effect of allowing deniable encryption. Simply add a few legit-looking secrets with a decoy key and if you're ever forced to disclose your keys, just give up the decoys. The program adds its own decoys so you can claim that the other encrypted entries are just that: decoys.
 
-### Get
-
 ##### :: `pocket get [-c N,r,p]`
 
 The *get* mode is used for retrieving secrets from the store.
 
 You'll be prompted to enter a password and an identifier. The program will then derive the secure identifier[s] and encryption key, and then retrieve, decrypt, and output the plaintext.
-
-### Forget
 
 ##### :: `pocket forget [-c N,r,p]`
 
