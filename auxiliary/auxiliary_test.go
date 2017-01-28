@@ -23,15 +23,6 @@ func TestParseArgs(t *testing.T) {
 
 	args2 := []string{"add", "get", "forget"}
 	for _, arg := range args2 {
-		args = []string{"./pocket", "help", arg}
-		mode, _, err = ParseArgs(args)
-		if err.Error() != "help" {
-			t.Error("Expected error; got ", err)
-		}
-		if mode != "" {
-			t.Error("Expected empty mode; got", mode)
-		}
-
 		args = []string{"./pocket", arg}
 		mode, _, err = ParseArgs(args)
 		if err != nil {
@@ -40,15 +31,6 @@ func TestParseArgs(t *testing.T) {
 		if mode != arg {
 			t.Error("Expected empty mode; got", mode)
 		}
-	}
-
-	args = []string{"./pocket", "help", "test"}
-	mode, _, err = ParseArgs(args)
-	if err.Error() != "[!] Invalid mode passed to help" {
-		t.Error("Expected error; got ", err)
-	}
-	if mode != "" {
-		t.Error("Expected empty mode; got", mode)
 	}
 
 	args = []string{"./pocket", "test"}
