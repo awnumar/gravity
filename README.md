@@ -46,15 +46,15 @@ The *add* mode is used to add new secrets to the store.
 
 You'll be prompted to enter a password and an identifier. Both of those things together are used to derive the encryption key that protects your secrets, so a strong identifier is recommended alongside a strong password.
 
-For the identifier, you should aim to use a phrase like `l33t encryption key for them thingz init` instead of something like `encryption key` which could easily be guessed. There's also nothing stopping you from using random values for both fields, assuming that you can remember them.
+For the identifier, you should aim to use a phrase like `l33t encryption key for them thingz init` instead of something like `encryption key` which could easily be guessed. However, there's nothing stopping you from using random values for both fields, assuming that you can remember them.
 
-Speaking of not stopping you from doing things, you're also free to use different passwords for different entries. Aside from increasing security, this also has the side effect of allowing deniable encryption. Simply add a few legit-looking secrets with a decoy key and if you're ever forced to disclose your keys, just give up the decoys. The program adds its own decoys so you can claim that the other encrypted entries are just that: decoys.
+You're also free to use different passwords for different entries. Aside from increasing security, this also has the side effect of allowing deniable encryption. Simply add a few legit-looking secrets with a decoy key and if you're ever forced to disclose your keys, just give up the decoys. The program adds its own decoys so you can claim that the other encrypted entries are just that: decoys.
 
 ##### :: `pocket get [-c N,r,p int]`
 
 The *get* mode is used for retrieving secrets from the store.
 
-You'll be prompted to enter a password and an identifier. The program will then derive the secure identifier[s] and encryption key, and then retrieve, decrypt, and output the plaintext.
+You'll be prompted to enter a password and an identifier. The program will derive the secure identifier[s] and encryption key, and then retrieve, decrypt, and output the plaintext.
 
 ##### :: `pocket forget [-c N,r,p int]`
 
@@ -72,7 +72,7 @@ This option is to specify custom scrypt cost-parameters that will be used to der
 
 Things to note:
 
-* The N parameter is as a power of two. So, for example if you want `N = 2^20`, you'd enter `N = 20`.
+* The N parameter should be specified as the power of two. So for example if you want `N = 2^20`, you'd enter `N = 20`.
 * If you set a custom cost-factor for an entry, you'll have to specify that same cost-factor every time you run `get` and also when you run `forget`.
 
 ## Credits
