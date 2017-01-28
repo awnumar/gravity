@@ -2,7 +2,7 @@ package auxiliary
 
 import "testing"
 
-func TestParseArgs(t *testing.T) {
+func TestParseArgsHelp(t *testing.T) {
 	args := []string{"./pocket"}
 	mode, _, err := ParseArgs(args)
 	if err.Error() != "help" {
@@ -20,11 +20,13 @@ func TestParseArgs(t *testing.T) {
 	if mode != "" {
 		t.Error("Expected empty mode; got", mode)
 	}
+}
 
+func TestParseArgsModes(t *testing.T) {
 	args2 := []string{"add", "get", "forget"}
 	for _, arg := range args2 {
-		args = []string{"./pocket", arg}
-		mode, _, err = ParseArgs(args)
+		args := []string{"./pocket", arg}
+		mode, _, err := ParseArgs(args)
 		if err != nil {
 			t.Error("Unexpected error; got", err)
 		}
@@ -33,17 +35,19 @@ func TestParseArgs(t *testing.T) {
 		}
 	}
 
-	args = []string{"./pocket", "test"}
-	mode, _, err = ParseArgs(args)
+	args := []string{"./pocket", "test"}
+	mode, _, err := ParseArgs(args)
 	if err.Error() != "[!] Invalid option" {
 		t.Error("Expected error; got ", err)
 	}
 	if mode != "" {
 		t.Error("Expected empty mode; got", mode)
 	}
+}
 
-	args = []string{"./pocket", "get", "-c"}
-	_, _, err = ParseArgs(args)
+func TestParseArgsScryptCost(t *testing.T) {
+	args := []string{"./pocket", "get", "-c"}
+	_, _, err := ParseArgs(args)
 	if err.Error() != "[!] Nothing passed to -c" {
 		t.Error("Expected error; got ", err)
 	}
@@ -54,7 +58,7 @@ func TestParseArgs(t *testing.T) {
 		t.Error("Expected error; got ", err)
 	}
 
-	args2 = []string{"N,8,1", "18,r,1", "18,8,p"}
+	args2 := []string{"N,8,1", "18,r,1", "18,8,p"}
 	for _, arg := range args2 {
 		args = []string{"./pocket", "get", "-c", arg}
 		_, _, err = ParseArgs(args)
