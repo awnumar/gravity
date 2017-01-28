@@ -68,7 +68,7 @@ You won't be asked for a confirmation, so when you run forget, make sure that yo
 
 ##### :: `[-c N,r,p int]`
 
-This specifies the scrypt cost-parameters that *pocket* will use to derive the identifier[s] and encryption key. If you don't understand what this is, leave it alone. The default values are `18,8,1`.
+This option is to specify custom scrypt cost-parameters that will be used to derive the identifier[s] and encryption key. If you don't understand what this is, leave it alone. The default values are `18,8,1`.
 
 Things to note:
 
