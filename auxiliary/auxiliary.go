@@ -36,7 +36,7 @@ func ParseArgs(args []string) (string, map[string]int, error) {
 
 :: Options
 
-  -c N,r,p    Cost factors for scrypt. (default: 18,8,1)
+  -c N,r,p      Cost factors for scrypt. (default: 18,8,1)
 
 Further help and usage information can be found in the README file or on the project page.`, args[0])
 
