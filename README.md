@@ -36,13 +36,13 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 ### Help
 
-#### :: `pocket help`
+##### :: `pocket help`
 
 This mode outputs a basic help message outlining the different modes and arguments. This page should be consulted for further, more in-depth, usage information.
 
 ### Add
 
-#### :: `pocket add [-c N,r,p]`
+##### :: `pocket add [-c N,r,p]`
 
 The *add* mode is used to add new secrets to the store.
 
@@ -54,7 +54,7 @@ Speaking of not stopping you from doing things, you're also free to use differen
 
 ### Get
 
-#### :: `pocket get [-c N,r,p]`
+##### :: `pocket get [-c N,r,p]`
 
 The *get* mode is used for retrieving secrets from the store.
 
@@ -62,7 +62,7 @@ You'll be prompted to enter a password and an identifier. The program will then 
 
 ### Forget
 
-#### :: `pocket forget [-c N,r,p]`
+##### :: `pocket forget [-c N,r,p]`
 
 The *forget* mode is used for removing secrets from the store.
 
