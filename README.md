@@ -38,7 +38,7 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 ##### :: `pocket help`
 
-This mode outputs a basic help message outlining the different modes and arguments. This page should be consulted for further, more in-depth, usage information.
+This mode outputs a basic help message outlining the different modes and arguments. For further and more in-depth usage information, this project-page (or the README file) should instead be consulted.
 
 ##### :: `pocket add [-c N,r,p int]`
 
@@ -66,7 +66,7 @@ You won't be asked for a confirmation, so when you run forget, make sure that yo
 
 ### Options
 
-##### :: `-c N,r,p int` (default: 18,8,1)
+##### :: `[-c N,r,p int]` (default: 18,8,1)
 
 Example: `~ >> pocket add -c 20,8,1`
 
