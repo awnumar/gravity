@@ -68,8 +68,6 @@ You won't be asked for a confirmation, so when you run forget, make sure that yo
 
 ##### :: `[-c N,r,p int]` (default: 18,8,1)
 
-Example: `~ >> pocket add -c 20,8,1`
-
 This specifies the scrypt cost-parameters that *pocket* will use to derive the identifier[s] and encryption key. If you don't understand what this is, leave it alone.
 
 Things to note:
