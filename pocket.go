@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/libeclipse/pocket/auxiliary"
+	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/crypto"
 )
 
@@ -30,7 +31,7 @@ func main() {
 	}
 
 	// Run setup.
-	auxiliary.Setup()
+	coffer.Setup()
 
 	// Launch appropriate function for run-mode.
 	switch mode {
@@ -55,7 +56,7 @@ func retrieve() {
 	fmt.Println("[+] Deriving encryption key...")
 	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
-	secret, err := auxiliary.RetrieveSecret(identifier)
+	secret, err := coffer.RetrieveSecret(identifier)
 	if err != nil {
 		fmt.Println(err)
 	} else {
@@ -91,7 +92,7 @@ func add() {
 	encryptedSecret := crypto.Encrypt(paddedSecret, key)
 
 	// Save the identifier:secret pair in the database.
-	err = auxiliary.SaveSecret(identifier, encryptedSecret)
+	err = coffer.SaveSecret(identifier, encryptedSecret)
 	if err != nil {
 		fmt.Println(err)
 	} else {
