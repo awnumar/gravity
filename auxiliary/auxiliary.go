@@ -234,11 +234,12 @@ func RetrieveSecret(identifier []byte) ([]byte, error) {
 		c := bucket.Cursor()
 		for id, ct := c.First(); id != nil; id, ct = c.Next() {
 			if reflect.DeepEqual(id, identifier) {
-				ciphertext = ct
+				ciphertext = append(ciphertext, ct...)
+				return nil
 			}
 		}
 
-		return nil
+		return errors.New("[!] Nothing to see here")
 	}); err != nil {
 		return nil, err
 	}
