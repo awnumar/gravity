@@ -85,20 +85,21 @@ func add() {
 	fmt.Println("[+] Deriving encryption key...")
 	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
-	// Check if there's a secret there already so we don't overwrite it.
-	if secretData[identifier] == nil {
-		// Store and save the id/secret pair.
-		paddedSecret, err := crypto.Pad([]byte(values[2]), 1025)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		secretData[identifier] = crypto.Encrypt(paddedSecret, key)
-		auxiliary.SaveSecrets(secretData)
+	// Store and save the id/secret pair.
+	paddedSecret, err := crypto.Pad([]byte(values[2]), 1025)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-		fmt.Println("[+] Okay, I'll remember that.")
+	// Encrypt the padded secret.
+	encryptedSecret := crypto.Encrypt(paddedSecret, key)
+
+	// Save the identifier:secret pair in the database.
+	err = auxiliary.SaveSecret(identifier, encryptedSecret)
+	if err != nil {
+		fmt.Println(err)
 	} else {
-		// Warn that there is already data here.
-		fmt.Println("[!] Cannot overwrite existing entry.")
+		fmt.Println("[+] Okay, I'll remember that.")
 	}
 }
 

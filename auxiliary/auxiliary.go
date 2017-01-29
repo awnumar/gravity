@@ -191,10 +191,7 @@ func SaveSecret(identifier, ciphertext []byte) error {
 
 	if err := db.Update(func(tx *bolt.Tx) error {
 		// Create bucket if it doesn't exist.
-		bucket, err := tx.CreateBucketIfNotExists([]byte("secrets"))
-		if err != nil {
-			log.Fatalln(err)
-		}
+		bucket, _ := tx.CreateBucketIfNotExists([]byte("secrets"))
 
 		// Check if this identifier already exists.
 		key := bucket.Get(identifier)

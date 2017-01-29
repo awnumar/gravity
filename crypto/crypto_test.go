@@ -34,7 +34,7 @@ func TestDeriveKey(t *testing.T) {
 }
 
 func TestDeriveID(t *testing.T) {
-	derivedKey := DeriveID([]byte("identifier"), scryptCost)
+	derivedKey := base64.StdEncoding.EncodeToString(DeriveID([]byte("identifier"), scryptCost))
 	if derivedKey != "HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=" {
 		t.Error("Expected `HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=`; got", derivedKey)
 	}

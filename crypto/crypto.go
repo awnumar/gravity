@@ -28,7 +28,7 @@ func generateRandomBytes(n int) []byte {
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
-func Encrypt(plaintext []byte, key []byte) string {
+func Encrypt(plaintext []byte, key []byte) []byte {
 	// Generate a random nonce.
 	nonceSlice := generateRandomBytes(24)
 
@@ -44,7 +44,7 @@ func Encrypt(plaintext []byte, key []byte) string {
 	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, &secretKey)
 
 	// Return the base64 encoded ciphertext.
-	return base64.StdEncoding.EncodeToString(ciphertext)
+	return ciphertext
 }
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
@@ -83,9 +83,9 @@ func DeriveKey(password, identifier []byte, cost map[string]int) []byte {
 }
 
 // DeriveID hashes the identifier using Scrypt and returns a base64 encoded string.
-func DeriveID(identifier []byte, cost map[string]int) string {
+func DeriveID(identifier []byte, cost map[string]int) []byte {
 	derivedKey, _ := scrypt.Key(identifier, []byte(""), 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
-	return base64.StdEncoding.EncodeToString(derivedKey)
+	return derivedKey
 }
 
 // Pad implements byte padding.
