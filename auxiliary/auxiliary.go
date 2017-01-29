@@ -13,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/boltdb/bolt"
+
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -134,21 +136,14 @@ func Setup() error {
 	}
 
 	// Check if we've done this before.
-	if _, err = os.Stat("./.pocket/secrets"); err == nil {
+	if _, err = os.Stat("./.pocket"); err != nil {
 		// Apparently we have.
-		return nil
-	}
 
-	// Create a directory to store our stuff in.
-	err = os.Mkdir("./.pocket", 0700)
-	if err != nil && !os.IsExist(err) {
-		log.Fatalln(err)
-	}
-
-	// Create an empty storage file for the secrets.
-	err = ioutil.WriteFile("./.pocket/secrets", []byte(""), 0700)
-	if err != nil {
-		log.Fatalln(err)
+		// Create a directory to store our stuff in.
+		err = os.Mkdir("./.pocket", 0700)
+		if err != nil && !os.IsExist(err) {
+			log.Fatalln(err)
+		}
 	}
 
 	return nil
@@ -185,16 +180,37 @@ func Input(prompt string) string {
 	return scanner.Text()
 }
 
-// SaveSecrets saves the secrets to the disk.
-func SaveSecrets(secrets map[string]interface{}) {
-	// Convert interface{} into raw JSON.
-	jsonFormattedSecrets, err := json.Marshal(secrets)
+// SaveSecret saves the secrets to the disk.
+func SaveSecret(identifier, ciphertext []byte) error {
+	// Open the database.
+	db, err := bolt.Open("./.pocket/secrets", 0700, nil)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	if err := db.Update(func(tx *bolt.Tx) error {
+		// Create bucket if it doesn't exist.
+		bucket, err := tx.CreateBucketIfNotExists([]byte("secrets"))
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		// Check if this identifier already exists.
+		key := bucket.Get(identifier)
+		if key != nil {
+			return errors.New("[!] Cannot overwrite existing entry")
+		}
+
+		// Save the identifier/ciphertext pair to the bucket.
+		bucket.Put(identifier, ciphertext)
+
+		return nil
+	}); err != nil {
+		return err
 	}
 
-	// Write the JSON to the disk.
-	ioutil.WriteFile("./.pocket/secrets", []byte(jsonFormattedSecrets), 0700)
+	return nil
 }
 
 // RetrieveSecrets retrieves the secrets from the disk.
