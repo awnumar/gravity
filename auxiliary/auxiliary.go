@@ -2,13 +2,12 @@ package auxiliary
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
+	"reflect"
 	"strconv"
 	"strings"
 	"syscall"
@@ -210,18 +209,39 @@ func SaveSecret(identifier, ciphertext []byte) error {
 	return nil
 }
 
-// RetrieveSecrets retrieves the secrets from the disk.
-func RetrieveSecrets() map[string]interface{} {
-	// Read the raw JSON from the disk.
-	jsonFormattedSecrets, err := ioutil.ReadFile("./.pocket/secrets")
+// RetrieveSecret retrieves the secrets from the disk.
+func RetrieveSecret(identifier []byte) ([]byte, error) {
+	// Open the database.
+	db, err := bolt.Open("./.pocket/secrets", 0700, &bolt.Options{ReadOnly: true})
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Allocate space to hold the ciphertext.
+	var ciphertext []byte
+
+	// Attempt to retrieve the ciphertext from the database.
+	if err := db.View(func(tx *bolt.Tx) error {
+		// Grab the bucket.
+		bucket := tx.Bucket([]byte("secrets"))
+		if bucket == nil {
+			// It doesn't exist.
+			return errors.New("[!] Nothing to see here")
+		}
+
+		// Iterate over all the keys.
+		c := bucket.Cursor()
+		for id, ct := c.First(); id != nil; id, ct = c.Next() {
+			if reflect.DeepEqual(id, identifier) {
+				ciphertext = ct
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 
-	// Convert JSON to map[string]interface{} type.
-	secrets := make(map[string]interface{})
-	json.Unmarshal(jsonFormattedSecrets, &secrets)
-
-	// Return the secrets.
-	return secrets
+	return ciphertext, nil
 }

@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"log"
@@ -50,13 +49,7 @@ func Encrypt(plaintext []byte, key []byte) []byte {
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext. If the key is incorrect, decryption
 // fails and the program terminates with exit code 1.
-func Decrypt(base64EncodedCiphertext string, key []byte) []byte {
-	// Decode base64 encoded ciphertext into bytes.
-	ciphertext, err := base64.StdEncoding.DecodeString(base64EncodedCiphertext)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
+func Decrypt(ciphertext []byte, key []byte) []byte {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])

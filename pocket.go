@@ -11,7 +11,6 @@ import (
 
 var (
 	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
-	secretData = make(map[string]interface{})
 )
 
 func main() {
@@ -32,9 +31,6 @@ func main() {
 
 	// Run setup.
 	auxiliary.Setup()
-
-	// Grab pre-saved secrets.
-	secretData = auxiliary.RetrieveSecrets()
 
 	// Launch appropriate function for run-mode.
 	switch mode {
@@ -59,17 +55,17 @@ func retrieve() {
 	fmt.Println("[+] Deriving encryption key...")
 	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
-	secret := secretData[identifier]
-	if secret != nil {
-		secret, err := crypto.Unpad(crypto.Decrypt(secret.(string), key))
+	secret, err := auxiliary.RetrieveSecret(identifier)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		secret, err = crypto.Unpad(crypto.Decrypt(secret, key))
 		if err != nil {
 			// This should never happen.
 			fmt.Println("[!] Invalid padding on decrypted secret.")
 		} else {
 			fmt.Println("[+] Secret:", string(secret))
 		}
-	} else {
-		fmt.Println("[+] There's nothing to see here.")
 	}
 }
 
@@ -110,15 +106,5 @@ func forget() {
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
 	identifier := crypto.DeriveID([]byte(values[0]), scryptCost)
-
-	// Check if there's actually something there.
-	if secretData[identifier] != nil {
-		// Delete the entry.
-		delete(secretData, string(identifier))
-		auxiliary.SaveSecrets(secretData)
-
-		fmt.Println("[+] It is forgotten.")
-	} else {
-		fmt.Println("[+] Nothing to do.")
-	}
+	_ = identifier
 }
