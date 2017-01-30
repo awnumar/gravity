@@ -113,4 +113,5 @@ func forget() {
 
 	// Delete the entry.
 	coffer.Delete(identifier)
+	fmt.Println("[+] It is forgotten.")
 }
