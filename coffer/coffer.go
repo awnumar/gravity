@@ -76,7 +76,7 @@ func RetrieveSecret(identifier []byte) ([]byte, error) {
 	// Attempt to retrieve the ciphertext from the database.
 	if err := Coffer.View(func(tx *bolt.Tx) error {
 		// Grab the bucket.
-		bucket := tx.Bucket([]byte("secrets"))
+		bucket := tx.Bucket([]byte("coffer"))
 
 		// Iterate over all the keys.
 		c := bucket.Cursor()
