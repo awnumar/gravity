@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"syscall"
@@ -92,8 +93,13 @@ func GetInputs(required []string) []string {
 		switch input {
 		case "password":
 			password := GetPass("[-] Password: ")
-			if len(password) < 1 {
+			if len(password) == 0 {
 				fmt.Println("[!] Length of password must be non-zero")
+				os.Exit(1)
+			}
+			confirmPassword := GetPass("[-] Confirm password: ")
+			if !reflect.DeepEqual(password, confirmPassword) {
+				fmt.Println("[!] Passwords do not match")
 				os.Exit(1)
 			}
 			required[i] = string(password)
@@ -116,7 +122,7 @@ func GetInputs(required []string) []string {
 	return required
 }
 
-// GetPass prompts for input without echo.
+// GetPass prompts for input without echoing back.
 func GetPass(prompt string) []byte {
 	// Output prompt.
 	fmt.Print(prompt)
