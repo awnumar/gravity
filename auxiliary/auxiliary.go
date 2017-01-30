@@ -104,13 +104,13 @@ func GetInputs(required []string) []string {
 				os.Exit(1)
 			}
 			required[i] = identifier
-		case "secret":
-			secret := Input("[-] Secret: ")
-			if len(secret) < 1 || len(secret) > 1024 {
-				fmt.Println("[!] Length of secret must be between 1-1024 bytes")
+		case "data":
+			data := Input("[-] Data: ")
+			if len(data) < 1 || len(data) > 1024 {
+				fmt.Println("[!] Length of data must be between 1-1024 bytes")
 				os.Exit(1)
 			}
-			required[i] = secret
+			required[i] = data
 		}
 	}
 	return required

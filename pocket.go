@@ -47,7 +47,7 @@ func main() {
 
 func add() {
 	// Get values from the user.
-	values := auxiliary.GetInputs([]string{"password", "identifier", "secret"})
+	values := auxiliary.GetInputs([]string{"password", "identifier", "data"})
 
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
@@ -57,17 +57,17 @@ func add() {
 	fmt.Println("[+] Deriving encryption key...")
 	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
-	// Store and save the id/secret pair.
-	paddedSecret, err := crypto.Pad([]byte(values[2]), 1025)
+	// Store and save the id/data pair.
+	paddedData, err := crypto.Pad([]byte(values[2]), 1025)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// Encrypt the padded secret.
-	encryptedSecret := crypto.Encrypt(paddedSecret, key)
+	// Encrypt the padded data.
+	encryptedData := crypto.Encrypt(paddedData, key)
 
-	// Save the identifier:secret pair in the database.
-	err = coffer.SaveSecret(identifier, encryptedSecret)
+	// Save the identifier:data pair in the database.
+	err = coffer.Save(identifier, encryptedData)
 	if err != nil {
 		// Cannot overwrite existing entry.
 		fmt.Println(err)
@@ -88,17 +88,17 @@ func retrieve() {
 	fmt.Println("[+] Deriving encryption key...")
 	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
-	secret, err := coffer.RetrieveSecret(identifier)
+	data, err := coffer.Retrieve(identifier)
 	if err != nil {
 		// Entry not found.
 		fmt.Println(err)
 	} else {
-		secret, err = crypto.Unpad(crypto.Decrypt(secret, key))
+		data, err = crypto.Unpad(crypto.Decrypt(data, key))
 		if err != nil {
 			// This should never happen.
-			fmt.Println("[!] Invalid padding on decrypted secret")
+			fmt.Println("[!] Invalid padding on decrypted data")
 		} else {
-			fmt.Println("[+] Secret:", string(secret))
+			fmt.Println("[+] Data:", string(data))
 		}
 	}
 }
@@ -110,5 +110,7 @@ func forget() {
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
 	identifier := crypto.DeriveID([]byte(values[0]), scryptCost)
-	_ = identifier
+
+	// Delete the entry.
+	coffer.Delete(identifier)
 }

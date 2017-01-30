@@ -48,8 +48,8 @@ func Setup() {
 	})
 }
 
-// SaveSecret saves the secrets to the disk.
-func SaveSecret(identifier, ciphertext []byte) error {
+// Save saves a secret to the database.
+func Save(identifier, ciphertext []byte) error {
 	return Coffer.Update(func(tx *bolt.Tx) error {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
@@ -68,14 +68,14 @@ func SaveSecret(identifier, ciphertext []byte) error {
 	})
 }
 
-// RetrieveSecret retrieves the secrets from the disk.
-func RetrieveSecret(identifier []byte) ([]byte, error) {
+// Retrieve retrieves a secret from the database.
+func Retrieve(identifier []byte) ([]byte, error) {
 	// Allocate space to hold the ciphertext.
 	var ciphertext []byte
 
 	// Attempt to retrieve the ciphertext from the database.
 	if err := Coffer.View(func(tx *bolt.Tx) error {
-		// Grab the bucket.
+		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
 		// Iterate over all the keys.
@@ -94,4 +94,17 @@ func RetrieveSecret(identifier []byte) ([]byte, error) {
 	}
 
 	return ciphertext, nil
+}
+
+// Delete deletes an entry from the database.
+func Delete(identifier []byte) {
+	Coffer.Update(func(tx *bolt.Tx) error {
+		// Grab the bucket that we'll be using.
+		bucket := tx.Bucket([]byte("coffer"))
+
+		// Delete the entry.
+		bucket.Delete(identifier)
+
+		return nil
+	})
 }
