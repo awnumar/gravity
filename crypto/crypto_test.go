@@ -19,7 +19,9 @@ func TestGenerateRandomBytes(t *testing.T) {
 
 func TestDecrypt(t *testing.T) {
 	key, _ := base64.StdEncoding.DecodeString("JNut6eJfb6ySwOac7FHe3bsSU75FpL/o776VD+oYWxk=")
-	ciphertext := "5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw="
+	ciphertext, _ := base64.StdEncoding.DecodeString("5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw=")
+
+	// Correct key
 	plaintext := string(Decrypt(ciphertext, key))
 	if plaintext != "test" {
 		t.Error("Expected plaintext to be `test`; got", plaintext)
@@ -34,7 +36,7 @@ func TestDeriveKey(t *testing.T) {
 }
 
 func TestDeriveID(t *testing.T) {
-	derivedKey := DeriveID([]byte("identifier"), scryptCost)
+	derivedKey := base64.StdEncoding.EncodeToString(DeriveID([]byte("identifier"), scryptCost))
 	if derivedKey != "HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=" {
 		t.Error("Expected `HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=`; got", derivedKey)
 	}
