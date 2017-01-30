@@ -69,6 +69,7 @@ func add() {
 	// Save the identifier:secret pair in the database.
 	err = coffer.SaveSecret(identifier, encryptedSecret)
 	if err != nil {
+		// Cannot overwrite existing entry.
 		fmt.Println(err)
 	} else {
 		fmt.Println("[+] Okay, I'll remember that.")
@@ -89,6 +90,7 @@ func retrieve() {
 
 	secret, err := coffer.RetrieveSecret(identifier)
 	if err != nil {
+		// Entry not found.
 		fmt.Println(err)
 	} else {
 		secret, err = crypto.Unpad(crypto.Decrypt(secret, key))
