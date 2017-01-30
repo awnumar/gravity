@@ -10,84 +10,73 @@ import (
 	"github.com/boltdb/bolt"
 )
 
+var (
+	// Coffer is a pointer to the database object.
+	Coffer *bolt.DB
+)
+
 // Setup sets up the environment.
-func Setup() error {
-	// Get the current user.
+func Setup() {
+	// Ascertain the path to the secret store.
 	user, err := user.Current()
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// Change the working directory to the user's home.
-	err = os.Chdir(user.HomeDir)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	// Check if we've done this before.
-	if _, err = os.Stat("./.pocket"); err != nil {
-		// Apparently we have.
+	if _, err = os.Stat(user.HomeDir + "/.pocket"); err != nil {
+		// Apparently we haven't.
 
 		// Create a directory to store our stuff in.
-		err = os.Mkdir("./.pocket", 0700)
-		if err != nil && !os.IsExist(err) {
+		err = os.Mkdir(user.HomeDir+"/.pocket", 0700)
+		if err != nil {
 			log.Fatalln(err)
 		}
 	}
 
-	return nil
+	// Open the database file.
+	db, err := bolt.Open(user.HomeDir+"/.pocket/coffer.bolt", 0700, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	Coffer = db
+
+	// Create the bucket to guarantee it exists.
+	Coffer.Update(func(tx *bolt.Tx) error {
+		_, _ = tx.CreateBucketIfNotExists([]byte("coffer"))
+		return nil
+	})
 }
 
 // SaveSecret saves the secrets to the disk.
 func SaveSecret(identifier, ciphertext []byte) error {
-	// Open the database.
-	db, err := bolt.Open("./.pocket/secrets", 0700, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
-	if err := db.Update(func(tx *bolt.Tx) error {
-		// Create bucket if it doesn't exist.
-		bucket, _ := tx.CreateBucketIfNotExists([]byte("secrets"))
+	return Coffer.Update(func(tx *bolt.Tx) error {
+		// Grab the bucket that we'll be using.
+		bucket := tx.Bucket([]byte("coffer"))
 
 		// Check if this identifier already exists.
-		key := bucket.Get(identifier)
-		if key != nil {
+		value := bucket.Get(identifier)
+		if value != nil {
+			// It does; abort and return an error.
 			return errors.New("[!] Cannot overwrite existing entry")
 		}
 
-		// Save the identifier/ciphertext pair to the bucket.
+		// Save the identifier:ciphertext pair to the coffer.
 		bucket.Put(identifier, ciphertext)
 
 		return nil
-	}); err != nil {
-		return err
-	}
-
-	return nil
+	})
 }
 
 // RetrieveSecret retrieves the secrets from the disk.
 func RetrieveSecret(identifier []byte) ([]byte, error) {
-	// Open the database.
-	db, err := bolt.Open("./.pocket/secrets", 0700, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer db.Close()
-
 	// Allocate space to hold the ciphertext.
 	var ciphertext []byte
 
 	// Attempt to retrieve the ciphertext from the database.
-	if err := db.View(func(tx *bolt.Tx) error {
+	if err := Coffer.View(func(tx *bolt.Tx) error {
 		// Grab the bucket.
 		bucket := tx.Bucket([]byte("secrets"))
-		if bucket == nil {
-			// It doesn't exist.
-			return errors.New("[!] Nothing to see here")
-		}
 
 		// Iterate over all the keys.
 		c := bucket.Cursor()
@@ -98,6 +87,7 @@ func RetrieveSecret(identifier []byte) ([]byte, error) {
 			}
 		}
 
+		// We didn't find that key; return an error.
 		return errors.New("[!] Nothing to see here")
 	}); err != nil {
 		return nil, err

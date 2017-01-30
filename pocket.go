@@ -30,43 +30,18 @@ func main() {
 		scryptCost = sc
 	}
 
-	// Run setup.
+	// Setup the secret store.
 	coffer.Setup()
+	defer coffer.Coffer.Close()
 
 	// Launch appropriate function for run-mode.
 	switch mode {
-	case "get":
-		retrieve()
 	case "add":
 		add()
+	case "get":
+		retrieve()
 	case "forget":
 		forget()
-	}
-}
-
-func retrieve() {
-	// Get values from the user.
-	values := auxiliary.GetInputs([]string{"password", "identifier"})
-
-	// Derive and store identifier.
-	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[1]), scryptCost)
-
-	// Derive and store encryption key.
-	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
-
-	secret, err := coffer.RetrieveSecret(identifier)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		secret, err = crypto.Unpad(crypto.Decrypt(secret, key))
-		if err != nil {
-			// This should never happen.
-			fmt.Println("[!] Invalid padding on decrypted secret.")
-		} else {
-			fmt.Println("[+] Secret:", string(secret))
-		}
 	}
 }
 
@@ -97,6 +72,32 @@ func add() {
 		fmt.Println(err)
 	} else {
 		fmt.Println("[+] Okay, I'll remember that.")
+	}
+}
+
+func retrieve() {
+	// Get values from the user.
+	values := auxiliary.GetInputs([]string{"password", "identifier"})
+
+	// Derive and store identifier.
+	fmt.Println("[+] Deriving secure identifier...")
+	identifier := crypto.DeriveID([]byte(values[1]), scryptCost)
+
+	// Derive and store encryption key.
+	fmt.Println("[+] Deriving encryption key...")
+	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
+
+	secret, err := coffer.RetrieveSecret(identifier)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		secret, err = crypto.Unpad(crypto.Decrypt(secret, key))
+		if err != nil {
+			// This should never happen.
+			fmt.Println("[!] Invalid padding on decrypted secret")
+		} else {
+			fmt.Println("[+] Secret:", string(secret))
+		}
 	}
 }
 
