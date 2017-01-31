@@ -40,6 +40,7 @@ func main() {
 	switch *storeFlag {
 	default:
 		fallthrough
+
 	case "coffer":
 		var err error
 		secretStore, err = coffer.Setup()
