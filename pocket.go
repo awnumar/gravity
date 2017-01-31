@@ -1,17 +1,23 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/libeclipse/pocket/auxiliary"
-	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/crypto"
+	"github.com/libeclipse/pocket/store"
+	"github.com/libeclipse/pocket/store/coffer"
 )
 
 var (
+	// options
+	storeFlag  = flag.String("store", "coffer", "set which store to use")
 	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
+
+	secretStore store.Store
 )
 
 func main() {
@@ -30,9 +36,17 @@ func main() {
 		scryptCost = sc
 	}
 
-	// Setup the secret store.
-	coffer.Setup()
-	defer coffer.Close()
+	// Determine which store to use
+	switch *storeFlag {
+	default:
+		fallthrough
+	case "coffer":
+		var err error
+		secretStore, err = coffer.Setup()
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 
 	// Launch appropriate function for run-mode.
 	switch mode {
@@ -67,7 +81,7 @@ func add() {
 	encryptedData := crypto.Encrypt(paddedData, key)
 
 	// Save the identifier:data pair in the database.
-	err = coffer.Save(identifier, encryptedData)
+	err = secretStore.Save(identifier, encryptedData)
 	if err != nil {
 		// Cannot overwrite existing entry.
 		fmt.Println(err)
@@ -88,7 +102,7 @@ func retrieve() {
 	fmt.Println("[+] Deriving encryption key...")
 	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
 
-	data, err := coffer.Retrieve(identifier)
+	data, err := secretStore.Retrieve(identifier)
 	if err != nil {
 		// Entry not found.
 		fmt.Println(err)
@@ -112,6 +126,6 @@ func forget() {
 	identifier := crypto.DeriveID([]byte(values[0]), scryptCost)
 
 	// Delete the entry.
-	coffer.Delete(identifier)
+	secretStore.Delete(identifier)
 	fmt.Println("[+] It is forgotten.")
 }
