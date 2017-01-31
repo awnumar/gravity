@@ -32,7 +32,7 @@ func main() {
 
 	// Setup the secret store.
 	coffer.Setup()
-	defer coffer.Coffer.Close()
+	defer coffer.Close()
 
 	// Launch appropriate function for run-mode.
 	switch mode {

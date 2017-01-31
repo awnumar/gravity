@@ -43,7 +43,7 @@ func Setup() {
 
 	// Create the bucket to guarantee it exists.
 	Coffer.Update(func(tx *bolt.Tx) error {
-		_, _ = tx.CreateBucketIfNotExists([]byte("coffer"))
+		tx.CreateBucketIfNotExists([]byte("coffer"))
 		return nil
 	})
 }
@@ -107,4 +107,9 @@ func Delete(identifier []byte) {
 
 		return nil
 	})
+}
+
+// Close closes the database object.
+func Close() {
+	Coffer.Close()
 }
