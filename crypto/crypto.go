@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/scrypt"
@@ -49,7 +48,7 @@ func Encrypt(plaintext []byte, key []byte) []byte {
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext. If the key is incorrect, decryption
 // fails and the program terminates with exit code 1.
-func Decrypt(ciphertext []byte, key []byte) []byte {
+func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])
@@ -61,12 +60,12 @@ func Decrypt(ciphertext []byte, key []byte) []byte {
 	// Decrypt the ciphertext and store the result.
 	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, &secretKey)
 	if !okay {
-		fmt.Println("[!] Decryption failed")
-		os.Exit(1)
+		// This shouldn't happen.
+		return nil, errors.New("[!] Decryption of data failed")
 	}
 
 	// Return the resulting plaintext.
-	return plaintext
+	return plaintext, nil
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
@@ -85,7 +84,7 @@ func DeriveID(identifier []byte, cost map[string]int) []byte {
 func Pad(text []byte, padTo int) ([]byte, error) {
 	// Check if input is even valid.
 	if len(text) > padTo-1 {
-		return nil, errors.New("pad: text length must not exceed (padTo-1)")
+		return nil, errors.New(fmt.Sprint("[!] Length of data must not exceed ", padTo-1))
 	}
 
 	// Add the compulsory byte of value `1`.

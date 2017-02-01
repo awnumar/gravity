@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 	"strconv"
@@ -85,63 +84,8 @@ Further help and usage information can be found in the README file or on the pro
 	}
 }
 
-// GetInputs takes a slice of required inputs,
-// asks the user for them, and returns them in
-// the same order.
-func GetInputs(required []string) []string {
-	for i, input := range required {
-		switch input {
-		case "password":
-			password := GetPass("[-] Password: ")
-			if len(password) == 0 {
-				fmt.Println("[!] Length of password must be non-zero")
-				os.Exit(1)
-			}
-			confirmPassword := GetPass("[-] Confirm password: ")
-			if !reflect.DeepEqual(password, confirmPassword) {
-				fmt.Println("[!] Passwords do not match")
-				os.Exit(1)
-			}
-			required[i] = string(password)
-		case "identifier":
-			identifier := Input("[-] Identifier: ")
-			if len(identifier) < 1 {
-				fmt.Println("[!] Length of identifier must be non-zero")
-				os.Exit(1)
-			}
-			required[i] = identifier
-		case "data":
-			data := Input("[-] Data: ")
-			if len(data) < 1 || len(data) > 1024 {
-				fmt.Println("[!] Length of data must be between 1-1024 bytes")
-				os.Exit(1)
-			}
-			required[i] = data
-		}
-	}
-	return required
-}
-
-// GetPass prompts for input without echoing back.
-func GetPass(prompt string) []byte {
-	// Output prompt.
-	fmt.Print(prompt)
-
-	// Get input without echoing back.
-	input, err := terminal.ReadPassword(int(syscall.Stdin))
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	// Output a newline for formatting.
-	fmt.Println()
-
-	// Return password.
-	return input
-}
-
 // Input takes input from the user.
-func Input(prompt string) string {
+func Input(prompt string) ([]byte, error) {
 	// Output prompt.
 	fmt.Print(prompt)
 
@@ -149,6 +93,57 @@ func Input(prompt string) string {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 
-	// Return the inputted data.
-	return scanner.Text()
+	// Check the length of the data.
+	data := scanner.Bytes()
+	if len(data) == 0 {
+		return nil, errors.New("[!] Length of input must be non-zero")
+	}
+
+	// Everything went well. Return the data.
+	return data, nil
+}
+
+// GetPass prompts for input without echoing back.
+func GetPass() ([]byte, error) {
+	// Prompt for password.
+	password, err := _getPass("[-] Password: ")
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if length of password is zero.
+	if len(password) == 0 {
+		return nil, errors.New("[!] Length of password must be non-zero")
+	}
+
+	// Prompt for password confirmation.
+	confirmPassword, err := _getPass("[-] Confirm password: ")
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if password matches confirmation.
+	if !reflect.DeepEqual(password, confirmPassword) {
+		return nil, errors.New("[!] Passwords do not match")
+	}
+
+	// Return the password.
+	return password, nil
+}
+
+func _getPass(prompt string) ([]byte, error) {
+	// Output prompt.
+	fmt.Print(prompt)
+
+	// Get input without echoing back.
+	input, err := terminal.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return nil, err
+	}
+
+	// Output a newline for formatting.
+	fmt.Println()
+
+	// Return password.
+	return input, nil
 }
