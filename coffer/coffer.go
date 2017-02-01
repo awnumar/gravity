@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"os/user"
-	"reflect"
 
 	"github.com/boltdb/bolt"
 )
@@ -79,17 +78,15 @@ func Retrieve(identifier []byte) ([]byte, error) {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
-		// Iterate over all the keys.
-		c := bucket.Cursor()
-		for id, ct := c.First(); id != nil; id, ct = c.Next() {
-			if reflect.DeepEqual(id, identifier) {
-				ciphertext = append(ciphertext, ct...)
-				return nil
-			}
+		id := bucket.Get(identifier)
+		if id == nil {
+			// We didn't find that key; return an error.
+			return errors.New("[!] Nothing to see here")
 		}
 
-		// We didn't find that key; return an error.
-		return errors.New("[!] Nothing to see here")
+		ciphertext = append(ciphertext, id...)
+
+		return nil
 	}); err != nil {
 		return nil, err
 	}
