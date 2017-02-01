@@ -94,7 +94,7 @@ func Input(prompt string) ([]byte, error) {
 	scanner.Scan()
 
 	// Check the length of the data.
-	data := scanner.Bytes()
+	data := scanner.Bytes() //LOCKTHIS
 	if len(data) == 0 {
 		return nil, errors.New("[!] Length of input must be non-zero")
 	}
@@ -136,7 +136,7 @@ func _getPass(prompt string) ([]byte, error) {
 	fmt.Print(prompt)
 
 	// Get input without echoing back.
-	input, err := terminal.ReadPassword(int(syscall.Stdin))
+	input, err := terminal.ReadPassword(int(syscall.Stdin)) //LOCKTHIS
 	if err != nil {
 		return nil, err
 	}

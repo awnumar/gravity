@@ -25,7 +25,7 @@ func generateRandomBytes(n int) ([]byte, error) {
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
-func Encrypt(plaintext []byte, key []byte) ([]byte, error) {
+func Encrypt(plaintext []byte, key [32]byte) ([]byte, error) {
 	// Generate a random nonce.
 	nonceSlice, err := generateRandomBytes(24)
 	if err != nil {
@@ -36,12 +36,8 @@ func Encrypt(plaintext []byte, key []byte) ([]byte, error) {
 	var nonce [24]byte
 	copy(nonce[:], nonceSlice)
 
-	// Store the symmetric key in an array.
-	var secretKey [32]byte
-	copy(secretKey[:], key)
-
 	// Encrypt the plaintext.
-	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, &secretKey)
+	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, &key)
 
 	// Return the base64 encoded ciphertext.
 	return ciphertext, nil
@@ -49,17 +45,13 @@ func Encrypt(plaintext []byte, key []byte) ([]byte, error) {
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext.
-func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
+func Decrypt(ciphertext []byte, key [32]byte) ([]byte, error) {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])
 
-	// Store the symmetric key in an array.
-	var secretKey [32]byte
-	copy(secretKey[:], key)
-
 	// Decrypt the ciphertext and store the result.
-	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, &secretKey)
+	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, &key)
 	if !okay {
 		// This shouldn't happen.
 		return nil, errors.New("[!] Decryption of data failed")
@@ -70,8 +62,14 @@ func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
-func DeriveKey(password, identifier []byte, cost map[string]int) []byte {
-	derivedKey, _ := scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+func DeriveKey(password, identifier []byte, cost map[string]int) [32]byte {
+	//LOCKTHIS
+	derivedKeySlice, _ := scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+
+	// Convert to fixed-size array.
+	var derivedKey [32]byte //LOCKTHIS
+	copy(derivedKey[:], derivedKeySlice)
+
 	return derivedKey
 }
 

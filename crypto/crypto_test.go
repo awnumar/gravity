@@ -21,10 +21,12 @@ func TestGenerateRandomBytes(t *testing.T) {
 }
 
 func TestDecrypt(t *testing.T) {
-	key, _ := base64.StdEncoding.DecodeString("JNut6eJfb6ySwOac7FHe3bsSU75FpL/o776VD+oYWxk=")
+	keySlice, _ := base64.StdEncoding.DecodeString("JNut6eJfb6ySwOac7FHe3bsSU75FpL/o776VD+oYWxk=")
 	ciphertext, _ := base64.StdEncoding.DecodeString("5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw=")
 
 	// Correct key
+	var key [32]byte
+	copy(key[:], keySlice)
 	plaintext, err := Decrypt(ciphertext, key)
 	if err != nil {
 		t.Error(err)
@@ -35,8 +37,9 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestDeriveKey(t *testing.T) {
-	derivedKey := base64.StdEncoding.EncodeToString(DeriveKey([]byte("password"), []byte("identifier"), scryptCost))
-	if derivedKey != "rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=" {
+	derivedKey := DeriveKey([]byte("password"), []byte("identifier"), scryptCost)
+	derivedKeyString := base64.StdEncoding.EncodeToString(derivedKey[:])
+	if derivedKeyString != "rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=" {
 		t.Error("Expected `rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=`; got", derivedKey)
 	}
 }
