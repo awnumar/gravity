@@ -22,11 +22,11 @@ func TestDecrypt(t *testing.T) {
 	ciphertext, _ := base64.StdEncoding.DecodeString("5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw=")
 
 	// Correct key
-	plaintext, err := string(Decrypt(ciphertext, key))
+	plaintext, err := Decrypt(ciphertext, key)
 	if err != nil {
 		t.Error(err)
 	}
-	if plaintext != "test" {
+	if !reflect.DeepEqual(plaintext, []byte("test")) {
 		t.Error("Expected plaintext to be `test`; got", plaintext)
 	}
 }
