@@ -19,11 +19,10 @@ func main() {
 	mode, sc, err := auxiliary.ParseArgs(os.Args)
 	if err != nil {
 		if err.Error() == "help" {
-			os.Exit(0)
-		} else {
-			fmt.Println(err)
-			os.Exit(1)
+			return
 		}
+		fmt.Println(err)
+		return
 	}
 
 	if sc != nil {
@@ -31,7 +30,11 @@ func main() {
 	}
 
 	// Setup the secret store.
-	coffer.Setup()
+	err = coffer.Setup()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer coffer.Close()
 
 	// Launch appropriate function for run-mode.
@@ -79,7 +82,10 @@ func add() error {
 	key := crypto.DeriveKey(password, identifier, scryptCost)
 
 	// Encrypt the padded data.
-	encryptedData := crypto.Encrypt(paddedData, key)
+	encryptedData, err := crypto.Encrypt(paddedData, key)
+	if err != nil {
+		return err
+	}
 
 	// Derive and store secure identifier.
 	fmt.Println("[+] Deriving secure identifier...")

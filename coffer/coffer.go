@@ -2,7 +2,6 @@ package coffer
 
 import (
 	"errors"
-	"log"
 	"os"
 	"os/user"
 	"reflect"
@@ -16,11 +15,11 @@ var (
 )
 
 // Setup sets up the environment.
-func Setup() {
+func Setup() error {
 	// Ascertain the path to the secret store.
 	user, err := user.Current()
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	// Check if we've done this before.
@@ -30,14 +29,14 @@ func Setup() {
 		// Create a directory to store our stuff in.
 		err = os.Mkdir(user.HomeDir+"/.pocket", 0700)
 		if err != nil {
-			log.Fatalln(err)
+			return err
 		}
 	}
 
 	// Open the database file.
 	db, err := bolt.Open(user.HomeDir+"/.pocket/coffer.bolt", 0700, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	Coffer = db
 
@@ -46,6 +45,8 @@ func Setup() {
 		tx.CreateBucketIfNotExists([]byte("coffer"))
 		return nil
 	})
+
+	return nil
 }
 
 // Save saves a secret to the database.

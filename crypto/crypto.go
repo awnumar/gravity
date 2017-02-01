@@ -4,31 +4,33 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"log"
 
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/scrypt"
 )
 
-func generateRandomBytes(n int) []byte {
+func generateRandomBytes(n int) ([]byte, error) {
 	// Create a byte slice (b) of size n to store the random bytes.
 	b := make([]byte, n)
 
 	// Read n bytes into b; throw an error if number of bytes read != n.
 	_, err := rand.Read(b)
 	if err != nil {
-		log.Fatalln(err)
+		return nil, err
 	}
 
 	// Return the CSPR bytes.
-	return b
+	return b, nil
 }
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
-func Encrypt(plaintext []byte, key []byte) []byte {
+func Encrypt(plaintext []byte, key []byte) ([]byte, error) {
 	// Generate a random nonce.
-	nonceSlice := generateRandomBytes(24)
+	nonceSlice, err := generateRandomBytes(24)
+	if err != nil {
+		return nil, err
+	}
 
 	// Store it in an array.
 	var nonce [24]byte
@@ -42,12 +44,11 @@ func Encrypt(plaintext []byte, key []byte) []byte {
 	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, &secretKey)
 
 	// Return the base64 encoded ciphertext.
-	return ciphertext
+	return ciphertext, nil
 }
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
-// said key, and then returns the plaintext. If the key is incorrect, decryption
-// fails and the program terminates with exit code 1.
+// said key, and then returns the plaintext.
 func Decrypt(ciphertext []byte, key []byte) ([]byte, error) {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
@@ -84,7 +85,7 @@ func DeriveID(identifier []byte, cost map[string]int) []byte {
 func Pad(text []byte, padTo int) ([]byte, error) {
 	// Check if input is even valid.
 	if len(text) > padTo-1 {
-		return nil, errors.New(fmt.Sprint("[!] Length of data must not exceed ", padTo-1))
+		return nil, errors.New(fmt.Sprint("[!] Length of data must not exceed ", padTo-1, " bytes"))
 	}
 
 	// Add the compulsory byte of value `1`.
