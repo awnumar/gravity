@@ -27,7 +27,7 @@ func TestDecrypt(t *testing.T) {
 	// Correct key
 	var key [32]byte
 	copy(key[:], keySlice)
-	plaintext, err := Decrypt(ciphertext, key)
+	plaintext, err := Decrypt(ciphertext, &key)
 	if err != nil {
 		t.Error(err)
 	}

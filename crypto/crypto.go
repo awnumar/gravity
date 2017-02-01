@@ -25,7 +25,7 @@ func generateRandomBytes(n int) ([]byte, error) {
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
-func Encrypt(plaintext []byte, key [32]byte) ([]byte, error) {
+func Encrypt(plaintext []byte, key *[32]byte) ([]byte, error) {
 	// Generate a random nonce.
 	nonceSlice, err := generateRandomBytes(24)
 	if err != nil {
@@ -37,7 +37,7 @@ func Encrypt(plaintext []byte, key [32]byte) ([]byte, error) {
 	copy(nonce[:], nonceSlice)
 
 	// Encrypt the plaintext.
-	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, &key)
+	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, key)
 
 	// Return the base64 encoded ciphertext.
 	return ciphertext, nil
@@ -45,13 +45,13 @@ func Encrypt(plaintext []byte, key [32]byte) ([]byte, error) {
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext.
-func Decrypt(ciphertext []byte, key [32]byte) ([]byte, error) {
+func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])
 
 	// Decrypt the ciphertext and store the result.
-	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, &key)
+	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
 	if !okay {
 		// This shouldn't happen.
 		return nil, errors.New("[!] Decryption of data failed")

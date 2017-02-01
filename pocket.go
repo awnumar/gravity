@@ -82,7 +82,7 @@ func add() error {
 	key := crypto.DeriveKey(password, identifier, scryptCost) //LOCKTHIS
 
 	// Encrypt the padded data.
-	encryptedData, err := crypto.Encrypt(paddedData, key)
+	encryptedData, err := crypto.Encrypt(paddedData, &key)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func retrieve() error {
 	key := crypto.DeriveKey(password, identifier, scryptCost)
 
 	// Decrypt the data.
-	data, err = crypto.Decrypt(data, key) //LOCKTHIS
+	data, err = crypto.Decrypt(data, &key) //LOCKTHIS
 	if err != nil {
 		return err
 	}
