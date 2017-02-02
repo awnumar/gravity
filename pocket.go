@@ -79,10 +79,10 @@ func add() error {
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey(password, identifier, scryptCost) //LOCKTHIS
+	key := crypto.DeriveKey(password, identifier, scryptCost)
 
 	// Encrypt the padded data.
-	encryptedData, err := crypto.Encrypt(paddedData, &key)
+	encryptedData, err := crypto.Encrypt(paddedData, key)
 	if err != nil {
 		return err
 	}
@@ -131,7 +131,7 @@ func retrieve() error {
 	key := crypto.DeriveKey(password, identifier, scryptCost)
 
 	// Decrypt the data.
-	data, err = crypto.Decrypt(data, &key) //LOCKTHIS
+	data, err = crypto.Decrypt(data, key)
 	if err != nil {
 		return err
 	}

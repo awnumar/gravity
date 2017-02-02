@@ -7,20 +7,22 @@ import (
 
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/scrypt"
+	"golang.org/x/sys/unix"
 )
 
-func generateRandomBytes(n int) ([]byte, error) {
-	// Create a byte slice (b) of size n to store the random bytes.
-	b := make([]byte, n)
+var (
+	// Monitor if mlock() worked or not.
+	mlock = true
+)
 
-	// Read n bytes into b; throw an error if number of bytes read != n.
-	_, err := rand.Read(b)
-	if err != nil {
-		return nil, err
+// ProtectMemory calls mlock() and prevents sensitive information from being written to SWAP.
+func ProtectMemory(data []byte) {
+	err := unix.Mlock(data)
+	if err != nil && mlock {
+		// It failed once, probably won't work next time. Supress further warnings.
+		mlock = false
+		fmt.Printf("[!] Warning: Could not mlock() sensitive data; it might get written to SWAP [%s]", err)
 	}
-
-	// Return the CSPR bytes.
-	return b, nil
 }
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
@@ -57,20 +59,24 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 		return nil, errors.New("[!] Decryption of data failed")
 	}
 
+	// Protect the plaintext.
+	ProtectMemory(plaintext)
+
 	// Return the resulting plaintext.
 	return plaintext, nil
 }
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
-func DeriveKey(password, identifier []byte, cost map[string]int) [32]byte {
-	//LOCKTHIS
+func DeriveKey(password, identifier []byte, cost map[string]int) *[32]byte {
 	derivedKeySlice, _ := scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+	ProtectMemory(derivedKeySlice)
 
 	// Convert to fixed-size array.
-	var derivedKey [32]byte //LOCKTHIS
+	var derivedKey [32]byte
 	copy(derivedKey[:], derivedKeySlice)
+	ProtectMemory(derivedKey[:])
 
-	return derivedKey
+	return &derivedKey
 }
 
 // DeriveID hashes the identifier using Scrypt and returns a base64 encoded string.
@@ -97,8 +103,6 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 		text = append(text, byte(0))
 	}
 
-	//LOCKTHIS: text
-
 	// Return padded byte slice.
 	return text, nil
 }
@@ -106,8 +110,9 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 // Unpad reverses byte padding.
 func Unpad(text []byte) ([]byte, error) {
 	// Keep a copy of the original just in case.
-	var original []byte //LOCKTHIS
-	original = append(original, text...)
+	original := make([]byte, len(text))
+	copy(original, text)
+	ProtectMemory(original)
 
 	// Iterate over the text backwards,
 	// removing the appropriate padding bytes.
@@ -123,6 +128,25 @@ func Unpad(text []byte) ([]byte, error) {
 		}
 	}
 
+	// Copy to its own slice so we're not referencing useless data.
+	unpadded := make([]byte, len(text))
+	copy(unpadded, text)
+	ProtectMemory(unpadded)
+
 	// That simple.  We're done.
-	return text, nil
+	return unpadded, nil
+}
+
+func generateRandomBytes(n int) ([]byte, error) {
+	// Create a byte slice (b) of size n to store the random bytes.
+	b := make([]byte, n)
+
+	// Read n bytes into b; throw an error if number of bytes read != n.
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the CSPR bytes.
+	return b, nil
 }
