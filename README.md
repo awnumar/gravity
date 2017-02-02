@@ -6,13 +6,13 @@
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
-Protect super-secret files, strings, and even passwords, even in the case of your password being breached. *Pocket* will prevent an adversary from ascertaining the length of data, the number of entries, the type of data, or even if there is any data to begin with.
+Protect super-secret ***things*** even in the case of your password being breached.
 
 ## Possible Uses
 
-* Encrypting super-secret files.
-* Storing super-secret passwords.
-* Saving super-secret strings.
+* Encrypting *super-secret* files.
+* Storing *super-secret* passwords.
+* Saving *super-secret* strings.
 * Just something to gaze at with wonder.
 
 ## Security Properties
