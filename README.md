@@ -8,7 +8,7 @@
 
 Protect super-secret ***things*** even in the case of your password being breached.
 
-You could use *pocket* to:
+**You could use *pocket* to:**
 
 * Encrypt your *super-secret* files.
 * Store your *super-secret* passwords.
