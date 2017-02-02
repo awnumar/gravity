@@ -6,11 +6,18 @@
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
-Protect highly sensitive information, even in the case of your password being breached.
+Protect super-secret files, strings, and even passwords, even in the case of your password being breached. *Pocket* will prevent an adversary from ascertaining the length of data, the number of entries, the type of data, or even if there is any data to begin with.
 
-## Features
+## Possible Uses
 
-***Not all of these features have yet been implemented.***
+* Encrypting super-secret files.
+* Storing super-secret passwords.
+* Saving super-secret strings.
+* Just something to gaze at with wonder.
+
+## Security Properties
+
+***Not all of these have yet been implemented.***
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your secrets.
 * ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
@@ -18,7 +25,8 @@ Protect highly sensitive information, even in the case of your password being br
 * ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that `n` of the entries are real and the rest are decoys, where `n >= 0`.
 * ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them are random decoys added by the program.
 * ***Hidden entry identifiers*** - The entry identifiers are hashed so that an attacker cannot even tell what type of data is stored. There have been many cases where users have encrypted their data but file names have still given them away. In *pocket*, this is mitigated.
-* ***Cleared logs and metadata*** - Any occurrence of *pocket* will be cleared from your bash history, and metadata in the secrets file that would reveal any dates/times will set to (and kept at) `January 1, 1970`. These measures will prevent anyone from correlating the logs to any entries, and will also hide the fact that you've used the application at all: further backing up the claim that some/all of the entries are decoys.
+
+For a full overview of the protocol, click [here](/PROTOCOL.md).
 
 ## Installation
 
