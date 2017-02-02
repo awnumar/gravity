@@ -87,7 +87,7 @@ func DeriveID(identifier []byte, cost map[string]int) []byte {
 func Pad(text []byte, padTo int) ([]byte, error) {
 	// Check if input is even valid.
 	if len(text) > padTo-1 {
-		return nil, errors.New(fmt.Sprint("[!] Length of data must not exceed ", padTo-1, " bytes"))
+		return nil, fmt.Errorf("[!] Length of data must not exceed %d bytes", padTo-1)
 	}
 
 	// Add the compulsory byte of value `1`.

@@ -19,7 +19,7 @@ func main() {
 	mode, sc, err := auxiliary.ParseArgs(os.Args)
 	if err != nil && err.Error() != "help" {
 		fmt.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	if sc != nil {
