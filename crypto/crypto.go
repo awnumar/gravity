@@ -97,6 +97,8 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 		text = append(text, byte(0))
 	}
 
+	//LOCKTHIS: text
+
 	// Return padded byte slice.
 	return text, nil
 }
@@ -104,7 +106,8 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 // Unpad reverses byte padding.
 func Unpad(text []byte) ([]byte, error) {
 	// Keep a copy of the original just in case.
-	var original = text
+	var original []byte //LOCKTHIS
+	original = append(original, text...)
 
 	// Iterate over the text backwards,
 	// removing the appropriate padding bytes.
