@@ -8,12 +8,13 @@
 
 Protect super-secret ***things*** even in the case of your password being breached.
 
-## Possible Uses
+You could use *pocket* to:
 
-* Encrypting *super-secret* files.
-* Storing *super-secret* passwords.
-* Saving *super-secret* strings.
-* Just something to gaze at with wonder.
+* Encrypt your *super-secret* files.
+* Store your *super-secret* passwords.
+* Save some *super-secret* strings.
+* Log a *super-secret* diary entry.
+* Just look at in wonder when you're (*super-secretly*) bored.
 
 ## Security Properties
 
