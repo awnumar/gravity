@@ -6,19 +6,28 @@
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
-Protect highly sensitive information, even in the case of your password being breached.
+Protect super-secret ***things*** even in the case of your password being breached.
 
-## Features
+**You could use *pocket* to:**
 
-***Not all of these features have yet been implemented.***
+* Encrypt your *super-secret* files.
+* Store your *super-secret* passwords.
+* Save some *super-secret* strings.
+* Log a *super-secret* diary entry.
+* Just look at in wonder when you're (*super-secretly*) bored.
+
+## Security Properties
+
+***Not all of these have yet been implemented.***
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your secrets.
-* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
-* ***Multiple password support*** - You're free to use different passwords for different entries, and no one would ever know that you did.
-* ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that `n` of the entries are real and the rest are decoys, where `n >= 0`.
-* ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them are random decoys added by the program.
-* ***Hidden entry identifiers*** - The entry identifiers are hashed so that an attacker cannot even tell what type of data is stored. There have been many cases where users have encrypted their data but file names have still given them away. In *pocket*, this is mitigated.
-* ***Cleared logs and metadata*** - Any occurrence of *pocket* will be cleared from your bash history, and metadata in the secrets file that would reveal any dates/times will set to (and kept at) `January 1, 1970`. These measures will prevent anyone from correlating the logs to any entries, and will also hide the fact that you've used the application at all: further backing up the claim that some/all of the entries are decoys.
+* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This (used with the decoy entries) effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
+* ***Multiple password support*** - You're free to use different passwords for different entries, and no one (except you) would ever know that you did.
+* ***Decoy entries*** - You'll be prompted to add a number of decoy entries. These will **not** be differentiable from real data that you store, so you'll easily be able to claim that some (or all) of the entries that are in the database are simply decoys.
+* ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them were random decoys added by the program. But, you might be asking, *why stop there*? Add as many layers of decoys as you want! Forced to reveal your passwords? Give them one set of decoys. They don't believe that's all of them? Give up another set... And another... And another... Just keep dropping them bombs. `¯\_(ツ)_/¯` (*I'm only half kidding.*)
+* ***Hidden everything*** - *Pocket* makes sure that an attacker will not be able to ascertain the length, type, or content of any data, and also prevents the inference of things like the number of secrets stored.
+
+For a full overview of the protocol, click [here](/PROTOCOL.md).
 
 ## Installation
 
