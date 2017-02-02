@@ -65,13 +65,19 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 
 // DeriveKey derives a 32 byte encryption key from a password and identifier.
 func DeriveKey(password, identifier []byte, cost map[string]int) *[32]byte {
-	derivedKeySlice, _ := scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+	// Allocate and protect  memory for the output of the hash function.
+	derivedKeySlice := make([]byte, 32)
 	ProtectMemory(derivedKeySlice)
 
-	// Convert to fixed-size array.
+	// Allocate and protect memory for the 32 byte array that we'll return.
 	var derivedKey [32]byte
-	copy(derivedKey[:], derivedKeySlice)
 	ProtectMemory(derivedKey[:])
+
+	// Derive the key and store in the memory we allocated above.
+	derivedKeySlice, _ = scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+
+	// Copy to the 32 byte array.
+	copy(derivedKey[:], derivedKeySlice)
 
 	// Return a pointer.
 	return &derivedKey
@@ -109,8 +115,8 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 func Unpad(text []byte) ([]byte, error) {
 	// Keep a copy of the original just in case.
 	original := make([]byte, len(text))
-	copy(original, text)
 	ProtectMemory(original)
+	copy(original, text)
 
 	// Iterate over the text backwards,
 	// removing the appropriate padding bytes.
@@ -128,8 +134,8 @@ func Unpad(text []byte) ([]byte, error) {
 
 	// Copy to its own slice so we're not referencing useless data.
 	unpadded := make([]byte, len(text))
-	copy(unpadded, text)
 	ProtectMemory(unpadded)
+	copy(unpadded, text)
 
 	// That simple.  We're done.
 	return unpadded, nil
