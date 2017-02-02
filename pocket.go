@@ -17,10 +17,7 @@ var (
 func main() {
 	// Parse command line flags.
 	mode, sc, err := auxiliary.ParseArgs(os.Args)
-	if err != nil {
-		if err.Error() == "help" {
-			return
-		}
+	if err != nil && err.Error() != "help" {
 		fmt.Println(err)
 		return
 	}

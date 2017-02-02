@@ -38,11 +38,8 @@ func Encrypt(plaintext []byte, key *[32]byte) ([]byte, error) {
 	var nonce [24]byte
 	copy(nonce[:], nonceSlice)
 
-	// Encrypt the plaintext.
-	ciphertext := secretbox.Seal(nonce[:], plaintext, &nonce, key)
-
-	// Return the base64 encoded ciphertext.
-	return ciphertext, nil
+	// Encrypt and return the plaintext.
+	return secretbox.Seal(nonce[:], plaintext, &nonce, key), nil
 }
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
@@ -76,6 +73,7 @@ func DeriveKey(password, identifier []byte, cost map[string]int) *[32]byte {
 	copy(derivedKey[:], derivedKeySlice)
 	ProtectMemory(derivedKey[:])
 
+	// Return a pointer.
 	return &derivedKey
 }
 
