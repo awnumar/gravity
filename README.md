@@ -21,11 +21,11 @@ Protect super-secret ***things*** even in the case of your password being breach
 ***Not all of these have yet been implemented.***
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your secrets.
-* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
-* ***Multiple password support*** - You're free to use different passwords for different entries, and no one would ever know that you did.
-* ***Decoy entries*** - A random number of randomly generated decoys will randomly be added to the secrets store and won't be differentiable from real entries. This will make it plausible to claim that `n` of the entries are real and the rest are decoys, where `n >= 0`.
-* ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them are random decoys added by the program.
-* ***Hidden entry identifiers*** - The entry identifiers are hashed so that an attacker cannot even tell what type of data is stored. There have been many cases where users have encrypted their data but file names have still given them away. In *pocket*, this is mitigated.
+* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This (used with the decoy entries) effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
+* ***Multiple password support*** - You're free to use different passwords for different entries, and no one (except you) would ever know that you did.
+* ***Decoy entries*** - You'll be prompted to add a number of decoy entries. These will **not** be differentiable from real data that you store so you'll be able to easily claim that some or all of the entries that are in the database are simply decoys.
+* ***Deniability*** - Since *pocket* will not stop you from using different passwords, it is possible to add some of your own decoys. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the password/identifiers for these decoy entries and claim that the rest of them were random decoys added by the program.
+* ***Hidden everything*** - *Pocket* makes sure that an attacker will not be able to ascertain the length, type, or content of any data, and also prevents the inference of things like the number of secrets stored.
 
 For a full overview of the protocol, click [here](/PROTOCOL.md).
 
