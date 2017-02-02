@@ -1,6 +1,6 @@
 # pocket
 
-<img align="right" src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.png" height="200">
+<img align="right" src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="200">
 
 [![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Dependency Status](https://dependencyci.com/github/libeclipse/pocket/badge)](https://dependencyci.com/github/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
 
