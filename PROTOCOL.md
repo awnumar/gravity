@@ -25,3 +25,5 @@
 **K<sub>id</sub>** - *A key derived from both I<sub>key</sub> and I<sub>id</sub>, that is used to derive X<sub>V<sub>n</sub></sub>.*
 
 **X<sub>V<sub>n</sub></sub>** - *A derived identifier to locate a specific entry. Derived from K<sub>id</sub> and V<sub>n</sub>.*
+
+## :: Modus Operandi
