@@ -5,9 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/libeclipse/pocket/crypto/memlock"
+
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/scrypt"
-	"golang.org/x/sys/unix"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 
 // ProtectMemory calls mlock() and prevents sensitive information from being written to SWAP.
 func ProtectMemory(data []byte) {
-	err := unix.Mlock(data)
+	err := memlock.Lock(data)
 	if err != nil && mlock {
 		// It failed once, probably won't work next time. Supress further warnings.
 		mlock = false
