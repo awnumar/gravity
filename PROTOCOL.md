@@ -27,3 +27,17 @@
 **X<sub>V<sub>n</sub></sub>** - *A derived identifier to locate a specific entry. Derived from K<sub>id</sub> and V<sub>n</sub>.*
 
 ## :: Modus Operandi
+
+In all of the following procedures,
+
+I<sub>key</sub> = *"yellow submarine"*
+
+I<sub>id</sub> = *"dream journal entry 0x01"*
+
+I<sub>p</sub> is a 2048 byte plaintext.
+
+### Adding an entry
+
+### Retrieving an entry
+
+### Deleting an entry
