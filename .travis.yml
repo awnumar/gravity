@@ -1,7 +1,12 @@
 language: go
+
 os:
   - linux
   - osx
+
+script:
+  - set +e
+
 notifications:
   email: false
   slack:
