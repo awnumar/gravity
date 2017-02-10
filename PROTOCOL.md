@@ -6,29 +6,29 @@
 
 ### Inputs
 
-**I<sub>key</sub>** - *A strong password.*
+**I<sub>key</sub>** - _A strong password._
 
-**I<sub>p</sub>** - *The user-inputted data that we will be protecting.*
+**I<sub>p</sub>** - _The user-inputted data that we will be protecting._
 
-**I<sub>id</sub>** - *A string that identifies **I<sub>p</sub>** so it can be located on retrieval.*
+**I<sub>id</sub>** - _A string that identifies **I<sub>p</sub>** so it can be located on retrieval._
 
 ### Variables
 
-**V<sub>l</sub>** - *The fixed length of plaintext per entry, defined as 1024 bytes.*
+**V<sub>l</sub>** - _The fixed length of plaintext per entry, defined as 1024 bytes._
 
-**X<sub>n</sub>** - *The index of an entry. For example if len(**I<sub>p</sub>**) = 2048, there will be two entries with **X<sub>n</sub>** values of `0` and `1` respectively.*
+**X<sub>n</sub>** - _The index of an entry. For example if len(**I<sub>p</sub>**) = 2048, there will be two entries with **X<sub>n</sub>** values of `0` and `1` respectively._
 
 ### Derivations
 
-**K<sub>m</sub>** - *A master-key derived from both **I<sub>key</sub>** and I<sub>id</sub>.*
+**K<sub>m</sub>** - _A master-key derived from both **I<sub>key</sub>** and I<sub>id</sub>._
 
-**K<sub>id</sub>** - *A key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**, that is used to derive **X<sub>V<sub>n</sub></sub>**.*
+**K<sub>id</sub>** - _A key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**, that is used to derive **X<sub>V<sub>n</sub></sub>**._
 
 ### Outputs
 
-**Z<sub>X<sub>n</sub></sub>** - *A derived identifier to locate a specific entry. Derived from **K<sub>id</sub>** and the respective **X<sub>n</sub>** values.*
+**Z<sub>X<sub>n</sub></sub>** - _A derived identifier to locate a specific entry. Derived from **K<sub>id</sub>** and the respective **X<sub>n</sub>** values._
 
-**C<sub>X<sub>n</sub></sub>** - *A piece of ciphertext with index **X<sub>n</sub>**.*
+**C<sub>X<sub>n</sub></sub>** - _A piece of ciphertext with index **X<sub>n</sub>**._
 
 ## :: Modus Operandi
 
