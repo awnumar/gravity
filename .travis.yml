@@ -5,6 +5,11 @@ os:
   - osx
 
 script:
+  - go test -v ./auxiliary/...
+	- go test -v ./coffer/...
+	- go test -v ./crypto/...
+	- go test -v ./
+  - go build -v .
   - set +e
 
 notifications:
