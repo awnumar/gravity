@@ -20,7 +20,7 @@
 
 ### Derivations
 
-**K<sub>m</sub>** - _A master-key derived from both **I<sub>key</sub>** and I<sub>id</sub>._
+**K<sub>m</sub>** - _A master-key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**._
 
 **K<sub>id</sub>** - _A key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**, that is used to derive **X<sub>V<sub>n</sub></sub>**._
 
@@ -32,13 +32,7 @@
 
 ## :: Modus Operandi
 
-In all of the following procedures,
-
-**I<sub>key</sub>** = *"yellow submarine"*
-
-**I<sub>id</sub>** = *"dream journal entry 0x01"*
-
-**I<sub>p</sub>** is a 1536 byte plaintext.
+In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 
 ### Adding an entry
 
