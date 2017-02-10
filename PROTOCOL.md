@@ -76,4 +76,4 @@ In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 
 3. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and remove it.
 
-4. Keep generating values of **Z<sub>X<sub>n</sub></sub>** and looking for them in the database. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find two entries with **X<sub>n</sub>** equalling `0` and `1` respectively. Remove them both.
+4. Keep generating values of **Z<sub>X<sub>n</sub></sub>**, looking for them in the database and removing them. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find and remove two entries with **X<sub>n</sub>** equalling `0` and `1` respectively.
