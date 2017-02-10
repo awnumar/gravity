@@ -69,3 +69,11 @@ In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 8. We now have the original decrypted data. Output it to the user.
 
 ### Deleting an entry
+
+1. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+
+2. Generate **Z<sub>X<sub>0</sub></sub>** by computing **sha256(K<sub>id</sub> || 0)**.
+
+3. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and remove it.
+
+4. Keep generating values of **Z<sub>X<sub>n</sub></sub>** and looking for them in the database. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find two entries with **X<sub>n</sub>** equalling `0` and `1` respectively. Remove them both.
