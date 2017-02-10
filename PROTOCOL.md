@@ -52,4 +52,20 @@ In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 
 ### Retrieving an entry
 
+1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
+
+2. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+
+3. Generate **Z<sub>X<sub>0</sub></sub>** by computing **sha256(K<sub>id</sub> || 0)**.
+
+4. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and pull the corresponding value (**C<sub>X<sub>0</sub></sub>**).
+
+5. Keep generating values of **Z<sub>X<sub>n</sub></sub>** and looking for them in the database. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find two entries with **X<sub>n</sub>** equalling `0` and `1` respectively.
+
+6. Decrypt each **C<sub>X<sub>n</sub></sub>** value that we have.
+
+7. Unpad each decrypted **C<sub>X<sub>n</sub></sub>** value and concatenate the resulting values in order of **X<sub>n</sub>** ascending. In our case, we'd have two pieces of data of lengths 1024 bytes and 512 bytes respectively, so we'd join them in order of **X<sub>0</sub>** || **X<sub>1</sub>**.
+
+8. We now have the original decrypted data. Output it to the user.
+
 ### Deleting an entry
