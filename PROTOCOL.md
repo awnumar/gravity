@@ -44,11 +44,11 @@ In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 
 4. Pad each piece to 1025 bytes using byte padding. [https://en.wikipedia.org/wiki/Padding_(cryptography)#Byte_padding]
 
-5. Encrypt each padded piece separately using XSalsa20 and Poly1305 with the key **K<sub>m</sub>**. In our case, this would give us **C<sub>X<sub>0</sub></sub>** and **C<sub>X<sub>1</sub></sub>**.
+5. Encrypt each padded piece separately using XSalsa20 and Poly1305 with the key **K<sub>m</sub>**. In our case, this would give us two values: **C<sub>X<sub>0</sub></sub>** and **C<sub>X<sub>1</sub></sub>**.
 
 6. Generate **Z<sub>X<sub>n</sub></sub>** values for the pieces of ciphertext by computing **sha256(K<sub>id</sub> || X<sub>n</sub>)** for each piece. In our case, we'd compute **sha256(K<sub>id</sub> || 0)** and **sha256(K<sub>id</sub> || 1)**.
 
-7. Add to the database. At this point we have two **Z<sub>X<sub>n</sub></sub>** values and their respective ciphertexts, so we'll save **Z<sub>X<sub>0</sub></sub>**:**C<sub>X<sub>0</sub></sub>** and **Z<sub>X<sub>1</sub></sub>**:**C<sub>X<sub>1</sub></sub>**.
+7. Add the pairs **Z<sub>X<sub>0</sub></sub>**:**C<sub>X<sub>0</sub></sub>** and **Z<sub>X<sub>1</sub></sub>**:**C<sub>X<sub>1</sub></sub>** to the database.
 
 ### Retrieving an entry
 
