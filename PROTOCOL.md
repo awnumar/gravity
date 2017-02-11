@@ -16,7 +16,7 @@
 
 > `master_key = Scrypt(master_password || identifier)`
 
-The `master_key` is 32 bytes long and is what is used to actually encrypt the plaintext itself.
+This is 32 bytes long and is what is used as the actual encryption key for all `plaintext[n]`.
 
 ### :: `ciphertext[n]`
 
@@ -28,15 +28,15 @@ The `master_key` is 32 bytes long and is what is used to actually encrypt the pl
 
 > `root_identifier = Scrypt(identifier || master_password)`
 
-The `root_identifier` 32 bytes long and is used to derive individual `derived_identifier[n]` values.
+A 32 byte value that is used to derive `derived_identifier[n]`.
 
 ### :: `derived_identifier[n]`
 
 > `derived_identifier[n] = sha256(root_identifier || n)`
 
-The `derived_identifier[n]` is 32 bytes long and is what is actually stored in the database alongside chunks of the ciphertext. The reason for it is so that we are able to store ciphertexts across multiple entries in the database without leaking information about which entries are linked or how many entries compose the data.
+A 32 byte value that is stored in the database alongside chunks of the ciphertext. The reason we use this instead of `root_identifier` is so that we are able to store ciphertexts across multiple entries by simply incrementing `n` for every chunk of plaintext. This prevents leakage of information about which entries are linked or how many entries compose `plaintext`.
 
-`n` refers to the index of the slice of the ciphertext that we're deriving the identifier for: `derived_identifier[n]` corresponds to `ciphertext[n]`.
+`n` refers to the index of the chunk of ciphertext that we're deriving the identifier for: `derived_identifier[n]` corresponds to `ciphertext[n]`.
 
 ## Modus Operandi
 
@@ -46,17 +46,17 @@ The `derived_identifier[n]` is 32 bytes long and is what is actually stored in t
 
 2. For each `n`, pad `plaintext[n]` to 1025 bytes.
 
-3. For each `n`, derive `ciphertext[n]` and `derived_identifier[n]`.
+3. For each `n`, compute `ciphertext[n]` and `derived_identifier[n]`.
 
-4. Save every `derived_identifier[n]` : `ciphertext[n]` pair in the database.
+4. Save every `derived_identifier[n]` : `ciphertext[n]` pair to the database.
 
 ### :: Retrieving an entry
 
-1. Compute `derived_identifier[0]` and look up the corresponding `ciphertext[0]` in the database.
+1. Compute `derived_identifier[0]` and search for it in the database to get `ciphertext[0]`.
 
-2. Keep computing `derived_identifier[n+1]` and looking for it in the database. Stop when the key does not exist.
+2. Keep computing `derived_identifier[n+1]` and looking for it in the database. Stop when nothing is found.
 
-3. Decrypt each `ciphertext[n]` that we have to get corresponding `plaintext[n]` values.
+3. Decrypt each `ciphertext[n]` to get a set of `plaintext[n]` values.
 
 4. Unpad each `plaintext[n]` and concatenate the resulting values in order of `n` ascending. This will give us `plaintext`.
 
@@ -70,7 +70,7 @@ The `derived_identifier[n]` is 32 bytes long and is what is actually stored in t
 
 ### :: Decoys
 
-The user will have the option to add a certain amount of decoy entries. For example, if the user decides to add `1 GB` of decoys, then we will add `~ 1 GB` of random entries to the database.
+The user will have the option to add a certain amount of decoy data. In order to minimise any assumptions that an adversary can make, the number of decoy entries added should not be a predictable number like 10000.
 
 1. Generate three random 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
 
