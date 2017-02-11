@@ -6,7 +6,7 @@
 
 `master_password` - _A strong password._
 
-`plaintext[n]` - _The user-inputted data that we will be protecting, where `n` refers to the index of the slice of plaintext after splitting it into chunks._
+`plaintext` - _The user-inputted data that we will be protecting. When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk._
 
 `identifier` - _A string that is used to locate the correct ciphertext on retrieval._
 
@@ -72,11 +72,11 @@ The `derived_identifier[n]` is 32 bytes long and is what is actually stored in t
 
 The user will have the option to add a certain amount of decoy entries. For example, if the user decides to add `1 GB` of decoys, then we will add `~ 1 GB` of random entries to the database.
 
-1. Generate three distinct, randomly generated, 32 byte values.
+1. Generate three random 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
 
-2. Treat them as a valid user-inputted entry and follow the highlighted in `Adding an entry`.
+2. Treat them valid user-inputted values and follow the steps for `Adding an entry`.
 
-3. Repeat until a sufficient number of decoys have been added.
+3. Repeat steps `1` and `2` until a sufficient number of decoys have been added.
 
 Something to note is that the user does not necessarily have to make use of this feature. Rather, simply the fact that it exists allows the user to claim that some or all of the entries in the database are decoys.
 
