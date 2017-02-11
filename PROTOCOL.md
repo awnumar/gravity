@@ -14,25 +14,25 @@
 
 ### :: `master_key`
 
-: `master_key = Scrypt(master_password || identifier)`
+> `master_key = Scrypt(master_password || identifier)`
 
 The `master_key` is 32 bytes long and is what is used to actually encrypt the plaintext itself.
 
 ### :: `ciphertext[n]`
 
-: `ciphertext[n] = XSalsa20Poly1305(master_key, plaintext[n])`
+> `ciphertext[n] = XSalsa20Poly1305(master_key, plaintext[n])`
 
 `ciphertext[n]` refers to the result of encrypting `plaintext[n]` with `master_key`.
 
 ### :: `root_identifier`
 
-: `root_identifier = Scrypt(identifier || master_password)`
+> `root_identifier = Scrypt(identifier || master_password)`
 
 The `root_identifier` 32 bytes long and is used to derive individual `derived_identifier[n]` values.
 
 ### :: `derived_identifier[n]`
 
-: `derived_identifier[n] = sha256(root_identifier || n)`
+> `derived_identifier[n] = sha256(root_identifier || n)`
 
 The `derived_identifier[n]` is 32 bytes long and is what is actually stored in the database alongside chunks of the ciphertext. The reason for it is so that we are able to store ciphertexts across multiple entries in the database without leaking information about which entries are linked or how many entries compose the data.
 
