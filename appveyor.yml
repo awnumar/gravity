@@ -1,0 +1,28 @@
+version: '{build}'
+
+platform: Any CPU
+
+clone_folder: c:\go\src\github.com\libeclipse\pocket
+
+environment:
+  GOPATH: c:\go
+
+install:
+- set PATH=%GOPATH%\bin;c:\go\bin;%PATH%
+- go version
+
+build_script:
+- go build -v .
+
+test_script:
+    - go test -v ./auxiliary/...
+    - go test -v ./coffer/...
+    - go test -v ./crypto/...
+    - go test -v ./
+
+notifications:
+- provider: Slack
+  incoming_webhook: https://hooks.slack.com/services/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
+  on_build_success: true
+  on_build_failure: true
+  on_build_status_changed: true
