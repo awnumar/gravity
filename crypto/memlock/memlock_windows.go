@@ -11,11 +11,11 @@ import (
 // Lock is a wrapper for windows.VirtualLock()
 func Lock(b []byte) error {
 	p := unsafe.Pointer(&b[0])
-	return windows.VirtualLock(p, len(b))
+	return windows.VirtualLock(uintptr(p), uintptr(len(b)))
 }
 
 // Unlock is a wrapper for windows.VirtualUnlock()
 func Unlock(b []byte) error {
 	p := unsafe.Pointer(&b[0])
-	return windows.VirtualUnlock(p, len(b))
+	return windows.VirtualUnlock(uintptr(p), uintptr(len(b)))
 }
