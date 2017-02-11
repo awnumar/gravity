@@ -1,79 +1,89 @@
-# Technical Information
+# Protocol
 
-***Note: This protocol is not (yet) set in stone. It may be amended at any time.***
+***Note: This document is not (yet) set in stone. It may be amended at any time.***
 
-## :: Definitions
+## Inputs
 
-### Inputs
+`master_password` - _A strong password._
 
-**I<sub>key</sub>** - _A strong password._
+`plaintext` - _The user-inputted data that we will be protecting. When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk._
 
-**I<sub>p</sub>** - _The user-inputted data that we will be protecting._
+`identifier` - _A string that is used to locate the correct ciphertext on retrieval._
 
-**I<sub>id</sub>** - _A string that identifies **I<sub>p</sub>** so it can be located on retrieval._
+## Derivations
 
-### Variables
+### :: `master_key`
 
-**V<sub>l</sub>** - _The fixed length of plaintext per entry, defined as 1024 bytes._
+> `master_key = Scrypt(master_password || identifier)`
 
-**X<sub>n</sub>** - _The index of an entry. For example if len(**I<sub>p</sub>**) = 2048, there will be two entries with **X<sub>n</sub>** values of `0` and `1` respectively._
+This is 32 bytes long and is what is used as the actual encryption key for all `plaintext[n]`.
 
-### Derivations
+### :: `ciphertext[n]`
 
-**K<sub>m</sub>** - _A master-key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**._
+> `ciphertext[n] = XSalsa20Poly1305(master_key, plaintext[n])`
 
-**K<sub>id</sub>** - _A key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**, that is used to derive **X<sub>V<sub>n</sub></sub>**._
+`ciphertext[n]` refers to the result of encrypting `plaintext[n]` with `master_key`.
 
-### Outputs
+### :: `root_identifier`
 
-**Z<sub>X<sub>n</sub></sub>** - _A derived identifier to locate a specific entry. Derived from **K<sub>id</sub>** and the respective **X<sub>n</sub>** values._
+> `root_identifier = Scrypt(identifier || master_password)`
 
-**C<sub>X<sub>n</sub></sub>** - _A piece of ciphertext with index **X<sub>n</sub>**._
+A 32 byte value that is used to derive `derived_identifier[n]`.
 
-## :: Modus Operandi
+### :: `derived_identifier[n]`
 
-In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
+> `derived_identifier[n] = sha256(root_identifier || n)`
 
-### Adding an entry
+A 32 byte value that is stored in the database alongside chunks of the ciphertext. The reason we use this instead of `root_identifier` is so that we are able to store ciphertexts across multiple entries by simply incrementing `n` for every chunk of plaintext. This prevents leakage of information about which entries are linked or how many entries compose `plaintext`.
 
-1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
+`n` refers to the index of the chunk of ciphertext that we're deriving the identifier for: `derived_identifier[n]` corresponds to `ciphertext[n]`.
 
-2. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+## Modus Operandi
 
-3. Split **I<sub>p</sub>** into pieces of length 1024. With our **I<sub>p</sub>**, we will get one piece of length 1024 and another piece of length 512.
+### :: Adding an entry
 
-4. Pad each piece to 1025 bytes using byte padding. [https://en.wikipedia.org/wiki/Padding_(cryptography)#Byte_padding]
+1. Split `plaintext` into chunks of length 1024 bytes. The last chunk will have a length of `len(plaintext) mod 1024`.
 
-5. Encrypt each padded piece separately using XSalsa20 and Poly1305 with the key **K<sub>m</sub>**. In our case, this would give us two values: **C<sub>X<sub>0</sub></sub>** and **C<sub>X<sub>1</sub></sub>**.
+2. For each `n`, pad `plaintext[n]` to 1025 bytes.
 
-6. Generate **Z<sub>X<sub>n</sub></sub>** values for the pieces of ciphertext by computing **sha256(K<sub>id</sub> || X<sub>n</sub>)** for each piece. In our case, we'd compute **sha256(K<sub>id</sub> || 0)** and **sha256(K<sub>id</sub> || 1)**.
+3. For each `n`, compute `ciphertext[n]` and `derived_identifier[n]`.
 
-7. Add the pairs **Z<sub>X<sub>0</sub></sub>**:**C<sub>X<sub>0</sub></sub>** and **Z<sub>X<sub>1</sub></sub>**:**C<sub>X<sub>1</sub></sub>** to the database.
+4. Save every `derived_identifier[n]` : `ciphertext[n]` pair to the database.
 
-### Retrieving an entry
+### :: Retrieving an entry
 
-1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
+1. Compute `derived_identifier[0]` and search for it in the database to get `ciphertext[0]`.
 
-2. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+2. Keep computing `derived_identifier[n+1]` and looking for it in the database. Stop when nothing is found.
 
-3. Generate **Z<sub>X<sub>0</sub></sub>** by computing **sha256(K<sub>id</sub> || 0)**.
+3. Decrypt each `ciphertext[n]` to get a set of `plaintext[n]` values.
 
-4. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and pull the corresponding value (**C<sub>X<sub>0</sub></sub>**).
+4. Unpad each `plaintext[n]` and concatenate the resulting values in order of `n` ascending. This will give us `plaintext`.
 
-5. Keep generating values of **Z<sub>X<sub>n</sub></sub>** and looking for them in the database. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find two entries with **X<sub>n</sub>** equalling `0` and `1` respectively.
+### :: Deleting an entry
 
-6. Decrypt each **C<sub>X<sub>n</sub></sub>** value that we have.
+1. Compute `derived_identifier[0]` and remove it from the database.
 
-7. Unpad each decrypted **C<sub>X<sub>n</sub></sub>** value and concatenate the resulting values in order of **X<sub>n</sub>** ascending. In our case, we'd have two pieces of data of lengths 1024 bytes and 512 bytes respectively, so we'd join them in order of **X<sub>0</sub>** || **X<sub>1</sub>**.
+2. Keep computing `derived_identifier[n+1]` and removing it from the database. Stop when the key does not exist.
 
-8. We now have the original decrypted data. Output it to the user.
+## Miscellaneous
 
-### Deleting an entry
+### :: Decoys
 
-1. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+The user will have the option to add a certain amount of decoy data. In order to minimise any assumptions that an adversary can make, the number of decoy entries added should not be a predictable number like 10000.
 
-2. Generate **Z<sub>X<sub>0</sub></sub>** by computing **sha256(K<sub>id</sub> || 0)**.
+1. Generate three random 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
 
-3. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and remove it.
+2. Treat them valid user-inputted values and follow the steps for `Adding an entry`.
 
-4. Keep generating values of **Z<sub>X<sub>n</sub></sub>**, looking for them in the database and removing them. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find and remove two entries with **X<sub>n</sub>** equalling `0` and `1` respectively.
+3. Repeat steps `1` and `2` until a sufficient number of decoys have been added.
+
+Something to note is that the user does not necessarily have to make use of this feature. Rather, simply the fact that it exists allows the user to claim that some or all of the entries in the database are decoys.
+
+### :: Padding
+
+The padding scheme that is used is byte-padding: a variant of bit-padding<sup>[0]</sup> but with whole bytes instead of bits. The reason for this is because it doesn't require the length of padding to be encoded into the padding itself, thereby doing away with problems that arise when `len(padding)` does not fit inside a single byte.
+
+## References
+
+[0] A, Menezes., P, van Oorschot., S, Vanstone. (1996, October 16). Handbook of Applied Cryptography: Algorithm 9.30. Retrieved from http://cacr.uwaterloo.ca/hac/about/chap9.pdf#page=15
