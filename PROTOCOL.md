@@ -1,40 +1,46 @@
-# Technical Information
+# Protocol
 
-***Note: This protocol is not (yet) set in stone. It may be amended at any time.***
+***Note: This document is not (yet) set in stone. It may be amended at any time.***
 
-## :: Definitions
+## Inputs
 
-### Inputs
+`master_password` - _A strong password._
 
-**I<sub>key</sub>** - _A strong password._
+`plaintext[n]` - _The user-inputted data that we will be protecting, where `n` refers to the index of the slice of plaintext after splitting it into chunks._
 
-**I<sub>p</sub>** - _The user-inputted data that we will be protecting._
+`identifier` - _A string that is used to locate the correct ciphertext on retrieval._
 
-**I<sub>id</sub>** - _A string that identifies **I<sub>p</sub>** so it can be located on retrieval._
+## Definitions and Derivations
 
-### Variables
+### :: `master_key`
 
-**V<sub>l</sub>** - _The fixed length of plaintext per entry, defined as 1024 bytes._
+`master_key = Scrypt(master_password || identifier)`
 
-**X<sub>n</sub>** - _The index of an entry. For example if len(**I<sub>p</sub>**) = 2048, there will be two entries with **X<sub>n</sub>** values of `0` and `1` respectively._
+The `master_key` is 32 bytes long and is what is used to actually encrypt the plaintext itself.
 
-### Derivations
+### :: `root_identifier`
 
-**K<sub>m</sub>** - _A master-key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**._
+`root_identifier = Scrypt(identifier || master_password)`
 
-**K<sub>id</sub>** - _A key derived from both **I<sub>key</sub>** and **I<sub>id</sub>**, that is used to derive **X<sub>V<sub>n</sub></sub>**._
+The `root_identifier` 32 bytes long and is used to derive individual `derived_identifier[n]` values.
 
-### Outputs
+### :: `ciphertext[n]`
 
-**Z<sub>X<sub>n</sub></sub>** - _A derived identifier to locate a specific entry. Derived from **K<sub>id</sub>** and the respective **X<sub>n</sub>** values._
+`ciphertext[n] = XSalsa20Poly1305(master_key, plaintext[n])`
 
-**C<sub>X<sub>n</sub></sub>** - _A piece of ciphertext with index **X<sub>n</sub>**._
+`ciphertext[n]` refers to the result of encrypting `plaintext[n]` with `master_key`.
 
-## :: Modus Operandi
+### :: `derived_identifier[n]`
 
-In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
+`derived_identifier[n] = sha256(root_identifier || n)`
 
-### Adding an entry
+The `derived_identifier[n]` is 32 bytes long and is what is actually stored in the database alongside chunks of the ciphertext. The reason for it is so that we are able to store ciphertexts across multiple entries in the database without leaking information about which entries are linked or how many entries compose the data.
+
+`n` refers to the index of the slice of the ciphertext that we're deriving the identifier for: `derived_identifier[n]` corresponds to `ciphertext[n]`.
+
+## Modus Operandi
+
+### :: Adding an entry
 
 1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
 
@@ -50,7 +56,7 @@ In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 
 7. Add the pairs **Z<sub>X<sub>0</sub></sub>**:**C<sub>X<sub>0</sub></sub>** and **Z<sub>X<sub>1</sub></sub>**:**C<sub>X<sub>1</sub></sub>** to the database.
 
-### Retrieving an entry
+### :: Retrieving an entry
 
 1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
 
@@ -68,7 +74,7 @@ In all of the following, **I<sub>p</sub>** is a 1536 byte plaintext.
 
 8. We now have the original decrypted data. Output it to the user.
 
-### Deleting an entry
+### :: Deleting an entry
 
 1. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
 
