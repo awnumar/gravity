@@ -2,10 +2,10 @@ package auxiliary
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
-	"reflect"
 	"strconv"
 	"strings"
 	"syscall"
@@ -126,7 +126,7 @@ func GetPass() ([]byte, error) {
 	}
 
 	// Check if password matches confirmation.
-	if !reflect.DeepEqual(password, confirmPassword) {
+	if !bytes.Equal(password, confirmPassword) {
 		return nil, errors.New("[!] Passwords do not match")
 	}
 

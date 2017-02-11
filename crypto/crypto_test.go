@@ -3,7 +3,6 @@ package crypto
 import (
 	"bytes"
 	"encoding/base64"
-	"reflect"
 	"testing"
 )
 
@@ -63,7 +62,7 @@ func TestEncryptionCycle(t *testing.T) {
 		t.Error("Unexpected error:", err)
 	}
 
-	if !reflect.DeepEqual(decrypted, plaintext) {
+	if !bytes.Equal(decrypted, plaintext) {
 		t.Error("Decrypted != Plaintext; decrypted =", string(decrypted))
 	}
 }
@@ -135,7 +134,7 @@ func TestUnpad(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error:", err)
 	}
-	if !reflect.DeepEqual(unpadded, text) {
+	if !bytes.Equal(unpadded, text) {
 		t.Error("Unpad didn't work; got", unpadded)
 	}
 
@@ -148,7 +147,7 @@ func TestUnpad(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error:", err)
 	}
-	if !reflect.DeepEqual(unpadded, text) {
+	if !bytes.Equal(unpadded, text) {
 		t.Error("Unpad didn't work; got", unpadded)
 	}
 
@@ -161,7 +160,7 @@ func TestUnpad(t *testing.T) {
 	if err != nil {
 		t.Error("Unexpected error:", err)
 	}
-	if !reflect.DeepEqual(unpadded, text) {
+	if !bytes.Equal(unpadded, text) {
 		t.Error("Unpad didn't work; got", unpadded)
 	}
 
@@ -170,7 +169,7 @@ func TestUnpad(t *testing.T) {
 	if err == nil {
 		t.Error("Expected an error since inputs are invalid; unpadded:", unpadded)
 	}
-	if !reflect.DeepEqual(unpadded, text) {
+	if !bytes.Equal(unpadded, text) {
 		t.Error("Unpadded != text with invalid input; unpadded:", unpadded)
 	}
 }
