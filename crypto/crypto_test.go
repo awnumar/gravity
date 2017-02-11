@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"bytes"
 	"encoding/base64"
 	"reflect"
 	"testing"
@@ -31,7 +32,7 @@ func TestDecrypt(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !reflect.DeepEqual(plaintext, []byte("test")) {
+	if !bytes.Equal(plaintext, []byte("test")) {
 		t.Error("Expected plaintext to be `test`; got", plaintext)
 	}
 
