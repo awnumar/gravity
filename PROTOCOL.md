@@ -8,7 +8,7 @@
 
 `plaintext` - _The user-inputted data that we will be protecting. When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk._
 
-`identifier` - _A string that is used to locate the correct ciphertext on retrieval._
+`identifier` - *A string that identifies the plaintext that we are storing. It should not be guessable but does not necessarily have to be as strong as `master_password`.*
 
 ## Derivations
 
