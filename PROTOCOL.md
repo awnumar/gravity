@@ -42,44 +42,30 @@ The `derived_identifier[n]` is 32 bytes long and is what is actually stored in t
 
 ### :: Adding an entry
 
-1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
+1. Split `plaintext` into chunks of length 1024 bytes. The last chunk will have a length of `len(plaintext) mod 1024`.
 
-2. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+2. For each `n`, pad `plaintext[n]` to 1025 bytes using byte-padding: a variant of bit-padding<sup>[0]</sup> but with whole bytes instead of bits.
 
-3. Split **I<sub>p</sub>** into pieces of length 1024. With our **I<sub>p</sub>**, we will get one piece of length 1024 and another piece of length 512.
+3. For each `n`, derive `ciphertext[n]` and `derived_identifier[n]`.
 
-4. Pad each piece to 1025 bytes using byte padding. [https://en.wikipedia.org/wiki/Padding_(cryptography)#Byte_padding]
-
-5. Encrypt each padded piece separately using XSalsa20 and Poly1305 with the key **K<sub>m</sub>**. In our case, this would give us two values: **C<sub>X<sub>0</sub></sub>** and **C<sub>X<sub>1</sub></sub>**.
-
-6. Generate **Z<sub>X<sub>n</sub></sub>** values for the pieces of ciphertext by computing **sha256(K<sub>id</sub> || X<sub>n</sub>)** for each piece. In our case, we'd compute **sha256(K<sub>id</sub> || 0)** and **sha256(K<sub>id</sub> || 1)**.
-
-7. Add the pairs **Z<sub>X<sub>0</sub></sub>**:**C<sub>X<sub>0</sub></sub>** and **Z<sub>X<sub>1</sub></sub>**:**C<sub>X<sub>1</sub></sub>** to the database.
+4. Save every `derived_identifier[n]`:`ciphertext[n]` pair in the database.
 
 ### :: Retrieving an entry
 
-1. Generate **K<sub>m</sub>** - Pass **I<sub>key</sub> || I<sub>id</sub>** to Scrypt (no salt).
+1. Compute `derived_identifier[0]` and look up the corresponding `ciphertext[0]` in the database.
 
-2. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+2. Keep computing `derived_identifier[n+1]` and looking for it in the database. Stop when the key does not exist.
 
-3. Generate **Z<sub>X<sub>0</sub></sub>** by computing **sha256(K<sub>id</sub> || 0)**.
+3. Decrypt each `ciphertext[n]` that we have to get corresponding `plaintext[n]` values.
 
-4. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and pull the corresponding value (**C<sub>X<sub>0</sub></sub>**).
-
-5. Keep generating values of **Z<sub>X<sub>n</sub></sub>** and looking for them in the database. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find two entries with **X<sub>n</sub>** equalling `0` and `1` respectively.
-
-6. Decrypt each **C<sub>X<sub>n</sub></sub>** value that we have.
-
-7. Unpad each decrypted **C<sub>X<sub>n</sub></sub>** value and concatenate the resulting values in order of **X<sub>n</sub>** ascending. In our case, we'd have two pieces of data of lengths 1024 bytes and 512 bytes respectively, so we'd join them in order of **X<sub>0</sub>** || **X<sub>1</sub>**.
-
-8. We now have the original decrypted data. Output it to the user.
+4. Unpad each `plaintext[n]` and concatenate the resulting values in order of `n` ascending. This will give us `plaintext`.
 
 ### :: Deleting an entry
 
-1. Generate **K<sub>id</sub>** - Pass **I<sub>id</sub> || I<sub>key</sub>** to Scrypt (no salt).
+1. Compute `derived_identifier[0]` and remove it from the database.
 
-2. Generate **Z<sub>X<sub>0</sub></sub>** by computing **sha256(K<sub>id</sub> || 0)**.
+2. Keep computing `derived_identifier[n+1]` and removing it from the database. Stop when the key does not exist.
 
-3. Search the database for the key **Z<sub>X<sub>0</sub></sub>** and remove it.
+## References
 
-4. Keep generating values of **Z<sub>X<sub>n</sub></sub>**, looking for them in the database and removing them. Stop when **Z<sub>X<sub>n</sub></sub>** does not exist for the current **X<sub>n</sub>** value. In our case, we'd find and remove two entries with **X<sub>n</sub>** equalling `0` and `1` respectively.
+[0] A, Menezes., P, van Oorschot., S, Vanstone. (1996, October 16). Handbook of Applied Cryptography: Algorithm 9.30. Retrieved from http://cacr.uwaterloo.ca/hac/about/chap9.pdf#page=15
