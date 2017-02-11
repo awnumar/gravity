@@ -2,7 +2,7 @@
 
 <img align="right" src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="200">
 
-[![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Dependency Status](https://dependencyci.com/github/libeclipse/pocket/badge)](https://dependencyci.com/github/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
+[![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Build status](https://ci.appveyor.com/api/projects/status/s2enb60sa9asjg87?svg=true)](https://ci.appveyor.com/project/libeclipse/pocket) [![Dependency Status](https://dependencyci.com/github/libeclipse/pocket/badge)](https://dependencyci.com/github/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
