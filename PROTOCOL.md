@@ -72,11 +72,13 @@ A 32 byte value that is stored in the database alongside chunks of the ciphertex
 
 The user will have the option to add a certain amount of decoy data. In order to minimise any assumptions that an adversary can make, the number of decoy entries added should not be a predictable number like 10000.
 
-1. Generate three random 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
+1. Generate three, random, 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
 
-2. Treat them valid user-inputted values and follow the steps for `Adding an entry`.
+2. Pad `plaintext` to 1025 bytes.
 
-3. Repeat steps `1` and `2` until a sufficient number of decoys have been added.
+3. Store the `sha256(identifier)` : `XSalsa20Poly1305(master_password, padded_plaintext)` pair in the database.
+
+4. Repeat steps 1 - 3 until a sufficient number of decoys have been added.
 
 Something to note is that the user does not necessarily have to make use of this feature. Rather, simply the fact that it exists allows the user to claim that some or all of the entries in the database are decoys.
 
