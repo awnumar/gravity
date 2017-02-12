@@ -12,9 +12,15 @@
 
 ## Derivations
 
+### :: `root_key`
+
+> `root_key = Scrypt(master_password || identifier)`
+
+This is 64 bytes long and is what is used to derive `master_key` and `root_identifier`.
+
 ### :: `master_key`
 
-> `master_key = Scrypt(master_password || identifier)`
+> `master_key = root_key[0:32]`
 
 This is 32 bytes long and is what is used as the actual encryption key for all `plaintext[n]`.
 
@@ -26,7 +32,7 @@ This is 32 bytes long and is what is used as the actual encryption key for all `
 
 ### :: `root_identifier`
 
-> `root_identifier = Scrypt(identifier || master_password)`
+> `root_identifier = root_key[32:64]`
 
 A 32 byte value that is used to derive `derived_identifier[n]`.
 
