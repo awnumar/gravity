@@ -18,6 +18,8 @@
 
 This is 64 bytes long and is what is used to derive `master_key` and `root_identifier`.
 
+The default Scrypt parameters are `N = 2^18`, `r = 16`, `p = 1`.
+
 ### :: `master_key`
 
 > `master_key = root_key[0:32]`
