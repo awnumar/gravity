@@ -12,7 +12,7 @@
 
 ## Derivations
 
-### :: `root_key`
+#### :: `root_key`
 
 > `root_key = Scrypt(master_password || identifier)`
 
@@ -20,13 +20,13 @@ This is 64 bytes long and is what is used to derive `master_key` and `root_ident
 
 The default Scrypt parameters are `N = 2^18`, `r = 16`, `p = 1`.
 
-### :: `master_key`
+#### :: `master_key`
 
 > `master_key = root_key[0:32]`
 
 This is 32 bytes long and is what is used as the actual encryption key for all `plaintext[n]`.
 
-### :: `ciphertext[n]`
+#### :: `ciphertext[n]`
 
 > `ciphertext[n] = XSalsa20Poly1305(master_key, plaintext[n])`
 
@@ -34,13 +34,13 @@ This is 32 bytes long and is what is used as the actual encryption key for all `
 
 `XSalsa20Poly1305()` is implemented using `NaCl:SecretBox`.
 
-### :: `root_identifier`
+#### :: `root_identifier`
 
 > `root_identifier = root_key[32:64]`
 
 A 32 byte value that is used to derive `derived_identifier[n]`.
 
-### :: `derived_identifier[n]`
+#### :: `derived_identifier[n]`
 
 > `derived_identifier[n] = sha256(root_identifier || n)`
 
