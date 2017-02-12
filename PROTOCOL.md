@@ -32,6 +32,8 @@ This is 32 bytes long and is what is used as the actual encryption key for all `
 
 `ciphertext[n]` refers to the result of encrypting `plaintext[n]` with `master_key`.
 
+`XSalsa20Poly1305()` is implemented using `NaCl:SecretBox`.
+
 ### :: `root_identifier`
 
 > `root_identifier = root_key[32:64]`
