@@ -4,11 +4,19 @@
 
 ## Inputs
 
-`master_password` - _A strong password._
+#### :: `master_password`
 
-`plaintext` - _The user-inputted data that we will be protecting. When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk._
+A strong password.
 
-`identifier` - *A string that identifies the plaintext that we are storing. It should not be guessable but does not necessarily have to be as strong as `master_password`.*
+#### :: `plaintext`
+
+The user-inputted data that we will be protecting.
+
+When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk.
+
+#### :: `identifier`
+
+A string that identifies `plaintext`. It should resist bruteforce attacks but does not necessarily have to be as strong as `master_password`.
 
 ## Derivations
 
