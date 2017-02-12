@@ -4,33 +4,51 @@
 
 ## Inputs
 
-`master_password` - _A strong password._
+#### :: `master_password`
 
-`plaintext` - _The user-inputted data that we will be protecting. When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk._
+A strong password.
 
-`identifier` - *A string that identifies the plaintext that we are storing. It should not be guessable but does not necessarily have to be as strong as `master_password`.*
+#### :: `plaintext`
+
+The user-inputted data that we will be protecting.
+
+When `plaintext` is split, individual chunks will be referred to as `plaintext[n]`, where `n` is the index of the chunk.
+
+#### :: `identifier`
+
+A string that identifies `plaintext`. It should resist bruteforce attacks but does not necessarily have to be as strong as `master_password`.
 
 ## Derivations
 
-### :: `master_key`
+#### :: `root_key`
 
-> `master_key = Scrypt(master_password || identifier)`
+> `root_key = Scrypt(master_password || identifier)`
+
+This is 64 bytes long and is what is used to derive `master_key` and `root_identifier`.
+
+The default Scrypt parameters are `N = 2^18`, `r = 16`, `p = 1`.
+
+#### :: `master_key`
+
+> `master_key = root_key[0:32]`
 
 This is 32 bytes long and is what is used as the actual encryption key for all `plaintext[n]`.
 
-### :: `ciphertext[n]`
+#### :: `ciphertext[n]`
 
 > `ciphertext[n] = XSalsa20Poly1305(master_key, plaintext[n])`
 
 `ciphertext[n]` refers to the result of encrypting `plaintext[n]` with `master_key`.
 
-### :: `root_identifier`
+`XSalsa20Poly1305()` is implemented using `NaCl:SecretBox`.
 
-> `root_identifier = Scrypt(identifier || master_password)`
+#### :: `root_identifier`
+
+> `root_identifier = root_key[32:64]`
 
 A 32 byte value that is used to derive `derived_identifier[n]`.
 
-### :: `derived_identifier[n]`
+#### :: `derived_identifier[n]`
 
 > `derived_identifier[n] = sha256(root_identifier || n)`
 
@@ -72,11 +90,13 @@ A 32 byte value that is stored in the database alongside chunks of the ciphertex
 
 The user will have the option to add a certain amount of decoy data. In order to minimise any assumptions that an adversary can make, the number of decoy entries added should not be a predictable number like 10000.
 
-1. Generate three random 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
+1. Generate three, random, 32 byte values for `master_password`, `plaintext` and `identifier` respectively.
 
-2. Treat them valid user-inputted values and follow the steps for `Adding an entry`.
+2. Pad `plaintext` to 1025 bytes.
 
-3. Repeat steps `1` and `2` until a sufficient number of decoys have been added.
+3. Store the `sha256(identifier)` : `XSalsa20Poly1305(master_password, padded_plaintext)` pair in the database.
+
+4. Repeat steps 1 - 3 until a sufficient number of decoys have been added.
 
 Something to note is that the user does not necessarily have to make use of this feature. Rather, simply the fact that it exists allows the user to claim that some or all of the entries in the database are decoys.
 
