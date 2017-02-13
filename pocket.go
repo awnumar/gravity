@@ -1,8 +1,8 @@
 package main
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/libeclipse/pocket/auxiliary"
@@ -17,13 +17,9 @@ var (
 func main() {
 	// Parse command line flags.
 	mode, sc, err := auxiliary.ParseArgs(os.Args)
-	if err != nil {
-		if err.Error() == "help" {
-			os.Exit(0)
-		} else {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+	if err != nil && err.Error() != "help" {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
 	if sc != nil {
@@ -31,87 +27,142 @@ func main() {
 	}
 
 	// Setup the secret store.
-	coffer.Setup()
+	err = coffer.Setup()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer coffer.Close()
 
 	// Launch appropriate function for run-mode.
 	switch mode {
 	case "add":
-		add()
+		err = add()
 	case "get":
-		retrieve()
+		err = retrieve()
 	case "forget":
-		forget()
+		err = forget()
 	}
+
+	// Output any errors that were returned.
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Zero out and unlock any protected memory.
+	crypto.CleanupMemory()
 }
 
-func add() {
-	// Get values from the user.
-	values := auxiliary.GetInputs([]string{"password", "identifier", "data"})
+func add() error {
+	// Prompt user for password.
+	password, err := auxiliary.GetPass()
+	if err != nil {
+		return err
+	}
 
-	// Derive and store identifier.
-	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[1]), scryptCost)
+	// Prompt user for the identifier.
+	identifier, err := auxiliary.Input("[-] Identifier: ")
+	if err != nil {
+		return err
+	}
+
+	// Prompt user for the plaintext data.
+	data, err := auxiliary.Input("[-] Data: ")
+	if err != nil {
+		return err
+	}
+
+	// Pad the data.
+	paddedData, err := crypto.Pad(data, 1025)
+	if err != nil {
+		return err
+	}
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
-
-	// Store and save the id/data pair.
-	paddedData, err := crypto.Pad([]byte(values[2]), 1025)
-	if err != nil {
-		log.Fatalln(err)
-	}
+	key := crypto.DeriveKey(password, identifier, scryptCost)
 
 	// Encrypt the padded data.
-	encryptedData := crypto.Encrypt(paddedData, key)
+	encryptedData, err := crypto.Encrypt(paddedData, key)
+	if err != nil {
+		return err
+	}
+
+	// Derive and store secure identifier.
+	fmt.Println("[+] Deriving secure identifier...")
+	secureIdentifier := crypto.DeriveID(identifier, scryptCost)
 
 	// Save the identifier:data pair in the database.
-	err = coffer.Save(identifier, encryptedData)
+	err = coffer.Save(secureIdentifier, encryptedData)
 	if err != nil {
 		// Cannot overwrite existing entry.
-		fmt.Println(err)
-	} else {
-		fmt.Println("[+] Okay, I'll remember that.")
+		return err
 	}
+
+	fmt.Println("[+] Okay, I'll remember that.")
+
+	return nil
 }
 
-func retrieve() {
-	// Get values from the user.
-	values := auxiliary.GetInputs([]string{"password", "identifier"})
+func retrieve() error {
+	// Prompt user for password.
+	password, err := auxiliary.GetPass()
+	if err != nil {
+		return err
+	}
+
+	// Prompt user for the identifier.
+	identifier, err := auxiliary.Input("[-] Identifier: ")
+	if err != nil {
+		return err
+	}
 
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[1]), scryptCost)
+	secureIdentifier := crypto.DeriveID(identifier, scryptCost)
+
+	data, err := coffer.Retrieve(secureIdentifier)
+	if err != nil {
+		// Entry not found.
+		return err
+	}
 
 	// Derive and store encryption key.
 	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey([]byte(values[0]), []byte(values[1]), scryptCost)
+	key := crypto.DeriveKey(password, identifier, scryptCost)
 
-	data, err := coffer.Retrieve(identifier)
+	// Decrypt the data.
+	data, err = crypto.Decrypt(data, key)
 	if err != nil {
-		// Entry not found.
-		fmt.Println(err)
-	} else {
-		data, err = crypto.Unpad(crypto.Decrypt(data, key))
-		if err != nil {
-			// This should never happen.
-			fmt.Println("[!] Invalid padding on decrypted data")
-		} else {
-			fmt.Println("[+] Data:", string(data))
-		}
+		return err
 	}
+
+	// Unpad the data.
+	data, err = crypto.Unpad(data)
+	if err != nil {
+		// This should never happen.
+		return errors.New("[!] Invalid padding on decrypted data")
+	}
+
+	fmt.Println("[+] Data:", string(data))
+
+	return nil
 }
 
-func forget() {
-	// Get values from the user.
-	values := auxiliary.GetInputs([]string{"identifier"})
+func forget() error {
+	// Prompt user for the identifier.
+	identifier, err := auxiliary.Input("[-] Identifier: ")
+	if err != nil {
+		return err
+	}
 
 	// Derive and store identifier.
 	fmt.Println("[+] Deriving secure identifier...")
-	identifier := crypto.DeriveID([]byte(values[0]), scryptCost)
+	secureIdentifier := crypto.DeriveID(identifier, scryptCost)
 
 	// Delete the entry.
-	coffer.Delete(identifier)
+	coffer.Delete(secureIdentifier)
 	fmt.Println("[+] It is forgotten.")
+
+	return nil
 }

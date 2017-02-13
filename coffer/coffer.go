@@ -2,10 +2,8 @@ package coffer
 
 import (
 	"errors"
-	"log"
 	"os"
 	"os/user"
-	"reflect"
 
 	"github.com/boltdb/bolt"
 )
@@ -16,11 +14,11 @@ var (
 )
 
 // Setup sets up the environment.
-func Setup() {
+func Setup() error {
 	// Ascertain the path to the secret store.
 	user, err := user.Current()
 	if err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	// Check if we've done this before.
@@ -30,14 +28,14 @@ func Setup() {
 		// Create a directory to store our stuff in.
 		err = os.Mkdir(user.HomeDir+"/.pocket", 0700)
 		if err != nil {
-			log.Fatalln(err)
+			return err
 		}
 	}
 
 	// Open the database file.
 	db, err := bolt.Open(user.HomeDir+"/.pocket/coffer.bolt", 0700, nil)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	Coffer = db
 
@@ -46,6 +44,8 @@ func Setup() {
 		tx.CreateBucketIfNotExists([]byte("coffer"))
 		return nil
 	})
+
+	return nil
 }
 
 // Save saves a secret to the database.
@@ -78,17 +78,15 @@ func Retrieve(identifier []byte) ([]byte, error) {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
-		// Iterate over all the keys.
-		c := bucket.Cursor()
-		for id, ct := c.First(); id != nil; id, ct = c.Next() {
-			if reflect.DeepEqual(id, identifier) {
-				ciphertext = append(ciphertext, ct...)
-				return nil
-			}
+		id := bucket.Get(identifier)
+		if id == nil {
+			// We didn't find that key; return an error.
+			return errors.New("[!] Nothing to see here")
 		}
 
-		// We didn't find that key; return an error.
-		return errors.New("[!] Nothing to see here")
+		ciphertext = append(ciphertext, id...)
+
+		return nil
 	}); err != nil {
 		return nil, err
 	}
