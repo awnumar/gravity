@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/libeclipse/pocket/crypto/memlock"
 
@@ -12,18 +13,63 @@ import (
 )
 
 var (
-	// Monitor if mlock() worked or not.
-	mlock = true
+	// Count of how many goroutines there are.
+	lockersCount int
+
+	// Let the goroutines know we're exiting.
+	isExiting chan bool
+
+	// Used to wait for goroutines to finish before exiting.
+	lockers sync.WaitGroup
 )
 
-// ProtectMemory calls mlock() and prevents sensitive information from being written to SWAP.
+// ProtectMemory prevents memory from being paged to disk, follows it
+// around until program exit, then zeros it out and unlocks it.
 func ProtectMemory(data []byte) {
-	err := memlock.Lock(data)
-	if err != nil && mlock {
-		// It failed once, probably won't work next time. Supress further warnings.
-		mlock = false
-		fmt.Printf("[!] Warning: Could not mlock() sensitive data; it might get written to SWAP [%s]", err)
+	// Increment counters since we're starting another goroutine.
+	lockersCount++ // Normal counter.
+	lockers.Add(1) // WaitGroup counter.
+
+	// Run as a goroutine so that callers don't have to be explicit.
+	go func(b []byte) {
+		// Monitor if we managed to lock b.
+		lockSuccess := true
+
+		// Prevent memory from being paged to disk.
+		err := memlock.Lock(b)
+		if err != nil {
+			lockSuccess = false
+			fmt.Printf("[!] Failed to lock %p; will still zero it out on exit. [Err: %s]\n", &b, err)
+		}
+
+		// Wait for the signal to let us know we're exiting.
+		<-isExiting
+
+		// Zero out the memory.
+		for i := 0; i < len(b); i++ {
+			b[i] = byte(0)
+		}
+
+		// If we managed to lock earlier, unlock.
+		if lockSuccess {
+			err := memlock.Unlock(b)
+			if err != nil {
+				fmt.Printf("[!] Failed to unlock %p [Err: %s]\n", &b, err)
+			}
+		}
+
+		// We're done. Decrement WaitGroup counter.
+		lockers.Done()
+	}(data)
+}
+
+// CleanupMemory instructs the goroutines to cleanup the
+// memory they've been watching and waits for them to finish.
+func CleanupMemory() {
+	for n := 0; n < lockersCount; n++ {
+		isExiting <- true
 	}
+	lockers.Wait()
 }
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with

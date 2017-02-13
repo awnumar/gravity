@@ -44,9 +44,13 @@ func main() {
 		err = forget()
 	}
 
+	// Output any errors that were returned.
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	// Zero out and unlock any protected memory.
+	crypto.CleanupMemory()
 }
 
 func add() error {
