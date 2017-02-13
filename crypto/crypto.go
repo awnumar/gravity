@@ -160,11 +160,6 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 
 // Unpad reverses byte padding.
 func Unpad(text []byte) ([]byte, error) {
-	// Keep a copy of the original just in case.
-	original := make([]byte, len(text))
-	ProtectMemory(original)
-	copy(original, text)
-
 	// Iterate over the text backwards,
 	// removing the appropriate padding bytes.
 	for i := len(text) - 1; i >= 0; i-- {
@@ -175,7 +170,7 @@ func Unpad(text []byte) ([]byte, error) {
 			text = text[:len(text)-1]
 			break
 		} else {
-			return original, errors.New("unpad: invalid padding")
+			return nil, errors.New("unpad: invalid padding")
 		}
 	}
 
@@ -184,7 +179,7 @@ func Unpad(text []byte) ([]byte, error) {
 	ProtectMemory(unpadded)
 	copy(unpadded, text)
 
-	// That simple.  We're done.
+	// That simple. We're done.
 	return unpadded, nil
 }
 

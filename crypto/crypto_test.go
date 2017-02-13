@@ -169,7 +169,7 @@ func TestUnpad(t *testing.T) {
 	if err == nil {
 		t.Error("Expected an error since inputs are invalid; unpadded:", unpadded)
 	}
-	if !bytes.Equal(unpadded, text) {
-		t.Error("Unpadded != text with invalid input; unpadded:", unpadded)
+	if unpadded != nil {
+		t.Error("Expected unpadded to be nil; unpadded =", unpadded)
 	}
 }

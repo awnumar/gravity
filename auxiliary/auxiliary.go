@@ -95,9 +95,10 @@ func Input(prompt string) ([]byte, error) {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
 
-	// Check the length of the data.
 	data := scanner.Bytes()
 	crypto.ProtectMemory(data)
+
+	// Check the length of the data.
 	if len(data) == 0 {
 		return nil, errors.New("[!] Length of input must be non-zero")
 	}
