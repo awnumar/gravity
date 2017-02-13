@@ -17,7 +17,7 @@ var (
 	lockersCount int
 
 	// Let the goroutines know we're exiting.
-	isExiting chan bool
+	isExiting = make(chan bool)
 
 	// Used to wait for goroutines to finish before exiting.
 	lockers sync.WaitGroup
