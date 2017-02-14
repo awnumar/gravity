@@ -52,7 +52,7 @@ A 32 byte value that is used to derive `derived_identifier[n]`.
 
 > `derived_identifier[n] = sha256(root_identifier || n)`
 
-A 32 byte value that is stored in the database alongside chunks of the ciphertext. The reason we use this instead of `root_identifier` is so that we are able to store ciphertexts across multiple entries by simply incrementing `n` for every chunk of plaintext. This prevents leakage of information about which entries are linked or how many entries compose `plaintext`.
+A 32 byte value that is stored in the database alongside chunks of the ciphertext. The reason we use this instead of `root_identifier` is so that we are able to store data across multiple entries by simply incrementing `n` for every chunk of plaintext. This prevents the leakage of information about which entries are linked or how many entries compose `plaintext`.
 
 `n` refers to the index of the chunk of ciphertext that we're deriving the identifier for: `derived_identifier[n]` corresponds to `ciphertext[n]`.
 
