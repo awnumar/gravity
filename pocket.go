@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
+	scryptCost = map[string]int{"N": 18, "r": 16, "p": 1}
 )
 
 func main() {
