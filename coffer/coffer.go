@@ -78,13 +78,14 @@ func Retrieve(identifier []byte) ([]byte, error) {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
-		id := bucket.Get(identifier)
-		if id == nil {
+		// Attempt to locate and grab the data from the coffer.
+		ct := bucket.Get(identifier)
+		if ct == nil {
 			// We didn't find that key; return an error.
 			return errors.New("[!] Nothing to see here")
 		}
 
-		ciphertext = append(ciphertext, id...)
+		ciphertext = append(ciphertext, ct...)
 
 		return nil
 	}); err != nil {
