@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	coffer *bolt.DB
+	// Coffer is a pointer to the database object.
+	Coffer *bolt.DB
 )
 
 // Setup sets up the environment.
@@ -36,10 +37,10 @@ func Setup() error {
 	if err != nil {
 		return err
 	}
-	coffer = db
+	Coffer = db
 
 	// Create the bucket to guarantee it exists.
-	coffer.Update(func(tx *bolt.Tx) error {
+	Coffer.Update(func(tx *bolt.Tx) error {
 		tx.CreateBucketIfNotExists([]byte("coffer"))
 		return nil
 	})
@@ -49,7 +50,7 @@ func Setup() error {
 
 // Save saves a secret to the database.
 func Save(identifier, ciphertext []byte) error {
-	return coffer.Update(func(tx *bolt.Tx) error {
+	return Coffer.Update(func(tx *bolt.Tx) error {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
@@ -73,7 +74,7 @@ func Retrieve(identifier []byte) ([]byte, error) {
 	var ciphertext []byte
 
 	// Attempt to retrieve the ciphertext from the database.
-	if err := coffer.View(func(tx *bolt.Tx) error {
+	if err := Coffer.View(func(tx *bolt.Tx) error {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
@@ -95,7 +96,7 @@ func Retrieve(identifier []byte) ([]byte, error) {
 
 // Delete deletes an entry from the database.
 func Delete(identifier []byte) {
-	coffer.Update(func(tx *bolt.Tx) error {
+	Coffer.Update(func(tx *bolt.Tx) error {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
@@ -108,5 +109,5 @@ func Delete(identifier []byte) {
 
 // Close closes the database object.
 func Close() {
-	coffer.Close()
+	Coffer.Close()
 }
