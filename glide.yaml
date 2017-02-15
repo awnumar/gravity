@@ -13,3 +13,7 @@ import:
   - nacl/secretbox
   - scrypt
   - ssh/terminal
+- package: golang.org/x/sys
+  subpackages:
+  - unix
+  - windows
