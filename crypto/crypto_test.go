@@ -36,10 +36,7 @@ func TestLocking(t *testing.T) {
 }
 
 func TestGenerateRandomBytes(t *testing.T) {
-	randomBytes, err := generateRandomBytes(32)
-	if err != nil {
-		t.Error(err)
-	}
+	randomBytes := generateRandomBytes(32)
 	if len(randomBytes) != 32 {
 		t.Error("Expected length to be 32; got", len(randomBytes))
 	}
@@ -89,21 +86,6 @@ func TestEncryptionCycle(t *testing.T) {
 
 	if !bytes.Equal(decrypted, plaintext) {
 		t.Error("Decrypted != Plaintext; decrypted =", string(decrypted))
-	}
-}
-
-func TestDeriveKey(t *testing.T) {
-	derivedKey := DeriveKey([]byte("password"), []byte("identifier"), scryptCost)
-	derivedKeyString := base64.StdEncoding.EncodeToString(derivedKey[:])
-	if derivedKeyString != "rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=" {
-		t.Error("Expected `rjbQVprXRtR4z3ZYGxfcBIYLj3exf/ftMVpdsc6YKGo=`; got", derivedKey)
-	}
-}
-
-func TestDeriveID(t *testing.T) {
-	derivedKey := base64.StdEncoding.EncodeToString(DeriveID([]byte("identifier"), scryptCost))
-	if derivedKey != "HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=" {
-		t.Error("Expected `HRd9/hpzbvfCEnhfNTIMPnGHOhTFEZSoVrdcBOrQT7w=`; got", derivedKey)
 	}
 }
 

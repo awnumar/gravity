@@ -86,6 +86,23 @@ Further help and usage information can be found in the README file or on the pro
 	}
 }
 
+// GetPassAndID prompts the user for their masterPassword and identifier.
+func GetPassAndID() ([]byte, []byte, error) {
+	// Prompt user for password.
+	masterPassword, err := GetPass()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Prompt user for the identifier.
+	identifier, err := Input("[-] Identifier: ")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return masterPassword, identifier, nil
+}
+
 // Input takes input from the user.
 func Input(prompt string) ([]byte, error) {
 	// Output prompt.
