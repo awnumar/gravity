@@ -1,5 +1,7 @@
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
+---
+
 <p align="center">
   <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="130" />
   <h3 align="center">Pocket</h3>
