@@ -1,5 +1,4 @@
-Pocket contributors
-===================
+# Pocket Contributors
 
 * **[Alipha](https://github.com/alipha)**
 
