@@ -10,7 +10,9 @@
   </p>
 </p>
 
-***Note: Still in alpha stages. Should not (yet) be used seriously.***
+<center>***Note: Still in alpha stages. Should not (yet) be used seriously.***</center>
+
+---
 
 Protect super-secret ***things*** even in the case of your password being breached.
 
