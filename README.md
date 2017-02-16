@@ -10,13 +10,9 @@
   </p>
 </p>
 
-## Potential Uses
+---
 
-* Encrypt your *super-secret* files.
-* Store your *super-secret* passwords.
-* Save some *super-secret* strings.
-* Log a *super-secret* diary entry.
-* Just look at in wonder when you're bored.
+Whether you want to encrypt your *super-secret* files, store your *super-secret* passwords, save some *super-secret* strings, log a *super-secret* diary entry, or have something to look at in wonder; *pocket* has you covered.
 
 ## Security Properties
 
