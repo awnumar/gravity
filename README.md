@@ -1,8 +1,14 @@
-# pocket
-
-<img align="right" src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="200">
-
-[![Build Status](https://travis-ci.org/libeclipse/pocket.svg?branch=master)](https://travis-ci.org/libeclipse/pocket) [![Build status](https://ci.appveyor.com/api/projects/status/s2enb60sa9asjg87/branch/master?svg=true)](https://ci.appveyor.com/project/libeclipse/pocket/branch/master) [![Dependency Status](https://dependencyci.com/github/libeclipse/pocket/badge)](https://dependencyci.com/github/libeclipse/pocket) [![Go Report Card](https://goreportcard.com/badge/github.com/libeclipse/pocket)](https://goreportcard.com/report/github.com/libeclipse/pocket)
+<p align="center">
+  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/images/pocket.svg" height="150" />
+  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/images/pocket-text.svg" />
+  <p align="center">The guardian of super-secret things.</p>
+  <p align="center">
+    <a href="https://travis-ci.org/libeclipse/pocket"><img src="https://travis-ci.org/libeclipse/pocket.svg?branch=master"></a>
+    <a href="https://ci.appveyor.com/project/libeclipse/pocket/branch/master"><img src="https://ci.appveyor.com/api/projects/status/s2enb60sa9asjg87/branch/master?svg=true"></a>
+    <a href="https://dependencyci.com/github/libeclipse/pocket"><img src="https://dependencyci.com/github/libeclipse/pocket/badge"></a>
+    <a href="https://goreportcard.com/report/github.com/libeclipse/pocket"><img src="https://goreportcard.com/badge/github.com/libeclipse/pocket"></a>
+  </p>
+</p>
 
 ***Note: Still in alpha stages. Should not (yet) be used seriously.***
 
