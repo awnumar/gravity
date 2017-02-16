@@ -10,8 +10,6 @@
   </p>
 </p>
 
----
-
 ## Potential Uses
 
 * Encrypt your *super-secret* files.
