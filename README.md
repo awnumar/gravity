@@ -12,7 +12,7 @@
 
 ---
 
-Whether you want to encrypt your *super-secret* files, store your *super-secret* passwords, save some *super-secret* strings, log a *super-secret* diary entry, or have something to look at in wonder; *pocket* has you covered.
+Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder; pocket has you covered.
 
 ## Security Properties
 
