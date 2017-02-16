@@ -1,3 +1,5 @@
+***Note: Still in alpha stages. Should not (yet) be used seriously.***
+
 <p align="center">
   <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="130" />
   <h3 align="center">Pocket</h3>
@@ -12,7 +14,7 @@
 
 ---
 
-Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder; pocket has you covered.
+Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
 
 ## Security Properties
 
