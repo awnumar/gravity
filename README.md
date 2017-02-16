@@ -17,10 +17,10 @@ Whether you want to encrypt your super-secret files, store your super-secret pas
 ## Security Properties
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your data.
-* ***Hidden data length*** - Secrets are padded and split over multiple entries in a way that makes it impossible to ascertain which ones are linked together. This (used with the decoy entries) effectively conceals the length of your data, whether it's a 2 GB file or a simple string.
+* ***Hidden data length*** - Data is split across multiple entries, effectively concealing the length.
 * ***Multiple password support*** - You're free to use different passwords for different entries, and no one (except you) would ever know that you did.
 * ***Decoy entries*** - You can add decoy data that is **not** be differentiable from real data that you store. This lets you claim that some (or all) of the entries in the database aren't real and therefore that you're unable to give up keys for them.
-* ***Deniability*** - Since multiple-passwords are a thing, it's possible to add some of your own decoys under a different password to your normal one. In the event of [rubber-hose-cryptanalysis](https://en.wikipedia.org/wiki/Rubber-hose_cryptanalysis), you can give up the passwords/identifiers for these fake entries and claim that the rest of the data is composed of random decoys added by the program. But why stop there? Add as many layers of decoys as you want! Forced to reveal your passwords? Give them one set. They don't believe that's all of them? Give up another set... And another... And another... (*I'm only half kidding.*)
+* ***Deniability*** - Multiple-password support combined with decoys basically gives you deniable encryption. Simply add a few entries under a different password to your normal one and if you're ever forced to disclose your keys, give up these and claim that the rest of the data is composed of random decoys.
 * ***Hidden everything*** - Pocket makes sure that an attacker will not be able to ascertain the length, type, or content of any data, and also prevents the inference of things like the number of secrets stored.
 
 For a full overview of the protocol, click [here](/PROTOCOL.md).
