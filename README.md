@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/images/pocket.svg" height="130" />
+  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="130" />
   <h3 align="center">Pocket</h3>
   <p align="center">The guardian of super-secret things.</p>
   <p align="center">
