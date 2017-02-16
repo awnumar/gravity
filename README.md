@@ -1,6 +1,6 @@
 <p align="center">
-  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/images/pocket.svg" height="150" />
-  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/images/pocket-text.svg" />
+  <img src="https://cdn.rawgit.com/libeclipse/pocket/documentation/prettify-readme/images/pocket.svg" height="150" />
+  <img src="https://cdn.rawgit.com/libeclipse/pocket/documentation/prettify-readme/images/pocket-text.svg" />
   <p align="center">The guardian of super-secret things.</p>
   <p align="center">
     <a href="https://travis-ci.org/libeclipse/pocket"><img src="https://travis-ci.org/libeclipse/pocket.svg?branch=master"></a>
