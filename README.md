@@ -18,6 +18,16 @@
 
 Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
 
+## Installation
+
+Simply run:
+
+`$ go get github.com/libeclipse/pocket`
+
+This will fetch, compile, and install *pocket* automatically. An added bonus is that it should now be in your PATH so you can call the program from anywhere with a simple:
+
+`$ pocket`
+
 ## Security Properties
 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your data.
@@ -28,13 +38,3 @@ Whether you want to encrypt your super-secret files, store your super-secret pas
 * ***Hidden everything*** - Pocket makes sure that an attacker will not be able to ascertain the length, type, or content of any data, and also prevents the inference of things like the number of secrets stored.
 
 For a full overview of the protocol, click [here](/PROTOCOL.md).
-
-## Installation
-
-Simply run:
-
-`$ go get github.com/libeclipse/pocket`
-
-This will fetch, compile, and install *pocket* automatically. An added bonus is that it should now be in your PATH so you can call the program from anywhere with a simple:
-
-`$ pocket`
