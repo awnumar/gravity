@@ -1,14 +1,13 @@
 # Pocket Contributors
 
-* **[Alipha](https://github.com/alipha)**
-
-  * Thought of using integers to store data across multiple entries.
-
 * **[dotcppfile](https://github.com/dotcppfile)**
 
-  * We came up with the idea for the project together.
-  * Brainstormed countless proposals and improvements.
-  * Critically analysed all design decisions and generally made sure that everything was perfect.
+  * We came up with the idea for the project together and continuously brainstormed countless proposals and improvements.
+  * Throughout the whole development, he critically analysed all design decisions and generally made sure that everything was perfect.
+
+* **[Kevin Spinar](https://github.com/alipha)**
+
+  * Thought of using integers to store data across multiple entries.
 
 * **[Tahir Akhlaq](https://github.com/takhlaq)**
 

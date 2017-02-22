@@ -18,6 +18,8 @@
 
 Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
 
+An adversary will not be able to ascertain the length, type, or content of any data, or even if you've stored data at all. Plausible deniability is a wonderful thing.
+
 ## Installation
 
 Simply run:
@@ -33,8 +35,7 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 * ***Multi-layer security*** - The password alone isn't enough to compromise your data.
 * ***Hidden data length*** - Data is split across multiple entries, effectively concealing the length.
 * ***Multiple password support*** - You're free to use different passwords for different entries, and no one (except you) would ever know that you did.
-* ***Decoy entries*** - You can add decoy data that is **not** be differentiable from real data that you store. This lets you claim that some (or all) of the entries in the database aren't real and therefore that you're unable to give up keys for them.
+* ***Decoy entries*** - You can add decoy data that is **not** differentiable from real data that you store. This lets you claim that some (or all) of the entries in the database aren't real and therefore that you're unable to give up keys for them.
 * ***Deniability*** - Multiple-password support combined with decoys basically gives you deniable encryption. Simply add a few entries under a different password to your normal one and if you're ever forced to disclose your keys, give up these and claim that the rest of the data is composed of random decoys.
-* ***Hidden everything*** - Pocket makes sure that an attacker will not be able to ascertain the length, type, or content of any data, and also prevents the inference of things like the number of secrets stored.
 
 For a full overview of the protocol, click [here](/PROTOCOL.md).
