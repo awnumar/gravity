@@ -19,6 +19,11 @@ func TestLocking(t *testing.T) {
 	ProtectMemory(dataOne)
 	ProtectMemory(dataTwo)
 
+	// Check if they're zeroed out. They shouldn't be.
+	if bytes.Equal(dataOne, make([]byte, 16)) || bytes.Equal(dataOne, make([]byte, 16)) {
+		t.Error("Ctitical error: memory zeroed out early")
+	}
+
 	// Cleanup.
 	CleanupMemory()
 
