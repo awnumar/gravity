@@ -75,10 +75,7 @@ func TestEncryptionCycle(t *testing.T) {
 	var key [32]byte
 	copy(key[:], []byte("yellow submarine"))
 
-	ciphertext, err := Encrypt(plaintext, &key)
-	if err != nil {
-		t.Error("Unexpected error:", err)
-	}
+	ciphertext := Encrypt(plaintext, &key)
 	decrypted, err := Decrypt(ciphertext, &key)
 	if err != nil {
 		t.Error("Unexpected error:", err)

@@ -82,13 +82,55 @@ func add() error {
 		}
 
 		// Derive ID, encrypt and save to the database.
-		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
+		err := coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
+		if err != nil {
+			return err
+		}
 	}
+
+	fmt.Println("[+] Saved")
 
 	return nil
 }
 
 func retrieve() error {
+	// Prompt for masterPassword and identifier.
+	masterPassword, identifier, err := auxiliary.GetPassAndID()
+	if err != nil {
+		return err
+	}
+
+	// Derive rootKey and rootIdentifier.
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
+	// Grab all the pieces.
+	var plaintext []byte
+	for n := 0; true; n++ {
+		// Derive derived_identifier[n]
+		ct, exists := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		if exists != nil {
+			// This one doesn't exist.
+			break
+		}
+
+		// Decrypt this slice.
+		pt, e := crypto.Decrypt(ct, masterKey)
+		if e != nil {
+			return e
+		}
+
+		// Unpad this slice.
+		unpadded, e := crypto.Unpad(pt)
+		if e != nil {
+			return e
+		}
+
+		// Append this slice of plaintext to the rest of it.
+		plaintext = append(plaintext, unpadded...)
+	}
+
+	fmt.Println("[+] Data:", string(plaintext))
+
 	return nil
 }
 
