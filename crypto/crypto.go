@@ -154,19 +154,18 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 		return nil, fmt.Errorf("[!] Length of data must not exceed %d bytes", padTo-1)
 	}
 
+	// Create a new slice to store the padded data since we don't want to mess with the original.
+	padded := make([]byte, padTo)
+	ProtectMemory(padded)
+
+	// Copy text into new slice.
+	copy(padded, text)
+
 	// Add the compulsory byte of value `1`.
-	text = append(text, byte(1))
-
-	// Determine number of zeros to add.
-	padLen := padTo - len(text)
-
-	// Append the determined number of zeroes to the text.
-	for n := 1; n <= padLen; n++ {
-		text = append(text, byte(0))
-	}
+	padded[len(text)] = byte(1)
 
 	// Return padded byte slice.
-	return text, nil
+	return padded, nil
 }
 
 // Unpad reverses byte padding.
