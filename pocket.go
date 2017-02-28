@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -129,11 +130,42 @@ func retrieve() error {
 		plaintext = append(plaintext, unpadded...)
 	}
 
+	if len(plaintext) == 0 {
+		return errors.New("[!] Nothing to see here")
+	}
+
 	fmt.Println("[+] Data:", string(plaintext))
 
 	return nil
 }
 
 func forget() error {
+	// Prompt for masterPassword and identifier.
+	masterPassword, identifier, err := auxiliary.GetPassAndID()
+	if err != nil {
+		return err
+	}
+
+	// Derive rootKey and rootIdentifier.
+	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
+	// Delete all the pieces.
+	for n := 0; true; n++ {
+		// Get the DeriveIdentifierN for this n.
+		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
+
+		// Check if it exists.
+		_, exists := coffer.Retrieve(derivedIdentifierN)
+		if exists != nil {
+			// This one doesn't exist.
+			break
+		}
+
+		// It exists. Remove it.
+		coffer.Delete(derivedIdentifierN)
+	}
+
+	fmt.Println("[+] It is forgotten.")
+
 	return nil
 }
