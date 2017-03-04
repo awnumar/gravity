@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
+	scryptCost = map[string]int{"N": 18, "r": 16, "p": 1}
 )
 
 func main() {
@@ -54,17 +54,14 @@ func main() {
 }
 
 func add() error {
-	// Prompt user for password.
-	password, err := auxiliary.GetPass()
+	// Prompt for masterPassword and identifier.
+	masterPassword, identifier, err := auxiliary.GetPassAndID()
 	if err != nil {
 		return err
 	}
 
-	// Prompt user for the identifier.
-	identifier, err := auxiliary.Input("[-] Identifier: ")
-	if err != nil {
-		return err
-	}
+	// Derive rootKey and rootIdentifier.
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
 	// Prompt user for the plaintext data.
 	data, err := auxiliary.Input("[-] Data: ")
@@ -72,96 +69,102 @@ func add() error {
 		return err
 	}
 
-	// Pad the data.
-	paddedData, err := crypto.Pad(data, 1025)
-	if err != nil {
-		return err
+	var padded []byte
+	for i := 0; i < len(data); i += 1024 {
+		if i+1024 > len(data) {
+			// Remaining data <= 1024.
+			padded, err = crypto.Pad(data[len(data)-(len(data)%1024):len(data)], 1025)
+		} else {
+			// Split into chunks of 1024 bytes and pad.
+			padded, err = crypto.Pad(data[i:i+1024], 1025)
+		}
+		if err != nil {
+			return err
+		}
+
+		// Derive ID, encrypt and save to the database.
+		err := coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
+		if err != nil {
+			return err
+		}
 	}
 
-	// Derive and store encryption key.
-	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey(password, identifier, scryptCost)
-
-	// Encrypt the padded data.
-	encryptedData, err := crypto.Encrypt(paddedData, key)
-	if err != nil {
-		return err
-	}
-
-	// Derive and store secure identifier.
-	fmt.Println("[+] Deriving secure identifier...")
-	secureIdentifier := crypto.DeriveID(identifier, scryptCost)
-
-	// Save the identifier:data pair in the database.
-	err = coffer.Save(secureIdentifier, encryptedData)
-	if err != nil {
-		// Cannot overwrite existing entry.
-		return err
-	}
-
-	fmt.Println("[+] Okay, I'll remember that.")
+	fmt.Println("[+] Saved")
 
 	return nil
 }
 
 func retrieve() error {
-	// Prompt user for password.
-	password, err := auxiliary.GetPass()
+	// Prompt for masterPassword and identifier.
+	masterPassword, identifier, err := auxiliary.GetPassAndID()
 	if err != nil {
 		return err
 	}
 
-	// Prompt user for the identifier.
-	identifier, err := auxiliary.Input("[-] Identifier: ")
-	if err != nil {
-		return err
+	// Derive rootKey and rootIdentifier.
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
+	// Grab all the pieces.
+	var plaintext []byte
+	for n := 0; true; n++ {
+		// Derive derived_identifier[n]
+		ct, exists := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		if exists != nil {
+			// This one doesn't exist.
+			break
+		}
+
+		// Decrypt this slice.
+		pt, e := crypto.Decrypt(ct, masterKey)
+		if e != nil {
+			return e
+		}
+
+		// Unpad this slice.
+		unpadded, e := crypto.Unpad(pt)
+		if e != nil {
+			return e
+		}
+
+		// Append this slice of plaintext to the rest of it.
+		plaintext = append(plaintext, unpadded...)
 	}
 
-	// Derive and store identifier.
-	fmt.Println("[+] Deriving secure identifier...")
-	secureIdentifier := crypto.DeriveID(identifier, scryptCost)
-
-	data, err := coffer.Retrieve(secureIdentifier)
-	if err != nil {
-		// Entry not found.
-		return err
+	if len(plaintext) == 0 {
+		return errors.New("[!] Nothing to see here")
 	}
 
-	// Derive and store encryption key.
-	fmt.Println("[+] Deriving encryption key...")
-	key := crypto.DeriveKey(password, identifier, scryptCost)
-
-	// Decrypt the data.
-	data, err = crypto.Decrypt(data, key)
-	if err != nil {
-		return err
-	}
-
-	// Unpad the data.
-	data, err = crypto.Unpad(data)
-	if err != nil {
-		// This should never happen.
-		return errors.New("[!] Invalid padding on decrypted data")
-	}
-
-	fmt.Println("[+] Data:", string(data))
+	fmt.Println("[+] Data:", string(plaintext))
 
 	return nil
 }
 
 func forget() error {
-	// Prompt user for the identifier.
-	identifier, err := auxiliary.Input("[-] Identifier: ")
+	// Prompt for masterPassword and identifier.
+	masterPassword, identifier, err := auxiliary.GetPassAndID()
 	if err != nil {
 		return err
 	}
 
-	// Derive and store identifier.
-	fmt.Println("[+] Deriving secure identifier...")
-	secureIdentifier := crypto.DeriveID(identifier, scryptCost)
+	// Derive rootKey and rootIdentifier.
+	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
-	// Delete the entry.
-	coffer.Delete(secureIdentifier)
+	// Delete all the pieces.
+	for n := 0; true; n++ {
+		// Get the DeriveIdentifierN for this n.
+		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
+
+		// Check if it exists.
+		_, exists := coffer.Retrieve(derivedIdentifierN)
+		if exists != nil {
+			// This one doesn't exist.
+			break
+		}
+
+		// It exists. Remove it.
+		coffer.Delete(derivedIdentifierN)
+	}
+
 	fmt.Println("[+] It is forgotten.")
 
 	return nil

@@ -2,8 +2,11 @@ package crypto
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/libeclipse/pocket/crypto/memlock"
@@ -74,19 +77,16 @@ func CleanupMemory() {
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
-func Encrypt(plaintext []byte, key *[32]byte) ([]byte, error) {
+func Encrypt(plaintext []byte, key *[32]byte) []byte {
 	// Generate a random nonce.
-	nonceSlice, err := generateRandomBytes(24)
-	if err != nil {
-		return nil, err
-	}
+	nonceSlice := generateRandomBytes(24)
 
 	// Store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], nonceSlice)
 
 	// Encrypt and return the plaintext.
-	return secretbox.Seal(nonce[:], plaintext, &nonce, key), nil
+	return secretbox.Seal(nonce[:], plaintext, &nonce, key)
 }
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
@@ -110,30 +110,41 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 	return plaintext, nil
 }
 
-// DeriveKey derives a 32 byte encryption key from a password and identifier.
-func DeriveKey(password, identifier []byte, cost map[string]int) *[32]byte {
-	// Allocate and protect  memory for the output of the hash function.
-	derivedKeySlice := make([]byte, 32)
-	ProtectMemory(derivedKeySlice)
+// DeriveSecureValues derives and returns a masterKey and rootIdentifier.
+func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
+	// Concatenate the inputs.
+	concatenatedValues := append(masterPassword, identifier...)
+	ProtectMemory(concatenatedValues)
+
+	// Allocate and protect memory for the output of the hash function.
+	rootKeySlice := make([]byte, 64)
+	ProtectMemory(rootKeySlice)
 
 	// Allocate and protect memory for the 32 byte array that we'll return.
-	var derivedKey [32]byte
-	ProtectMemory(derivedKey[:])
+	var masterKey [32]byte
+	ProtectMemory(masterKey[:])
 
-	// Derive the key and store in the memory we allocated above.
-	derivedKeySlice, _ = scrypt.Key(password, identifier, 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
+	// Derive rootKey.
+	rootKeySlice, _ = scrypt.Key(concatenatedValues, []byte(""), 1<<uint(costFactor["N"]), costFactor["r"], costFactor["p"], 64)
 
 	// Copy to the 32 byte array.
-	copy(derivedKey[:], derivedKeySlice)
+	copy(masterKey[:], rootKeySlice[0:32])
 
-	// Return a pointer.
-	return &derivedKey
+	// Slice and return respective values.
+	return &masterKey, rootKeySlice[32:64]
 }
 
-// DeriveID hashes the identifier using Scrypt and returns a base64 encoded string.
-func DeriveID(identifier []byte, cost map[string]int) []byte {
-	derivedKey, _ := scrypt.Key(identifier, []byte(""), 1<<uint(cost["N"]), cost["r"], cost["p"], 32)
-	return derivedKey
+// DeriveIdentifierN derives a value for derivedIdentifier for a value of `n`.
+func DeriveIdentifierN(rootIdentifier []byte, n int) []byte {
+	// Convert n to a byte slice.
+	byteN := make([]byte, 4)
+	binary.LittleEndian.PutUint32(byteN, uint32(n))
+
+	// Derive derivedIdentifier.
+	derivedIdentifier := sha256.Sum256(append(rootIdentifier, byteN...))
+
+	// Return as slice instead of array.
+	return derivedIdentifier[:]
 }
 
 // Pad implements byte padding.
@@ -143,19 +154,18 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 		return nil, fmt.Errorf("[!] Length of data must not exceed %d bytes", padTo-1)
 	}
 
+	// Create a new slice to store the padded data since we don't want to mess with the original.
+	padded := make([]byte, padTo)
+	ProtectMemory(padded)
+
+	// Copy text into new slice.
+	copy(padded, text)
+
 	// Add the compulsory byte of value `1`.
-	text = append(text, byte(1))
-
-	// Determine number of zeros to add.
-	padLen := padTo - len(text)
-
-	// Append the determined number of zeroes to the text.
-	for n := 1; n <= padLen; n++ {
-		text = append(text, byte(0))
-	}
+	padded[len(text)] = byte(1)
 
 	// Return padded byte slice.
-	return text, nil
+	return padded, nil
 }
 
 // Unpad reverses byte padding.
@@ -183,16 +193,18 @@ func Unpad(text []byte) ([]byte, error) {
 	return unpadded, nil
 }
 
-func generateRandomBytes(n int) ([]byte, error) {
+func generateRandomBytes(n int) []byte {
 	// Create a byte slice (b) of size n to store the random bytes.
 	b := make([]byte, n)
 
 	// Read n bytes into b; throw an error if number of bytes read != n.
 	_, err := rand.Read(b)
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		CleanupMemory()
+		os.Exit(1)
 	}
 
 	// Return the CSPR bytes.
-	return b, nil
+	return b
 }
