@@ -40,4 +40,6 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 If you are aware of a security bug, notifying us privately is in the interest of all users. We can then discuss it post-mortem.
 
-To notify us privately, you can send a PGP encrypted message to my [email](libeclipse@gmail.com). My PGP public-key is available [here](https://keybase.io/awn) [`5469 F4B9 688C 3FEE E105 0CA3 FAEE B039 F313 3EA8`]. To import it directly into GPG, run `curl https://keybase.io/awn/pgp_keys.asc | gpg --import`.
+To do this, please send a PGP encrypted message to my [email](libeclipse@gmail.com). My PGP public-key is available [here](https://keybase.io/awn) [`5469 F4B9 688C 3FEE E105 0CA3 FAEE B039 F313 3EA8`].
+
+To import it directly into GPG, run `curl https://keybase.io/awn/pgp_keys.asc | gpg --import`.
