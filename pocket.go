@@ -73,7 +73,7 @@ func add() error {
 	for i := 0; i < len(data); i += 1024 {
 		if i+1024 > len(data) {
 			// Remaining data <= 1024.
-			padded, err = crypto.Pad(data[len(data)-(len(data)%1024):len(data)], 1025)
+			padded, err = crypto.Pad(data[len(data)-(len(data)%1024):], 1025)
 		} else {
 			// Split into chunks of 1024 bytes and pad.
 			padded, err = crypto.Pad(data[i:i+1024], 1025)
