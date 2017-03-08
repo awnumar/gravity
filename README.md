@@ -24,7 +24,7 @@ On a high-level, Pocket does some [magic](/PROTOCOL.md) to store your data in su
 
 The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it.
 
-And if someone does manage to find out your password, it alone isn't enough to even locate the real entries amongst the decoys, never mind decrypt them.
+And if someone manages to find out your password, it alone isn't enough to even locate the right entries, never mind decrypt them.
 
 ## Installation
 
@@ -36,10 +36,14 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 `$ pocket`
 
-## Reporting security issues
+## Responsible disclosure
 
 If you are aware of a security bug, notifying us privately is in the interest of all users. We can then discuss it post-mortem.
 
-To do this, please send a PGP encrypted message to my [email](libeclipse@gmail.com). My PGP public-key is available [here](https://keybase.io/awn) [`5469 F4B9 688C 3FEE E105 0CA3 FAEE B039 F313 3EA8`].
+To do this, please send a PGP encrypted message to my [email](libeclipse@gmail.com). My PGP public-key is available [here](https://keybase.io/awn).
+
+My PGP public-key fingerprint is:
+
+> 5469 F4B9 688C 3FEE E105 0CA3 FAEE B039 F313 3EA8
 
 To import it directly into GPG, run `$ curl https://keybase.io/awn/pgp_keys.asc | gpg --import`.
