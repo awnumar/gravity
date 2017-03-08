@@ -20,11 +20,9 @@ Whether you want to encrypt your super-secret files, store your super-secret pas
 
 ## How it works
 
-On a high-level, Pocket does some [magic](/PROTOCOL.md) to store your data in such a way that nobody can get the length, type, or content of it. They won't even be sure that it exists at all! Plausible deniability is a wonderful thing.
+On a high-level, Pocket does some [magic](/PROTOCOL.md) to store your data in such a way that nobody can get the length, type, or content of it; even if they have the right password. They won't even be sure if it exists at all! (Plausible deniability is a wonderful thing.)
 
 The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it.
-
-And if someone manages to find out your password, it alone isn't enough to even locate the right entries, never mind decrypt them.
 
 ## Installation
 
