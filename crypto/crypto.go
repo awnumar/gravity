@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"crypto/rand"
-	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/libeclipse/pocket/memory"
 
+	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/scrypt"
 )
@@ -80,7 +80,7 @@ func DeriveIdentifierN(rootIdentifier []byte, n int) []byte {
 	binary.LittleEndian.PutUint32(byteN, uint32(n))
 
 	// Derive derivedIdentifier.
-	derivedIdentifier := sha256.Sum256(append(rootIdentifier, byteN...))
+	derivedIdentifier := blake2b.Sum256(append(rootIdentifier, byteN...))
 
 	// Return as slice instead of array.
 	return derivedIdentifier[:]
