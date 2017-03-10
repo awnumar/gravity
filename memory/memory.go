@@ -41,9 +41,7 @@ func Protect(data []byte) {
 		<-isExiting
 
 		// Zero out the memory.
-		for i := 0; i < len(b); i++ {
-			b[i] = byte(0)
-		}
+		Wipe(b)
 
 		// If we managed to lock earlier, unlock.
 		if lockSuccess {
