@@ -7,73 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"sync"
 
-	"github.com/libeclipse/pocket/crypto/memlock"
+	"github.com/libeclipse/pocket/memory"
 
 	"golang.org/x/crypto/nacl/secretbox"
 	"golang.org/x/crypto/scrypt"
 )
-
-var (
-	// Count of how many goroutines there are.
-	lockersCount int
-
-	// Let the goroutines know we're exiting.
-	isExiting = make(chan bool)
-
-	// Used to wait for goroutines to finish before exiting.
-	lockers sync.WaitGroup
-)
-
-// ProtectMemory prevents memory from being paged to disk, follows it
-// around until program exit, then zeros it out and unlocks it.
-func ProtectMemory(data []byte) {
-	// Increment counters since we're starting another goroutine.
-	lockersCount++ // Normal counter.
-	lockers.Add(1) // WaitGroup counter.
-
-	// Run as a goroutine so that callers don't have to be explicit.
-	go func(b []byte) {
-		// Monitor if we managed to lock b.
-		lockSuccess := true
-
-		// Prevent memory from being paged to disk.
-		err := memlock.Lock(b)
-		if err != nil {
-			lockSuccess = false
-			fmt.Printf("[!] Failed to lock %p; will still zero it out on exit. [Err: %s]\n", &b, err)
-		}
-
-		// Wait for the signal to let us know we're exiting.
-		<-isExiting
-
-		// Zero out the memory.
-		for i := 0; i < len(b); i++ {
-			b[i] = byte(0)
-		}
-
-		// If we managed to lock earlier, unlock.
-		if lockSuccess {
-			err := memlock.Unlock(b)
-			if err != nil {
-				fmt.Printf("[!] Failed to unlock %p [Err: %s]\n", &b, err)
-			}
-		}
-
-		// We're done. Decrement WaitGroup counter.
-		lockers.Done()
-	}(data)
-}
-
-// CleanupMemory instructs the goroutines to cleanup the
-// memory they've been watching and waits for them to finish.
-func CleanupMemory() {
-	for n := 0; n < lockersCount; n++ {
-		isExiting <- true
-	}
-	lockers.Wait()
-}
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
@@ -104,7 +43,7 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 	}
 
 	// Protect the plaintext.
-	ProtectMemory(plaintext)
+	memory.Protect(plaintext)
 
 	// Return the resulting plaintext.
 	return plaintext, nil
@@ -114,15 +53,15 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
 	// Concatenate the inputs.
 	concatenatedValues := append(masterPassword, identifier...)
-	ProtectMemory(concatenatedValues)
+	memory.Protect(concatenatedValues)
 
 	// Allocate and protect memory for the output of the hash function.
 	rootKeySlice := make([]byte, 64)
-	ProtectMemory(rootKeySlice)
+	memory.Protect(rootKeySlice)
 
 	// Allocate and protect memory for the 32 byte array that we'll return.
 	var masterKey [32]byte
-	ProtectMemory(masterKey[:])
+	memory.Protect(masterKey[:])
 
 	// Derive rootKey.
 	rootKeySlice, _ = scrypt.Key(concatenatedValues, []byte(""), 1<<uint(costFactor["N"]), costFactor["r"], costFactor["p"], 64)
@@ -156,7 +95,7 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 
 	// Create a new slice to store the padded data since we don't want to mess with the original.
 	padded := make([]byte, padTo)
-	ProtectMemory(padded)
+	memory.Protect(padded)
 
 	// Copy text into new slice.
 	copy(padded, text)
@@ -186,7 +125,7 @@ func Unpad(text []byte) ([]byte, error) {
 
 	// Copy to its own slice so we're not referencing useless data.
 	unpadded := make([]byte, len(text))
-	ProtectMemory(unpadded)
+	memory.Protect(unpadded)
 	copy(unpadded, text)
 
 	// That simple. We're done.
@@ -201,7 +140,7 @@ func generateRandomBytes(n int) []byte {
 	_, err := rand.Read(b)
 	if err != nil {
 		fmt.Println(err)
-		CleanupMemory()
+		memory.Cleanup()
 		os.Exit(1)
 	}
 

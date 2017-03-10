@@ -3,36 +3,50 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
 
-	"github.com/libeclipse/pocket/auxiliary"
 	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/crypto"
+	"github.com/libeclipse/pocket/input"
+	"github.com/libeclipse/pocket/memory"
 )
 
 var (
+	// The default cost factor for key deriviation.
 	scryptCost = map[string]int{"N": 18, "r": 16, "p": 1}
+
+	// Store the current session's secure values.
+	masterKey      *[32]byte
+	rootIdentifier []byte
 )
 
 func main() {
-	// Parse command line flags.
-	mode, sc, err := auxiliary.ParseArgs(os.Args)
-	if err != nil && err.Error() != "help" {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if sc != nil {
-		scryptCost = sc
-	}
+	// THIS IS TEMPORARY UNTIL THE CLI IS DONE.
+	m, _ := input.Input("[-] Mode: ")
+	mode := string(m)
 
 	// Setup the secret store.
-	err = coffer.Setup()
+	err := coffer.Setup()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer coffer.Close()
+
+	// Get the secure inputs from the user.
+	masterPassword, err := input.GetPass()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	identifier, err := input.Input("[-] Identifier: ")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	memory.Protect(identifier)
+
+	// Derive the secure values for this session.
+	masterKey, rootIdentifier = crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
 	// Launch appropriate function for run-mode.
 	switch mode {
@@ -42,6 +56,8 @@ func main() {
 		err = retrieve()
 	case "forget":
 		err = forget()
+	default:
+		err = errors.New("[!] Unknown mode")
 	}
 
 	// Output any errors that were returned.
@@ -50,21 +66,12 @@ func main() {
 	}
 
 	// Zero out and unlock any protected memory.
-	crypto.CleanupMemory()
+	memory.Cleanup()
 }
 
 func add() error {
-	// Prompt for masterPassword and identifier.
-	masterPassword, identifier, err := auxiliary.GetPassAndID()
-	if err != nil {
-		return err
-	}
-
-	// Derive rootKey and rootIdentifier.
-	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
-
 	// Prompt user for the plaintext data.
-	data, err := auxiliary.Input("[-] Data: ")
+	data, err := input.Input("[-] Data: ")
 	if err != nil {
 		return err
 	}
@@ -95,15 +102,6 @@ func add() error {
 }
 
 func retrieve() error {
-	// Prompt for masterPassword and identifier.
-	masterPassword, identifier, err := auxiliary.GetPassAndID()
-	if err != nil {
-		return err
-	}
-
-	// Derive rootKey and rootIdentifier.
-	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
-
 	// Grab all the pieces.
 	var plaintext []byte
 	for n := 0; true; n++ {
@@ -140,15 +138,6 @@ func retrieve() error {
 }
 
 func forget() error {
-	// Prompt for masterPassword and identifier.
-	masterPassword, identifier, err := auxiliary.GetPassAndID()
-	if err != nil {
-		return err
-	}
-
-	// Derive rootKey and rootIdentifier.
-	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
-
 	// Delete all the pieces.
 	for n := 0; true; n++ {
 		// Get the DeriveIdentifierN for this n.
