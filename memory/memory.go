@@ -69,3 +69,10 @@ func Cleanup() {
 	// Wait for them all to finish.
 	lockers.Wait()
 }
+
+// Wipe takes a byte slice and zeroes it out.
+func Wipe(b []byte) {
+	for i := 0; i < len(b); i++ {
+		b[i] = byte(0)
+	}
+}

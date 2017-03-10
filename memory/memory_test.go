@@ -34,3 +34,18 @@ func TestLocking(t *testing.T) {
 		}
 	}
 }
+
+func TestWipe(t *testing.T) {
+	// Declare specimen byte slice.
+	b := []byte("yellow submarine")
+
+	// Call wipe.
+	Wipe(b)
+
+	// Check if it's wiped.
+	for _, v := range b {
+		if v != 0 {
+			t.Error("Didn't zero out memory; b =", b)
+		}
+	}
+}
