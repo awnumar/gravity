@@ -18,7 +18,11 @@
 
 Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
 
-An adversary will not be able to ascertain the length, type, or content of any data, or even if you've stored data at all. Plausible deniability is a wonderful thing.
+## How it works
+
+On a high-level, Pocket does some [magic](/PROTOCOL.md) to store your data in such a way that nobody can get the length, type, or content of it; even if they have the right password. They won't even be sure if it exists at all! (Plausible deniability is a wonderful thing.)
+
+The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it.
 
 ## Installation
 
@@ -30,12 +34,14 @@ This will fetch, compile, and install *pocket* automatically. An added bonus is 
 
 `$ pocket`
 
-## Security Properties
+## Responsible disclosure
 
-* ***Multi-layer security*** - The password alone isn't enough to compromise your data.
-* ***Hidden data length*** - Data is split across multiple entries, effectively concealing the length.
-* ***Multiple password support*** - You're free to use different passwords for different entries, and no one (except you) would ever know that you did.
-* ***Decoy entries*** - You can add decoy data that is **not** differentiable from real data that you store. This lets you claim that some (or all) of the entries in the database aren't real and therefore that you're unable to give up keys for them.
-* ***Deniability*** - Multiple-password support combined with decoys basically gives you deniable encryption. Simply add a few entries under a different password to your normal one and if you're ever forced to disclose your keys, give up these and claim that the rest of the data is composed of random decoys.
+If you are aware of a security bug, notifying us privately is in the interest of all users. We can then discuss it post-mortem.
 
-For a full overview of the protocol, click [here](/PROTOCOL.md).
+To do this, please send a PGP encrypted message to my [email](mailto:libeclipse@gmail.com). My PGP public-key is available [here](https://keybase.io/awn).
+
+My PGP public-key fingerprint is:
+
+> 5469 F4B9 688C 3FEE E105 0CA3 FAEE B039 F313 3EA8
+
+To import it directly into GPG, run `$ curl https://keybase.io/awn/pgp_keys.asc | gpg --import`.

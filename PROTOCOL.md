@@ -50,7 +50,7 @@ A 32 byte value that is used to derive `derived_identifier[n]`.
 
 #### :: `derived_identifier[n]`
 
-> `derived_identifier[n] = sha256(root_identifier || n)`
+> `derived_identifier[n] = BLAKE2b_256(root_identifier || n)`
 
 A 32 byte value that is stored in the database alongside chunks of the ciphertext. The reason we use this instead of `root_identifier` is so that we are able to store data across multiple entries by simply incrementing `n` for every chunk of plaintext. This prevents the leakage of information about which entries are linked or how many entries compose `plaintext`.
 
@@ -94,7 +94,7 @@ The user will have the option to add a certain amount of decoy data. In order to
 
 2. Pad `plaintext` to 1025 bytes.
 
-3. Store the `sha256(identifier)` : `XSalsa20Poly1305(master_password, padded_plaintext)` pair in the database.
+3. Store the `BLAKE2b_256(identifier)` : `XSalsa20Poly1305(master_password, padded_plaintext)` pair in the database.
 
 4. Repeat steps 1 - 3 until a sufficient number of decoys have been added.
 
