@@ -5,12 +5,12 @@ os:
   - osx
 
 script:
+  - go build -v .
   - go test -v ./coffer/...
   - go test -v ./crypto/...
   - go test -v ./input/...
   - go test -v ./memory/...
   - go test -v ./
-  - go build -v .
 
 notifications:
   email: false
