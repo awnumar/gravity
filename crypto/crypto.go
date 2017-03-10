@@ -42,9 +42,6 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 		return nil, errors.New("[!] Decryption of data failed")
 	}
 
-	// Protect the plaintext.
-	memory.Protect(plaintext)
-
 	// Return the resulting plaintext.
 	return plaintext, nil
 }
@@ -95,7 +92,6 @@ func Pad(text []byte, padTo int) ([]byte, error) {
 
 	// Create a new slice to store the padded data since we don't want to mess with the original.
 	padded := make([]byte, padTo)
-	memory.Protect(padded)
 
 	// Copy text into new slice.
 	copy(padded, text)
@@ -125,7 +121,6 @@ func Unpad(text []byte) ([]byte, error) {
 
 	// Copy to its own slice so we're not referencing useless data.
 	unpadded := make([]byte, len(text))
-	memory.Protect(unpadded)
 	copy(unpadded, text)
 
 	// That simple. We're done.
