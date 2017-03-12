@@ -34,7 +34,7 @@ func Protect(data []byte) {
 		err := memlock.Lock(b)
 		if err != nil {
 			lockSuccess = false
-			fmt.Printf("[!] Failed to lock %p; will still zero it out on exit. [Err: %s]\n", &b, err)
+			fmt.Printf("! Failed to lock %p; will still zero it out on exit. [Err: %s]\n", &b, err)
 		}
 
 		// Wait for the signal to let us know we're exiting.
@@ -47,7 +47,7 @@ func Protect(data []byte) {
 		if lockSuccess {
 			err := memlock.Unlock(b)
 			if err != nil {
-				fmt.Printf("[!] Failed to unlock %p [Err: %s]\n", &b, err)
+				fmt.Printf("! Failed to unlock %p [Err: %s]\n", &b, err)
 			}
 		}
 

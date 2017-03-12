@@ -39,7 +39,7 @@ func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
 	if !okay {
 		// This shouldn't happen.
-		return nil, errors.New("[!] Decryption of data failed")
+		return nil, errors.New("! Decryption of data failed")
 	}
 
 	// Return the resulting plaintext.
@@ -87,7 +87,7 @@ func DeriveIdentifierN(rootIdentifier []byte, n int) []byte {
 func Pad(text []byte, padTo int) ([]byte, error) {
 	// Check if input is even valid.
 	if len(text) > padTo-1 {
-		return nil, fmt.Errorf("[!] Length of data must not exceed %d bytes", padTo-1)
+		return nil, fmt.Errorf("! Length of data must not exceed %d bytes", padTo-1)
 	}
 
 	// Create a new slice to store the padded data since we don't want to mess with the original.
@@ -115,7 +115,7 @@ func Unpad(text []byte) ([]byte, error) {
 			text = text[:len(text)-1]
 			break
 		} else {
-			return nil, errors.New("unpad: invalid padding")
+			return nil, errors.New("! Invalid padding")
 		}
 	}
 

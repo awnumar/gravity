@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/crypto"
@@ -20,10 +20,6 @@ var (
 )
 
 func main() {
-	// THIS IS TEMPORARY UNTIL THE CLI IS DONE.
-	m, _ := input.Input("[-] Mode: ")
-	mode := string(m)
-
 	// Setup the secret store.
 	err := coffer.Setup()
 	if err != nil {
@@ -32,35 +28,8 @@ func main() {
 	}
 	defer coffer.Close()
 
-	// Get the secure inputs from the user.
-	masterPassword, err := input.GetPass()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	identifier, err := input.Input("[-] Identifier: ")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	memory.Protect(identifier)
-
-	// Derive the secure values for this session.
-	masterKey, rootIdentifier = crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
-
-	// Launch appropriate function for run-mode.
-	switch mode {
-	case "add":
-		err = add()
-	case "get":
-		err = retrieve()
-	case "forget":
-		err = forget()
-	default:
-		err = errors.New("[!] Unknown mode")
-	}
-
-	// Output any errors that were returned.
+	// Launch CLI.
+	err = cli()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -69,14 +38,81 @@ func main() {
 	memory.Cleanup()
 }
 
-func add() error {
-	// Prompt user for the plaintext data.
-	data, err := input.Input("[-] Data: ")
+func cli() error {
+	banner := `
+                                ▄▄
+                                ██                    ██
+  ██▄███▄    ▄████▄    ▄█████▄  ██ ▄██▀    ▄████▄   ███████
+  ██▀  ▀██  ██▀  ▀██  ██▀    ▀  ██▄██     ██▄▄▄▄██    ██
+  ██    ██  ██    ██  ██        ██▀██▄    ██▀▀▀▀▀▀    ██
+  ███▄▄██▀  ▀██▄▄██▀  ▀██▄▄▄▄█  ██  ▀█▄   ▀██▄▄▄▄█    ██▄▄▄
+  ██ ▀▀▀      ▀▀▀▀      ▀▀▀▀▀   ▀▀   ▀▀▀    ▀▀▀▀▀      ▀▀▀▀
+  ██
+                      The guardian of super-secret things.
+`
+	fmt.Println(banner)
+
+	fmt.Println(`
+:: You find yourself in a field containing an infinite number of trees,
+each with an infinity of branches. You are told that there are secrets here
+of the darkest kind, but no one has any idea of where they are.
+
+:: It is said many a great traveller has let life slip through his fingers
+like sand, searching this tantalising place.
+
+:: I see in your eyes that you are determined to do the same. In that case,
+I will need the name of the tree that you wish to view...
+`)
+
+	masterPassword, err := input.GetPass()
 	if err != nil {
 		return err
 	}
 
+	fmt.Println(`
+:: Ah, a good choice. But I fear you do not have the time to search it all.
+
+:: The chosen tree has an infinite number of branches. Which one would you
+like to take a closer look at?
+`)
+
+	identifier := input.Input("- Identifier: ")
+
+	fmt.Println("\n:: Climbing tree...")
+
+	// Derive the secure values for this "branch".
+	masterKey, rootIdentifier = crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
+	// Check if there's something here.
+	_, exists := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, 0))
+	if exists != nil {
+		// Nope, nothing here.
+		fmt.Println("\n:: It doesn't look like there's anything here.")
+
+		conf := input.Input("\n- Would you like to hide something? ")
+		if strings.Contains(strings.ToLower(string(conf)), "y") {
+			return add()
+		}
+	} else {
+		fmt.Println("\n:: Oh, you found something!")
+
+		conf := string(input.Input("\n- Would you like to (V)iew or (R)emove this? "))
+		if strings.ToLower(conf) == "v" {
+			return retrieve()
+		} else if strings.ToLower(conf) == "r" {
+			return forget()
+		}
+	}
+
+	return nil
+}
+
+func add() error {
+	// Prompt user for the plaintext data.
+	data := input.Input("\n- Enter the data that you wish to hide: ")
+
 	var padded []byte
+	var err error
 	for i := 0; i < len(data); i += 1024 {
 		if i+1024 > len(data) {
 			// Remaining data <= 1024.
@@ -90,13 +126,13 @@ func add() error {
 		}
 
 		// Derive ID, encrypt and save to the database.
-		err := coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
+		err = coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
 		if err != nil {
 			return err
 		}
 	}
 
-	fmt.Println("[+] Saved")
+	fmt.Println("\n:: Ah, that is done. I doubt anyone will ever find it.")
 
 	return nil
 }
@@ -128,11 +164,13 @@ func retrieve() error {
 		plaintext = append(plaintext, unpadded...)
 	}
 
-	if len(plaintext) == 0 {
-		return errors.New("[!] Nothing to see here")
-	}
+	fmt.Println("\n:: Here it is:")
 
-	fmt.Println("[+] Data:", string(plaintext))
+	fmt.Printf(`
+-----BEGIN SECRET PLAINTEXT-----
+%s
+-----END SECRET PLAINTEXT-----
+`, plaintext)
 
 	return nil
 }
@@ -154,7 +192,7 @@ func forget() error {
 		coffer.Delete(derivedIdentifierN)
 	}
 
-	fmt.Println("[+] It is forgotten.")
+	fmt.Println("\n:: You successfully destroyed whatever was stored here.")
 
 	return nil
 }

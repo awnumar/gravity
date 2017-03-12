@@ -16,32 +16,27 @@ import (
 // GetPass takes a password from the user while doing all of the verifying stuff.
 func GetPass() ([]byte, error) {
 	// Prompt user for password.
-	masterPassword, err := _secureInput("[-] Password: ")
+	masterPassword, err := _secureInput("- Master password: ")
 	if err != nil {
 		return nil, err
 	}
 
-	// Check if length of password is zero.
-	if len(masterPassword) == 0 {
-		return nil, errors.New("[!] Length of password must be non-zero")
-	}
-
 	// Prompt for password confirmation.
-	confirmPassword, err := _secureInput("[-] Confirm password: ")
+	confirmPassword, err := _secureInput("- Confirm password: ")
 	if err != nil {
 		return nil, err
 	}
 
 	// Check if password matches confirmation.
 	if !bytes.Equal(masterPassword, confirmPassword) {
-		return nil, errors.New("[!] Passwords do not match")
+		return nil, errors.New("! Passwords do not match")
 	}
 
 	return masterPassword, nil
 }
 
 // Input reads from stdin while echoing back.
-func Input(prompt string) ([]byte, error) {
+func Input(prompt string) []byte {
 	// Output prompt.
 	fmt.Print(prompt)
 
@@ -52,13 +47,8 @@ func Input(prompt string) ([]byte, error) {
 	// Get the input out as bytes.
 	data := scanner.Bytes()
 
-	// Check the length of the data.
-	if len(data) == 0 {
-		return nil, errors.New("[!] Length of input must be non-zero")
-	}
-
 	// Everything went well. Return the data.
-	return data, nil
+	return data
 }
 
 // Get input without echoing and return a byte slice.
