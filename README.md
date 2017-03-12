@@ -18,13 +18,13 @@
 
 Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
 
+We use XSalsa20 with a Poly1305 MAC for encryption and authentication -- this is implemented with the [NaCl](https://godoc.org/golang.org/x/crypto/nacl/secretbox) package. For key-derivation we use [Scrypt](https://godoc.org/golang.org/x/crypto/scrypt), and for hashing we use [BLAKE2b](https://godoc.org/golang.org/x/crypto/blake2b). Both of these are implemented natively in Golang's crypto library.
+
 ## How it works
 
 On a high-level, Pocket does some [magic](/PROTOCOL.md) to store your data in such a way that nobody can get the length, type, or content of it; even if they have the right password. They won't even be sure that it actually exists! (Plausible deniability is a wonderful thing.)
 
 The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it.
-
-Pocket uses XSalsa20 with a Poly1305 MAC for encryption and authentication -- this is implemented with the [NaCl](https://godoc.org/golang.org/x/crypto/nacl/secretbox) package. For key-derivation we use [Scrypt](https://godoc.org/golang.org/x/crypto/scrypt), and for hashing we use [BLAKE2b](https://godoc.org/golang.org/x/crypto/blake2b). Both of these are implemented natively in Golang's crypto library.
 
 ## Installation
 
