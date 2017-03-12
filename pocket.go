@@ -145,6 +145,9 @@ func add() error {
 		}
 	}
 
+	// Wipe the plaintext.
+	memory.Wipe(data)
+
 	fmt.Println(":: Saved that for you.")
 
 	return nil
@@ -178,6 +181,9 @@ func get() error {
 
 		// Append this slice of plaintext to the rest of it.
 		plaintext = append(plaintext, unpadded...)
+
+		// Wipe the plaintext slice.
+		memory.Wipe(unpadded)
 	}
 
 	if len(plaintext) == 0 {
@@ -190,6 +196,9 @@ func get() error {
 %s
 -----END DATA-----
 `, plaintext)
+
+	// Wipe the plaintext.
+	memory.Wipe(plaintext)
 
 	return nil
 }
@@ -262,5 +271,5 @@ func decoys() {
 		count++
 		fmt.Printf("\rAdded %d/%d (%d%%)", count, numberOfDecoys, int(math.Floor(float64(count)/float64(numberOfDecoys)*100)))
 	}
-	fmt.Println("") // Formatting
+	fmt.Println("") // For formatting.
 }
