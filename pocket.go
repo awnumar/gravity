@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/crypto"
@@ -26,6 +29,15 @@ func main() {
 		return
 	}
 	defer coffer.Close()
+
+	// CleanupMemory in case of Ctrl+C
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		memory.Cleanup()
+		os.Exit(0)
+	}()
 
 	// Launch CLI.
 	err = cli()
@@ -144,10 +156,7 @@ func retrieve() error {
 		}
 
 		// Decrypt this slice.
-		pt, e := crypto.Decrypt(ct, masterKey)
-		if e != nil {
-			return e
-		}
+		pt := crypto.Decrypt(ct, masterKey)
 
 		// Unpad this slice.
 		unpadded, e := crypto.Unpad(pt)
