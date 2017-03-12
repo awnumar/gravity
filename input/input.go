@@ -3,7 +3,6 @@ package input
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"syscall"
@@ -13,23 +12,24 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
-// GetPass takes a password from the user while doing all of the verifying stuff.
-func GetPass() ([]byte, error) {
+// GetMasterPassword takes the masterPassword from the user while doing all of the verifying stuff.
+func GetMasterPassword() ([]byte, error) {
 	// Prompt user for password.
-	masterPassword, err := _secureInput("- Master password: ")
+	masterPassword, err := _secureInput("Master password: ")
 	if err != nil {
 		return nil, err
 	}
 
 	// Prompt for password confirmation.
-	confirmPassword, err := _secureInput("- Confirm password: ")
+	confirmPassword, err := _secureInput("Confirm password: ")
 	if err != nil {
 		return nil, err
 	}
 
 	// Check if password matches confirmation.
 	if !bytes.Equal(masterPassword, confirmPassword) {
-		return nil, errors.New("! Passwords do not match")
+		fmt.Println("! Passwords do not match")
+		return GetMasterPassword()
 	}
 
 	return masterPassword, nil

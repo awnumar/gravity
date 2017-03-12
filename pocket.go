@@ -14,9 +14,8 @@ var (
 	// The default cost factor for key deriviation.
 	scryptCost = map[string]int{"N": 18, "r": 16, "p": 1}
 
-	// Store the current session's secure values.
-	masterKey      *[32]byte
-	rootIdentifier []byte
+	// Store the container ID globally.
+	masterPassword []byte
 )
 
 func main() {
@@ -39,77 +38,67 @@ func main() {
 }
 
 func cli() error {
+	var err error
+
 	banner := `
-                                ▄▄
-                                ██                    ██
-  ██▄███▄    ▄████▄    ▄█████▄  ██ ▄██▀    ▄████▄   ███████
-  ██▀  ▀██  ██▀  ▀██  ██▀    ▀  ██▄██     ██▄▄▄▄██    ██
-  ██    ██  ██    ██  ██        ██▀██▄    ██▀▀▀▀▀▀    ██
-  ███▄▄██▀  ▀██▄▄██▀  ▀██▄▄▄▄█  ██  ▀█▄   ▀██▄▄▄▄█    ██▄▄▄
-  ██ ▀▀▀      ▀▀▀▀      ▀▀▀▀▀   ▀▀   ▀▀▀    ▀▀▀▀▀      ▀▀▀▀
-  ██
-                      The guardian of super-secret things.
+                                  ▄▄
+                                  ██                    ██
+    ██▄███▄    ▄████▄    ▄█████▄  ██ ▄██▀    ▄████▄   ███████
+    ██▀  ▀██  ██▀  ▀██  ██▀    ▀  ██▄██     ██▄▄▄▄██    ██
+    ██    ██  ██    ██  ██        ██▀██▄    ██▀▀▀▀▀▀    ██
+    ███▄▄██▀  ▀██▄▄██▀  ▀██▄▄▄▄█  ██  ▀█▄   ▀██▄▄▄▄█    ██▄▄▄
+    ██ ▀▀▀      ▀▀▀▀      ▀▀▀▀▀   ▀▀   ▀▀▀    ▀▀▀▀▀      ▀▀▀▀
+    ██
+                        The guardian of super-secret things.
 `
 	fmt.Println(banner)
 
-	fmt.Println(`
-:: You find yourself in a field containing an infinite number of trees,
-each with an infinity of branches. You are told that there are secrets here
-of the darkest kind, but no one has any idea of where they are.
-
-:: It is said many a great traveller has let life slip through his fingers
-like sand, searching this tantalising place.
-
-:: I see in your eyes that you are determined to do the same. In that case,
-I will need the name of the tree that you wish to view...
-`)
-
-	masterPassword, err := input.GetPass()
+	masterPassword, err = input.GetMasterPassword()
 	if err != nil {
 		return err
 	}
+	fmt.Println("") // For formatting.
 
-	fmt.Println(`
-:: Ah, a good choice. But I fear you do not have the time to search it all.
+	help := `:: add       - Store some new data in the database.
+:: get       - Retrieve some data from the database.
+:: remove    - Remove some previously stored data.
+:: decoys    - Add a variable number of decoys.
+:: passwd    - Change the session's master password.
+:: exit      - Exit the program.`
 
-:: The chosen tree has an infinite number of branches. Which one would you
-like to take a closer look at?
-`)
+	for {
+		cmd := strings.ToLower(strings.TrimSpace(string(input.Input("$ "))))
 
-	identifier := input.Input("- Identifier: ")
-
-	fmt.Println("\n:: Climbing tree...")
-
-	// Derive the secure values for this "branch".
-	masterKey, rootIdentifier = crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
-
-	// Check if there's something here.
-	_, exists := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, 0))
-	if exists != nil {
-		// Nope, nothing here.
-		fmt.Println("\n:: It doesn't look like there's anything here.")
-
-		conf := input.Input("\n- Would you like to hide something? ")
-		if strings.Contains(strings.ToLower(string(conf)), "y") {
-			return add()
-		}
-	} else {
-		fmt.Println("\n:: Oh, you found something!")
-
-		conf := string(input.Input("\n- Would you like to (V)iew or (R)emove this? "))
-		if strings.ToLower(conf) == "v" {
-			return retrieve()
-		} else if strings.ToLower(conf) == "r" {
-			return forget()
+		switch cmd {
+		case "passwd":
+			masterPassword, err = input.GetMasterPassword()
+			if err != nil {
+				return err
+			}
+		case "add":
+			add()
+		case "get":
+			retrieve()
+		case "remove":
+			forget()
+		case "decoys":
+		case "exit":
+			return nil
+		default:
+			fmt.Println(help)
 		}
 	}
-
-	return nil
 }
 
 func add() error {
+	// Prompt the user for the identifier.
+	identifier := input.Input("Enter a string to identify this data: ")
+
+	// Derive the secure values for this "branch".
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
 	// Prompt user for the plaintext data.
-	data := input.Input("\n- Enter the data that you wish to hide: ")
+	data := input.Input("Enter the data you wish to store: ")
 
 	var padded []byte
 	var err error
@@ -132,12 +121,18 @@ func add() error {
 		}
 	}
 
-	fmt.Println("\n:: Ah, that is done. I doubt anyone will ever find it.")
+	fmt.Println(":: Saved that for you.")
 
 	return nil
 }
 
 func retrieve() error {
+	// Prompt the user for the identifier.
+	identifier := input.Input("Enter the string that identifies this data: ")
+
+	// Derive the secure values for this "branch".
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
 	// Grab all the pieces.
 	var plaintext []byte
 	for n := 0; true; n++ {
@@ -164,19 +159,29 @@ func retrieve() error {
 		plaintext = append(plaintext, unpadded...)
 	}
 
-	fmt.Println("\n:: Here it is:")
+	if len(plaintext) == 0 {
+		fmt.Println("! There is nothing stored here")
+		return nil
+	}
 
 	fmt.Printf(`
------BEGIN SECRET PLAINTEXT-----
+-----BEGIN DATA-----
 %s
------END SECRET PLAINTEXT-----
+-----END DATA-----
 `, plaintext)
 
 	return nil
 }
 
 func forget() error {
+	// Prompt the user for the identifier.
+	identifier := input.Input("Enter the string that identifies this data: ")
+
+	// Derive the secure values for this "branch".
+	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
 	// Delete all the pieces.
+	count := 0
 	for n := 0; true; n++ {
 		// Get the DeriveIdentifierN for this n.
 		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
@@ -190,9 +195,14 @@ func forget() error {
 
 		// It exists. Remove it.
 		coffer.Delete(derivedIdentifierN)
+		count++
 	}
 
-	fmt.Println("\n:: You successfully destroyed whatever was stored here.")
+	if count != 0 {
+		fmt.Println(":: Successfully removed data.")
+	} else {
+		fmt.Println("! There is nothing here to remove")
+	}
 
 	return nil
 }

@@ -30,20 +30,16 @@ func Encrypt(plaintext []byte, key *[32]byte) []byte {
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext.
-func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
+func Decrypt(ciphertext []byte, key *[32]byte) []byte {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])
 
 	// Decrypt the ciphertext and store the result.
-	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
-	if !okay {
-		// This shouldn't happen.
-		return nil, errors.New("! Decryption of data failed")
-	}
+	plaintext, _ := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
 
 	// Return the resulting plaintext.
-	return plaintext, nil
+	return plaintext
 }
 
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
