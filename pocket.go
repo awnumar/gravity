@@ -117,6 +117,7 @@ func cli() error {
 func add() error {
 	// Prompt the user for the identifier.
 	identifier := input.Input("Enter a string to identify this data: ")
+	memory.Protect(identifier)
 
 	// Derive the secure values for this "branch".
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
@@ -158,6 +159,7 @@ func add() error {
 func get() error {
 	// Prompt the user for the identifier.
 	identifier := input.Input("Enter the string that identifies this data: ")
+	memory.Protect(identifier)
 
 	// Derive the secure values for this "branch".
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
@@ -208,6 +210,7 @@ func get() error {
 func remove() {
 	// Prompt the user for the identifier.
 	identifier := input.Input("Enter the string that identifies this data: ")
+	memory.Protect(identifier)
 
 	// Derive the secure values for this "branch".
 	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
