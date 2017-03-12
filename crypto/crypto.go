@@ -18,7 +18,7 @@ import (
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
 func Encrypt(plaintext []byte, key *[32]byte) []byte {
 	// Generate a random nonce.
-	nonceSlice := generateRandomBytes(24)
+	nonceSlice := GenerateRandomBytes(24)
 
 	// Store it in an array.
 	var nonce [24]byte
@@ -30,20 +30,16 @@ func Encrypt(plaintext []byte, key *[32]byte) []byte {
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext.
-func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
+func Decrypt(ciphertext []byte, key *[32]byte) []byte {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])
 
 	// Decrypt the ciphertext and store the result.
-	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
-	if !okay {
-		// This shouldn't happen.
-		return nil, errors.New("[!] Decryption of data failed")
-	}
+	plaintext, _ := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
 
 	// Return the resulting plaintext.
-	return plaintext, nil
+	return plaintext
 }
 
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
@@ -87,7 +83,7 @@ func DeriveIdentifierN(rootIdentifier []byte, n int) []byte {
 func Pad(text []byte, padTo int) ([]byte, error) {
 	// Check if input is even valid.
 	if len(text) > padTo-1 {
-		return nil, fmt.Errorf("[!] Length of data must not exceed %d bytes", padTo-1)
+		return nil, fmt.Errorf("! Length of data must not exceed %d bytes", padTo-1)
 	}
 
 	// Create a new slice to store the padded data since we don't want to mess with the original.
@@ -115,7 +111,7 @@ func Unpad(text []byte) ([]byte, error) {
 			text = text[:len(text)-1]
 			break
 		} else {
-			return nil, errors.New("unpad: invalid padding")
+			return nil, errors.New("! Invalid padding")
 		}
 	}
 
@@ -127,7 +123,8 @@ func Unpad(text []byte) ([]byte, error) {
 	return unpadded, nil
 }
 
-func generateRandomBytes(n int) []byte {
+// GenerateRandomBytes generates cryptographically secure random bytes.
+func GenerateRandomBytes(n int) []byte {
 	// Create a byte slice (b) of size n to store the random bytes.
 	b := make([]byte, n)
 

@@ -34,22 +34,20 @@ func Protect(data []byte) {
 		err := memlock.Lock(b)
 		if err != nil {
 			lockSuccess = false
-			fmt.Printf("[!] Failed to lock %p; will still zero it out on exit. [Err: %s]\n", &b, err)
+			fmt.Printf("! Failed to lock %p; will still zero it out on exit. [Err: %s]\n", &b, err)
 		}
 
 		// Wait for the signal to let us know we're exiting.
 		<-isExiting
 
 		// Zero out the memory.
-		for i := 0; i < len(b); i++ {
-			b[i] = byte(0)
-		}
+		Wipe(b)
 
 		// If we managed to lock earlier, unlock.
 		if lockSuccess {
 			err := memlock.Unlock(b)
 			if err != nil {
-				fmt.Printf("[!] Failed to unlock %p [Err: %s]\n", &b, err)
+				fmt.Printf("! Failed to unlock %p [Err: %s]\n", &b, err)
 			}
 		}
 
@@ -68,4 +66,11 @@ func Cleanup() {
 
 	// Wait for them all to finish.
 	lockers.Wait()
+}
+
+// Wipe takes a byte slice and zeroes it out.
+func Wipe(b []byte) {
+	for i := 0; i < len(b); i++ {
+		b[i] = byte(0)
+	}
 }

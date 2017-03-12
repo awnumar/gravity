@@ -58,7 +58,7 @@ func Save(identifier, ciphertext []byte) error {
 		value := bucket.Get(identifier)
 		if value != nil {
 			// It does; abort and return an error.
-			return errors.New("[!] Cannot overwrite existing entry")
+			return errors.New("! Cannot overwrite existing entry")
 		}
 
 		// Save the identifier:ciphertext pair to the coffer.
@@ -82,7 +82,7 @@ func Retrieve(identifier []byte) ([]byte, error) {
 		ct := bucket.Get(identifier)
 		if ct == nil {
 			// We didn't find that key; return an error.
-			return errors.New("[!] Nothing to see here")
+			return errors.New("! Nothing to see here")
 		}
 
 		ciphertext = append(ciphertext, ct...)
