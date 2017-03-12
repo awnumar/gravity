@@ -11,7 +11,7 @@ var (
 )
 
 func TestGenerateRandomBytes(t *testing.T) {
-	randomBytes := generateRandomBytes(32)
+	randomBytes := GenerateRandomBytes(32)
 	if len(randomBytes) != 32 {
 		t.Error("Expected length to be 32; got", len(randomBytes))
 	}

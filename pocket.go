@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
+
+	"golang.org/x/crypto/blake2b"
 
 	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/crypto"
@@ -88,12 +92,19 @@ func cli() error {
 				return err
 			}
 		case "add":
-			add()
+			err = add()
+			if err != nil {
+				return err
+			}
 		case "get":
-			retrieve()
+			err = get()
+			if err != nil {
+				return err
+			}
 		case "remove":
-			forget()
+			remove()
 		case "decoys":
+			decoys()
 		case "exit":
 			return nil
 		default:
@@ -129,7 +140,8 @@ func add() error {
 		// Derive ID, encrypt and save to the database.
 		err = coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
 		if err != nil {
-			return err
+			fmt.Println(err)
+			return nil
 		}
 	}
 
@@ -138,7 +150,7 @@ func add() error {
 	return nil
 }
 
-func retrieve() error {
+func get() error {
 	// Prompt the user for the identifier.
 	identifier := input.Input("Enter the string that identifies this data: ")
 
@@ -182,7 +194,7 @@ func retrieve() error {
 	return nil
 }
 
-func forget() error {
+func remove() {
 	// Prompt the user for the identifier.
 	identifier := input.Input("Enter the string that identifies this data: ")
 
@@ -212,6 +224,43 @@ func forget() error {
 	} else {
 		fmt.Println("! There is nothing here to remove")
 	}
+}
 
-	return nil
+func decoys() {
+	var numberOfDecoys int
+	var err error
+
+	// Get the number of decoys to add as an int.
+	for {
+		numberOfDecoys, err = strconv.Atoi(string(input.Input("How many decoys do you want to add? ")))
+		if err == nil {
+			break
+		}
+	}
+
+	count := 0
+	for i := 0; i < numberOfDecoys; i++ {
+		// Get some random bytes.
+		randomBytes := crypto.GenerateRandomBytes(96)
+
+		// Allocate 32 bytes as the key.
+		var key [32]byte
+		masterPassword := randomBytes[0:32]
+		copy(key[:], masterPassword)
+
+		// Allocate 32 bytes as the identifier.
+		identifier := randomBytes[32:64]
+		hashedIdentifier := blake2b.Sum256(identifier)
+
+		// Allocate 32 bytes as the plaintext.
+		plaintext := randomBytes[64:96]
+
+		// Save to the database.
+		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
+
+		// Increment counter.
+		count++
+		fmt.Printf("\rAdded %d/%d (%d%%)", count, numberOfDecoys, int(math.Floor(float64(count)/float64(numberOfDecoys)*100)))
+	}
+	fmt.Println("") // Formatting
 }

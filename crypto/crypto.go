@@ -18,7 +18,7 @@ import (
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
 func Encrypt(plaintext []byte, key *[32]byte) []byte {
 	// Generate a random nonce.
-	nonceSlice := generateRandomBytes(24)
+	nonceSlice := GenerateRandomBytes(24)
 
 	// Store it in an array.
 	var nonce [24]byte
@@ -123,7 +123,8 @@ func Unpad(text []byte) ([]byte, error) {
 	return unpadded, nil
 }
 
-func generateRandomBytes(n int) []byte {
+// GenerateRandomBytes generates cryptographically secure random bytes.
+func GenerateRandomBytes(n int) []byte {
 	// Create a byte slice (b) of size n to store the random bytes.
 	b := make([]byte, n)
 
