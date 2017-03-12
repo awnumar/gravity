@@ -145,6 +145,8 @@ func add() error {
 			fmt.Println(err)
 			return nil
 		}
+
+		// Wipe the padded data.
 		memory.Wipe(padded)
 	}
 
