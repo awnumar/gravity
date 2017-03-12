@@ -40,6 +40,7 @@ func main() {
 	go func() {
 		<-c
 		memory.Cleanup()
+		coffer.Close()
 		os.Exit(0)
 	}()
 
