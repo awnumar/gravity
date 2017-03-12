@@ -144,6 +144,7 @@ func add() error {
 			fmt.Println(err)
 			return nil
 		}
+		memory.Wipe(padded)
 	}
 
 	// Wipe the plaintext.
