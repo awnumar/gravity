@@ -70,18 +70,31 @@ func cli() error {
 `
 	fmt.Println(banner)
 
+	help := `
+:: add       - Add new data to the database. The data's security relies on
+               both the master password and the identifier that is supplied.
+
+:: get       - Retrieve data from the database. The data can only be retrieved
+               with both the correct password and identifier.
+
+:: remove    - Remove some previously stored data. To locate the data to remove,
+               both the correct password and identifier must be supplied.
+
+:: decoys    - This feature lets you add a variable amount of random decoy data
+               that is indistinguishable from real data. Note that this data cannot
+               later be removed from the database since it cannot be differentiated.
+
+:: passwd    - Change the session's master password. All subsequent actions that
+               require this value will use the newly supplied one.
+
+:: exit      - Exit the program.
+`
+
 	masterPassword, err = input.GetMasterPassword()
 	if err != nil {
 		return err
 	}
 	fmt.Println("") // For formatting.
-
-	help := `:: add       - Store some new data in the database.
-:: get       - Retrieve some data from the database.
-:: remove    - Remove some previously stored data.
-:: decoys    - Add a variable number of decoys.
-:: passwd    - Change the session's master password.
-:: exit      - Exit the program.`
 
 	for {
 		cmd := strings.ToLower(strings.TrimSpace(string(input.Input("$ "))))
@@ -116,14 +129,23 @@ func cli() error {
 
 func add() error {
 	// Prompt the user for the identifier.
-	identifier := input.Input("Enter a string to identify this data: ")
+	identifier := input.Input("- Identifier: ")
 	memory.Protect(identifier)
 
 	// Derive the secure values for this "branch".
+	fmt.Println("+ Generating root key...")
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
 	// Prompt user for the plaintext data.
-	data := input.Input("Enter the data you wish to store: ")
+	data := input.Input("- Data: ")
+	fmt.Println(data, len(data))
+
+	// Check if it exists already.
+	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
+	if coffer.Exists(derivedIdentifierN) {
+		fmt.Println("! Cannot overwrite existing entry")
+		return nil
+	}
 
 	var padded []byte
 	var err error
@@ -139,12 +161,8 @@ func add() error {
 			return err
 		}
 
-		// Derive ID, encrypt and save to the database.
-		err = coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
-		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
+		// Save it.
+		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
 
 		// Wipe the padded data.
 		memory.Wipe(padded)
@@ -153,17 +171,18 @@ func add() error {
 	// Wipe the plaintext.
 	memory.Wipe(data)
 
-	fmt.Println(":: Saved that for you.")
+	fmt.Println("+ Saved that for you.")
 
 	return nil
 }
 
 func get() error {
 	// Prompt the user for the identifier.
-	identifier := input.Input("Enter the string that identifies this data: ")
+	identifier := input.Input("- Identifier: ")
 	memory.Protect(identifier)
 
 	// Derive the secure values for this "branch".
+	fmt.Println("+ Generating root key...")
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
 	// Grab all the pieces.
@@ -171,7 +190,7 @@ func get() error {
 	for n := 0; true; n++ {
 		// Derive derived_identifier[n]
 		ct, exists := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
-		if exists != nil {
+		if exists == false {
 			// This one doesn't exist.
 			break
 		}
@@ -211,10 +230,11 @@ func get() error {
 
 func remove() {
 	// Prompt the user for the identifier.
-	identifier := input.Input("Enter the string that identifies this data: ")
+	identifier := input.Input("- Identifier: ")
 	memory.Protect(identifier)
 
 	// Derive the secure values for this "branch".
+	fmt.Println("+ Generating root key...")
 	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
 	// Delete all the pieces.
@@ -224,9 +244,7 @@ func remove() {
 		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
 
 		// Check if it exists.
-		_, exists := coffer.Retrieve(derivedIdentifierN)
-		if exists != nil {
-			// This one doesn't exist.
+		if coffer.Exists(derivedIdentifierN) == false {
 			break
 		}
 
@@ -236,7 +254,7 @@ func remove() {
 	}
 
 	if count != 0 {
-		fmt.Println(":: Successfully removed data.")
+		fmt.Println("+ Successfully removed data.")
 	} else {
 		fmt.Println("! There is nothing here to remove")
 	}
@@ -246,12 +264,23 @@ func decoys() {
 	var numberOfDecoys int
 	var err error
 
+	// Print some help information.
+	fmt.Println(`
+:: For deniable encryption, use this feature in conjunction with some fake data manually-added
+   under a different master-password. Then if you are ever forced to hand over your keys,
+   simply give up the fake data and claim that the rest of the entries in the database are decoys.
+
+:: You do not necessarily have to make use of this feature. Rather, simply the fact that
+   it exists allows you to claim that some or all of the entries in the database are decoys.
+`)
+
 	// Get the number of decoys to add as an int.
 	for {
 		numberOfDecoys, err = strconv.Atoi(string(input.Input("How many decoys do you want to add? ")))
 		if err == nil {
 			break
 		}
+		fmt.Println("! Input must be an integer")
 	}
 
 	count := 0
@@ -276,7 +305,7 @@ func decoys() {
 
 		// Increment counter.
 		count++
-		fmt.Printf("\rAdded %d/%d (%d%%)", count, numberOfDecoys, int(math.Floor(float64(count)/float64(numberOfDecoys)*100)))
+		fmt.Printf("\r+ Added %d/%d (%d%%)", count, numberOfDecoys, int(math.Floor(float64(count)/float64(numberOfDecoys)*100)))
 	}
 	fmt.Println("") // For formatting.
 }
