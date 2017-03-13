@@ -1,7 +1,6 @@
 package coffer
 
 import (
-	"errors"
 	"os"
 	"os/user"
 
@@ -48,18 +47,31 @@ func Setup() error {
 	return nil
 }
 
-// Save saves a secret to the database.
-func Save(identifier, ciphertext []byte) error {
-	return Coffer.Update(func(tx *bolt.Tx) error {
+// Exists checks if an entry exists and returns true or false.
+func Exists(identifier []byte) bool {
+	exists := false
+
+	Coffer.View(func(tx *bolt.Tx) error {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
-		// Check if this identifier already exists.
-		value := bucket.Get(identifier)
-		if value != nil {
-			// It does; abort and return an error.
-			return errors.New("! Cannot overwrite existing entry")
+		// Attempt to locate the entry.
+		ct := bucket.Get(identifier)
+		if ct != nil {
+			exists = true
 		}
+
+		return nil
+	})
+
+	return exists
+}
+
+// Save saves a secret to the database.
+func Save(identifier, ciphertext []byte) {
+	Coffer.Update(func(tx *bolt.Tx) error {
+		// Grab the bucket that we'll be using.
+		bucket := tx.Bucket([]byte("coffer"))
 
 		// Save the identifier:ciphertext pair to the coffer.
 		bucket.Put(identifier, ciphertext)
@@ -69,30 +81,28 @@ func Save(identifier, ciphertext []byte) error {
 }
 
 // Retrieve retrieves a secret from the database.
-func Retrieve(identifier []byte) ([]byte, error) {
-	// Allocate space to hold the ciphertext.
+func Retrieve(identifier []byte) ([]byte, bool) {
 	var ciphertext []byte
 
 	// Attempt to retrieve the ciphertext from the database.
-	if err := Coffer.View(func(tx *bolt.Tx) error {
+	Coffer.View(func(tx *bolt.Tx) error {
 		// Grab the bucket that we'll be using.
 		bucket := tx.Bucket([]byte("coffer"))
 
 		// Attempt to locate and grab the data from the coffer.
 		ct := bucket.Get(identifier)
-		if ct == nil {
-			// We didn't find that key; return an error.
-			return errors.New("! Nothing to see here")
+		if ct != nil {
+			ciphertext = append(ciphertext, ct...)
 		}
 
-		ciphertext = append(ciphertext, ct...)
-
 		return nil
-	}); err != nil {
-		return nil, err
+	})
+
+	if ciphertext == nil {
+		return ciphertext, false
 	}
 
-	return ciphertext, nil
+	return ciphertext, true
 }
 
 // Delete deletes an entry from the database.
