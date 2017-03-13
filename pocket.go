@@ -138,7 +138,6 @@ func add() error {
 
 	// Prompt user for the plaintext data.
 	data := input.Input("- Data: ")
-	fmt.Println(data, len(data))
 
 	// Check if it exists already.
 	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
