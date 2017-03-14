@@ -2,8 +2,10 @@ package memory
 
 import (
 	"fmt"
+	"os"
 	"sync"
 
+	"github.com/libeclipse/pocket/coffer"
 	"github.com/libeclipse/pocket/memory/memlock"
 )
 
@@ -73,4 +75,16 @@ func Wipe(b []byte) {
 	for i := 0; i < len(b); i++ {
 		b[i] = byte(0)
 	}
+}
+
+// SafeExit cleans up protected memory and then exits safely.
+func SafeExit(c int) {
+	// Cleanup protected memory.
+	Cleanup()
+
+	// Close database object.
+	coffer.Close()
+
+	// Exit with a specified exit-code.
+	os.Exit(c)
 }

@@ -40,15 +40,14 @@ func Input(prompt string) []byte {
 	// Output prompt.
 	fmt.Print(prompt)
 
-	// Create scanner and get input.
+	// Declare scanner on stdin.
 	scanner := bufio.NewScanner(os.Stdin)
+
+	// Read bytes.
 	scanner.Scan()
 
-	// Get the input out as bytes.
-	data := scanner.Bytes()
-
 	// Everything went well. Return the data.
-	return data
+	return scanner.Bytes()
 }
 
 // Get input without echoing and return a byte slice.

@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/libeclipse/pocket/memory"
 
@@ -132,8 +131,7 @@ func GenerateRandomBytes(n int) []byte {
 	_, err := rand.Read(b)
 	if err != nil {
 		fmt.Println(err)
-		memory.Cleanup()
-		os.Exit(1)
+		memory.SafeExit(1)
 	}
 
 	// Return the CSPR bytes.

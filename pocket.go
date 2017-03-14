@@ -39,9 +39,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		memory.Cleanup()
-		coffer.Close()
-		os.Exit(0)
+		memory.SafeExit(0)
 	}()
 
 	// Launch CLI.
