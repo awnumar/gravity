@@ -1,0 +1,76 @@
+:: Functions
+
+    hash(data)         => BLAKE2b_256(data)
+    kdf(data)          => Scrypt(data, N=2^18, r=16, p=1) (default)
+    encrypt(data, key) => XSalsa20Poly1305(data, key)
+
+:: Inputs
+
+    master_password
+        - a strong password
+
+    plaintext
+        - user-inputted data
+
+    identifier
+        - string to identify data; should be reasonably strong
+
+:: Setup
+
+    1. Generate root_key, where len(root_key) = 64.
+
+        root_key = kdf(master_password || identifier)
+
+    2. Derive master_key and root_identifier, where len(master_key), len(root_identifier) = 32.
+
+        master_key      = root_key[0:32]
+        root_identifier = root_key[32:64]
+
+:: Modus Operandi
+
+    :: Adding an entry
+
+        1. Split plaintext into chunks of length 1024 bytes. The last chunk will have a length of len(plaintext) mod 1024.
+        2. Pad each chunk of plaintext to 1025 bytes. This is so that there is no ambiguity when unpadding.
+        3. For each slice of plaintext, compute derived_identifer[n] = hash(root_identifier || n), where n is the index of the
+           slice we're referencing.
+        4. Encrypt each slice by doing ciphertext[n] = encrypt(plaintext[n], master_key), where n is the index of the slice we're
+           referencing.
+        5. Save every derived_identifier[n] : ciphertext[n] pair to the database.
+
+    :: Retrieving an entry
+
+        1. Compute derived_identifier[0] = hash(root_identifier || 0).
+        2. Search for derived_identifier[0] in the database and grab the corresponding ciphertext[0] value.
+        3. Decrypt this value and unpad to get plaintext[0].
+        4. Repeat steps 1-3 but with n instead of 0, where n is the value of the previous iteration but incremented. Stop when
+           derived_identifier[n] is not found.
+        5. Concatenate the resulting plaintext[n] values in order of n ascending. This will give us the plaintext.
+
+    :: Deleting an entry
+
+        1. Compute `derived_identifier[0]` and remove it from the database.
+        2. Repeat step 1 but with n instead of 0, where n is the value of the previous iteration but incremented. Stop when
+           derived_identifier[n] does not exist.
+
+:: Miscellaneous
+
+    :: Decoys
+
+        1. Generate three, cryptographically-secure, random, 32 byte values: R_1, R_2, and R_3.
+        2. Pad R_1 to 1025 bytes.
+        3. Store the hash(R_2) : encrypt(R_1, R_3) pair in the database.
+        4. Repeat steps 1-3 until a sufficient number of decoys have been added.
+
+        Something to note is that the user does not necessarily have to make use of this feature. Rather, simply the fact
+        that it exists allow the user to claim that some or all of the entries in the database are decoys.
+
+    :: Padding
+
+        The padding scheme that is used is byte-padding: a variant of bit-padding(0) but with whole bytes instead of bits. The
+        reason for this is because it doesn't require the length of padding to be encoded into the padding itself, thereby
+        doing away with problems that arise when len(padding) does not fit inside a single byte.
+
+## References
+
+(0) A, Menezes., P, van Oorschot., S, Vanstone. (1996, October 16). Handbook of Applied Cryptography: Algorithm 9.30. Retrieved from http://cacr.uwaterloo.ca/hac/about/chap9.pdf#page=15

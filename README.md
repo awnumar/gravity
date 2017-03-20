@@ -1,7 +1,3 @@
-***Note: Still in alpha stages. Should not (yet) be used seriously.***
-
----
-
 <p align="center">
   <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="130" />
   <h3 align="center">Pocket</h3>
@@ -11,6 +7,7 @@
     <a href="https://ci.appveyor.com/project/libeclipse/pocket/branch/master"><img src="https://ci.appveyor.com/api/projects/status/s2enb60sa9asjg87/branch/master?svg=true"></a>
     <a href="https://dependencyci.com/github/libeclipse/pocket"><img src="https://dependencyci.com/github/libeclipse/pocket/badge"></a>
     <a href="https://goreportcard.com/report/github.com/libeclipse/pocket"><img src="https://goreportcard.com/badge/github.com/libeclipse/pocket"></a>
+    <a href="#"><img src="https://img.shields.io/badge/status-beta-yellow.svg"></a>
   </p>
 </p>
 
@@ -18,13 +15,11 @@
 
 Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
 
-We use XSalsa20 with a Poly1305 MAC for encryption and authentication -- this is implemented with the [NaCl](https://godoc.org/golang.org/x/crypto/nacl/secretbox) package. For key-derivation we use [Scrypt](https://godoc.org/golang.org/x/crypto/scrypt), and for hashing we use [BLAKE2b](https://godoc.org/golang.org/x/crypto/blake2b). Both of these are implemented natively in Golang's crypto library.
-
 ## How it works
 
-On a high-level, Pocket does some [magic](/PROTOCOL.md) to store your data in such a way that nobody can get the length, type, or content of it; even if they have the right password. They won't even be sure that it actually exists! (Plausible deniability is a wonderful thing.)
+On a high-level, Pocket does some [magic](/PROTOCOL) to store your data in such a way that nobody can get the length, type, or content of it; even if they have the right password. They won't even be sure that it actually exists! (Plausible deniability is a wonderful thing.)
 
-The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it.
+The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it. If you're ever compelled to give up your keys, simply give up the alternate password and identifiers.
 
 ## Installation
 
@@ -32,7 +27,7 @@ Simply run:
 
 `$ go get github.com/libeclipse/pocket`
 
-This will fetch, compile, and install *pocket* automatically. An added bonus is that it should now be in your PATH so you can call the program from anywhere with a simple:
+This will fetch, compile, and install Pocket automatically. If you have `$GOPATH` in your PATH, you should be able to run Pocket with a simple:
 
 `$ pocket`
 
