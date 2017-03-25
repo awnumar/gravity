@@ -12,7 +12,6 @@
 * **[Tahir Akhlaq](https://github.com/takhlaq)**
 
   * Suggested AppVeyor for Windows testing.
-  * Code review.
 
 * **[Toby Archer](https://github.com/mnzt)**
 
