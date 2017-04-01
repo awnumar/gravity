@@ -1,7 +1,7 @@
 <p align="center">
   <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="130" />
   <h3 align="center">Pocket (beta)</h3>
-  <p align="center">The guardian of super-secret things.</p>
+  <p align="center">A utility to protect data with deniable encryption.</p>
   <p align="center">
     <a href="https://travis-ci.org/libeclipse/pocket"><img src="https://travis-ci.org/libeclipse/pocket.svg?branch=master"></a>
     <a href="https://ci.appveyor.com/project/libeclipse/pocket/branch/master"><img src="https://ci.appveyor.com/api/projects/status/s2enb60sa9asjg87/branch/master?svg=true"></a>
