@@ -82,9 +82,6 @@ func cli() error {
                that is indistinguishable from real data. Note that this data cannot
                later be removed from the database since it cannot be differentiated.
 
-:: passwd    - Change the session's master password. All subsequent actions that
-               require this value will use the newly supplied one.
-
 :: exit      - Exit the program.
 `
 
@@ -98,11 +95,6 @@ func cli() error {
 		cmd := strings.ToLower(strings.TrimSpace(string(input.Input("$ "))))
 
 		switch cmd {
-		case "passwd":
-			masterPassword, err = input.GetMasterPassword()
-			if err != nil {
-				return err
-			}
 		case "add":
 			err = add()
 			if err != nil {
