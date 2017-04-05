@@ -106,7 +106,10 @@ func cli() error {
 				return err
 			}
 		case "remove":
-			remove()
+			err = remove()
+			if err != nil {
+				return err
+			}
 		case "decoys":
 			decoys()
 		case "exit":
@@ -119,8 +122,10 @@ func cli() error {
 
 func add() error {
 	// Prompt the user for the identifier.
-	identifier := input.Input("- Identifier: ")
-	memory.Protect(identifier)
+	identifier, err := input.SecureInput("- Identifier: ")
+	if err != nil {
+		return err
+	}
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -137,7 +142,6 @@ func add() error {
 	}
 
 	var padded []byte
-	var err error
 	for i := 0; i < len(data); i += 1024 {
 		if i+1024 > len(data) {
 			// Remaining data <= 1024.
@@ -167,8 +171,10 @@ func add() error {
 
 func get() error {
 	// Prompt the user for the identifier.
-	identifier := input.Input("- Identifier: ")
-	memory.Protect(identifier)
+	identifier, err := input.SecureInput("- Identifier: ")
+	if err != nil {
+		return err
+	}
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -217,10 +223,12 @@ func get() error {
 	return nil
 }
 
-func remove() {
+func remove() error {
 	// Prompt the user for the identifier.
-	identifier := input.Input("- Identifier: ")
-	memory.Protect(identifier)
+	identifier, err := input.SecureInput("- Identifier: ")
+	if err != nil {
+		return err
+	}
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -247,6 +255,8 @@ func remove() {
 	} else {
 		fmt.Println("! There is nothing here to remove")
 	}
+
+	return nil
 }
 
 func decoys() {
