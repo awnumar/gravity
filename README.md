@@ -34,7 +34,7 @@ This will fetch, compile, and install Pocket automatically. If you have `$GOPATH
 
 If you are aware of a security bug, notifying us privately is in the interest of all users. We can then discuss it post-mortem.
 
-To do this, please send a PGP encrypted message to my [email](mailto:awn@cryptolosophy.io) My PGP public-key is available on my [keybase](https://keybase.io/awn).
+To do this, please send a PGP encrypted message to my [email](mailto:awn@cryptolosophy.io). My PGP public-key is available on my [keybase](https://keybase.io/awn).
 
 My PGP public-key fingerprint is:
 
