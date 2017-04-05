@@ -69,11 +69,12 @@ func cli() error {
 `
 	fmt.Println(banner)
 
-	help := `import - Import a new file to the database.
-export - Retrieve data from the database and export to a file.
-remove - Remove some previously stored data from the database.
-decoys - Add a variable amount of random decoy data.
-exit   - Exit the program.`
+	help := `import [path] - Import a new file to the database.
+export [path] - Retrieve data from the database and export to a file.
+peak          - Grab data from the database and print it to the screen.
+remove        - Remove some previously stored data from the database.
+decoys        - Add a variable amount of random decoy data.
+exit          - Exit the program.`
 
 	masterPassword, err = input.GetMasterPassword()
 	if err != nil {
@@ -82,16 +83,26 @@ exit   - Exit the program.`
 	fmt.Println("") // For formatting.
 
 	for {
-		cmd := strings.ToLower(strings.TrimSpace(input.Input("$ ")))
+		cmd := strings.Split(strings.ToLower(strings.TrimSpace(input.Input("$ "))), " ")
 
-		switch cmd {
+		switch cmd[0] {
 		case "import":
-			err = importFromDisk()
-			if err != nil {
-				return err
+			if len(cmd) < 2 {
+				fmt.Println("! Missing argument: path")
+			} else {
+				importFromDisk(cmd[1])
 			}
 		case "export":
-			err = get()
+			if len(cmd) < 2 {
+				fmt.Println("! Missing argument: path")
+			} else {
+				err = retrieve(cmd[1], false)
+				if err != nil {
+					return err
+				}
+			}
+		case "peak":
+			err = retrieve("", true)
 			if err != nil {
 				return err
 			}
@@ -110,12 +121,25 @@ exit   - Exit the program.`
 	}
 }
 
-func importFromDisk() error {
-	// Prompt the user for the identifier.
-	identifier, err := input.SecureInput("- Identifier: ")
+func importFromDisk(path string) {
+	// Handle the file.
+	info, err := os.Stat(path)
 	if err != nil {
-		return err
+		if os.IsNotExist(err) {
+			fmt.Printf("! %s does not exist\n", path)
+		} else {
+			fmt.Println(err)
+		}
+		return
 	}
+
+	if info.IsDir() {
+		fmt.Println("! We can't handle directories yet")
+		return
+	}
+
+	// Prompt the user for the identifier.
+	identifier := input.SecureInput("- Identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -125,13 +149,18 @@ func importFromDisk() error {
 	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
 	if coffer.Exists(derivedIdentifierN) {
 		fmt.Println("! Cannot overwrite existing entry")
-		return nil
+		return
 	}
 
-	// Prompt user for the path to the file.
-	f, err := os.Open(input.Input("- Path to data: "))
+	fmt.Println("+ Importing", path)
+	f, err := os.Open(path)
 	if err != nil {
-		return err
+		if os.IsPermission(err) {
+			fmt.Printf("! Insufficient permissions to open %s\n", path)
+		} else {
+			fmt.Println(err)
+		}
+		return
 	}
 
 	chunkCount := 0
@@ -142,13 +171,15 @@ func importFromDisk() error {
 			if err == io.EOF {
 				break
 			}
-			return err
+			fmt.Println(err)
+			return
 		}
 
 		// Pad data and wipe the buffer.
 		data, err := crypto.Pad(buffer, 1025)
 		if err != nil {
-			return err
+			fmt.Println(err)
+			return
 		}
 		memory.Wipe(buffer)
 
@@ -160,17 +191,12 @@ func importFromDisk() error {
 		chunkCount++
 	}
 
-	fmt.Println("+ Saved that for you.")
-
-	return nil
+	fmt.Println("+ Imported successfully.")
 }
 
-func get() error {
+func retrieve(path string, peak bool) error {
 	// Prompt the user for the identifier.
-	identifier, err := input.SecureInput("- Identifier: ")
-	if err != nil {
-		return err
-	}
+	identifier := input.SecureInput("- Identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -221,10 +247,7 @@ func get() error {
 
 func remove() error {
 	// Prompt the user for the identifier.
-	identifier, err := input.SecureInput("- Identifier: ")
-	if err != nil {
-		return err
-	}
+	identifier := input.SecureInput("- Identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
