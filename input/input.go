@@ -36,7 +36,7 @@ func GetMasterPassword() ([]byte, error) {
 }
 
 // Input reads from stdin while echoing back.
-func Input(prompt string) []byte {
+func Input(prompt string) string {
 	// Output prompt.
 	fmt.Print(prompt)
 
@@ -47,7 +47,7 @@ func Input(prompt string) []byte {
 	scanner.Scan()
 
 	// Everything went well. Return the data.
-	return scanner.Bytes()
+	return scanner.Text()
 }
 
 // SecureInput gets input without echoing and returns a byte slice.

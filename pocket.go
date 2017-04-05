@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"os/signal"
@@ -69,19 +70,10 @@ func cli() error {
 	fmt.Println(banner)
 
 	help := `
-:: add       - Add new data to the database. The data's security relies on
-               both the master password and the identifier that is supplied.
-
-:: get       - Retrieve data from the database. The data can only be retrieved
-               with both the correct password and identifier.
-
-:: remove    - Remove some previously stored data. To locate the data to remove,
-               both the correct password and identifier must be supplied.
-
-:: decoys    - This feature lets you add a variable amount of random decoy data
-               that is indistinguishable from real data. Note that this data cannot
-               later be removed from the database since it cannot be differentiated.
-
+:: import    - Import a new file to the database.
+:: export    - Retrieve data from the database and export to a file.
+:: remove    - Remove some previously stored data from the database.
+:: decoys    - Add a variable amount of random decoy data.
 :: exit      - Exit the program.
 `
 
@@ -92,15 +84,15 @@ func cli() error {
 	fmt.Println("") // For formatting.
 
 	for {
-		cmd := strings.ToLower(strings.TrimSpace(string(input.Input("$ "))))
+		cmd := strings.ToLower(strings.TrimSpace(input.Input("$ ")))
 
 		switch cmd {
-		case "add":
-			err = add()
+		case "import":
+			err = importFromDisk()
 			if err != nil {
 				return err
 			}
-		case "get":
+		case "export":
 			err = get()
 			if err != nil {
 				return err
@@ -120,7 +112,7 @@ func cli() error {
 	}
 }
 
-func add() error {
+func importFromDisk() error {
 	// Prompt the user for the identifier.
 	identifier, err := input.SecureInput("- Identifier: ")
 	if err != nil {
@@ -131,9 +123,6 @@ func add() error {
 	fmt.Println("+ Generating root key...")
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
-	// Prompt user for the plaintext data.
-	data := input.Input("- Data: ")
-
 	// Check if it exists already.
 	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
 	if coffer.Exists(derivedIdentifierN) {
@@ -141,28 +130,36 @@ func add() error {
 		return nil
 	}
 
-	var padded []byte
-	for i := 0; i < len(data); i += 1024 {
-		if i+1024 > len(data) {
-			// Remaining data <= 1024.
-			padded, err = crypto.Pad(data[len(data)-(len(data)%1024):], 1025)
-		} else {
-			// Split into chunks of 1024 bytes and pad.
-			padded, err = crypto.Pad(data[i:i+1024], 1025)
-		}
+	// Prompt user for the path to the file.
+	f, err := os.Open(input.Input("- Path to data: "))
+	if err != nil {
+		return err
+	}
+
+	chunkCount := 0
+	buffer := make([]byte, 1024)
+	for {
+		_, err := f.Read(buffer)
 		if err != nil {
+			if err == io.EOF {
+				break
+			}
 			return err
 		}
 
+		// Pad data and wipe the buffer.
+		data, err := crypto.Pad(buffer, 1025)
+		if err != nil {
+			return err
+		}
+		memory.Wipe(buffer)
+
 		// Save it.
-		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, i/1024), crypto.Encrypt(padded, masterKey))
+		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, chunkCount), crypto.Encrypt(data, masterKey))
 
-		// Wipe the padded data.
-		memory.Wipe(padded)
+		// Increment counter.
+		chunkCount++
 	}
-
-	// Wipe the plaintext.
-	memory.Wipe(data)
 
 	fmt.Println("+ Saved that for you.")
 
@@ -275,7 +272,7 @@ func decoys() {
 
 	// Get the number of decoys to add as an int.
 	for {
-		numberOfDecoys, err = strconv.Atoi(string(input.Input("How many decoys do you want to add? ")))
+		numberOfDecoys, err = strconv.Atoi(input.Input("How many decoys do you want to add? "))
 		if err == nil {
 			break
 		}
