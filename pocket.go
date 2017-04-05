@@ -69,13 +69,11 @@ func cli() error {
 `
 	fmt.Println(banner)
 
-	help := `
-:: import    - Import a new file to the database.
-:: export    - Retrieve data from the database and export to a file.
-:: remove    - Remove some previously stored data from the database.
-:: decoys    - Add a variable amount of random decoy data.
-:: exit      - Exit the program.
-`
+	help := `import - Import a new file to the database.
+export - Retrieve data from the database and export to a file.
+remove - Remove some previously stored data from the database.
+decoys - Add a variable amount of random decoy data.
+exit   - Exit the program.`
 
 	masterPassword, err = input.GetMasterPassword()
 	if err != nil {
@@ -154,8 +152,9 @@ func importFromDisk() error {
 		}
 		memory.Wipe(buffer)
 
-		// Save it.
+		// Save it and wipe plaintext.
 		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, chunkCount), crypto.Encrypt(data, masterKey))
+		memory.Wipe(data)
 
 		// Increment counter.
 		chunkCount++
