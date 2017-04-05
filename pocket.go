@@ -285,7 +285,7 @@ func decoys() {
 	count := 0
 	for i := 0; i < numberOfDecoys; i++ {
 		// Get some random bytes.
-		randomBytes := crypto.GenerateRandomBytes(96)
+		randomBytes := crypto.GenerateRandomBytes(64)
 
 		// Allocate 32 bytes as the key.
 		var key [32]byte
@@ -297,7 +297,7 @@ func decoys() {
 		hashedIdentifier := blake2b.Sum256(identifier)
 
 		// Allocate 32 bytes as the plaintext.
-		plaintext, _ := crypto.Pad(randomBytes[64:96], 1025)
+		plaintext := make([]byte, 1025)
 
 		// Save to the database.
 		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))

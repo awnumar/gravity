@@ -57,9 +57,9 @@
 
     :: Decoys
 
-        1. Generate three, cryptographically-secure, random, 32 byte values: R_1, R_2, and R_3.
-        2. Pad R_1 to 1025 bytes.
-        3. Store the hash(R_2) : encrypt(R_1, R_3) pair in the database.
+        1. Generate two, cryptographically-secure, random, 32 byte values: R_1 and R_2.
+        2. R_3 is data of length 1025 bytes. It is all zeroes.
+        3. Store the hash(R_2) : encrypt(R_3, R_1) pair in the database.
         4. Repeat steps 1-3 until a sufficient number of decoys have been added.
 
         Something to note is that the user does not necessarily have to make use of this feature. Rather, simply the fact
