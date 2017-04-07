@@ -159,7 +159,7 @@ func importFromDisk(path string) {
 	defer f.Close()
 
 	chunkIndex := 0
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 4095)
 	for {
 		b, err := f.Read(buffer)
 		if err != nil {
@@ -174,7 +174,7 @@ func importFromDisk(path string) {
 		copy(data, buffer[:b])
 
 		// Pad data and wipe the buffer.
-		data, err = crypto.Pad(data, 1025)
+		data, err = crypto.Pad(data, 4096)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -309,13 +309,12 @@ func remove() error {
 		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
 
 		// Check if it exists.
-		if coffer.Exists(derivedIdentifierN) == false {
+		if coffer.Exists(derivedIdentifierN) {
+			coffer.Delete(derivedIdentifierN)
+			count++
+		} else {
 			break
 		}
-
-		// It exists. Remove it.
-		coffer.Delete(derivedIdentifierN)
-		count++
 	}
 
 	if count != 0 {
@@ -365,7 +364,7 @@ func decoys() {
 		hashedIdentifier := blake2b.Sum256(identifier)
 
 		// Allocate 32 bytes as the plaintext.
-		plaintext := make([]byte, 1025)
+		plaintext := make([]byte, 4096)
 
 		// Save to the database.
 		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
