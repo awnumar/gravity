@@ -14,17 +14,9 @@ import (
 
 // GetMasterPassword takes the masterPassword from the user while doing all of the verifying stuff.
 func GetMasterPassword() ([]byte, error) {
-	// Prompt user for password.
-	masterPassword, err := SecureInput("- Master password: ")
-	if err != nil {
-		return nil, err
-	}
-
-	// Prompt for password confirmation.
-	confirmPassword, err := SecureInput("- Confirm password: ")
-	if err != nil {
-		return nil, err
-	}
+	// Prompt user for password and confirmation.
+	masterPassword := SecureInput("- Master password: ")
+	confirmPassword := SecureInput("- Confirm password: ")
 
 	// Check if password matches confirmation.
 	if !bytes.Equal(masterPassword, confirmPassword) {
@@ -36,7 +28,7 @@ func GetMasterPassword() ([]byte, error) {
 }
 
 // Input reads from stdin while echoing back.
-func Input(prompt string) []byte {
+func Input(prompt string) string {
 	// Output prompt.
 	fmt.Print(prompt)
 
@@ -47,18 +39,19 @@ func Input(prompt string) []byte {
 	scanner.Scan()
 
 	// Everything went well. Return the data.
-	return scanner.Bytes()
+	return scanner.Text()
 }
 
 // SecureInput gets input without echoing and returns a byte slice.
-func SecureInput(prompt string) ([]byte, error) {
+func SecureInput(prompt string) []byte {
 	// Output prompt.
 	fmt.Print(prompt)
 
 	// Get input without echoing back.
 	input, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
-		return nil, err
+		fmt.Println(err)
+		memory.SafeExit(1)
 	}
 	memory.Protect(input)
 
@@ -66,5 +59,5 @@ func SecureInput(prompt string) ([]byte, error) {
 	fmt.Println()
 
 	// Return password.
-	return input, nil
+	return input
 }

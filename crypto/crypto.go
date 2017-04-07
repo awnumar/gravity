@@ -105,7 +105,6 @@ func Unpad(text []byte) ([]byte, error) {
 	for i := len(text) - 1; i >= 0; i-- {
 		if text[i] == 0 {
 			text = text[:len(text)-1]
-			continue
 		} else if text[i] == 1 {
 			text = text[:len(text)-1]
 			break
