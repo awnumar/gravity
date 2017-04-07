@@ -83,7 +83,7 @@ exit          - Exit the program.`
 	fmt.Println("") // For formatting.
 
 	for {
-		cmd := strings.Split(strings.ToLower(strings.TrimSpace(input.Input("$ "))), " ")
+		cmd := strings.Split(strings.TrimSpace(input.Input("$ ")), " ")
 
 		switch cmd[0] {
 		case "import":
@@ -96,16 +96,10 @@ exit          - Exit the program.`
 			if len(cmd) < 2 {
 				fmt.Println("! Missing argument: path")
 			} else {
-				err = retrieve(cmd[1], false)
-				if err != nil {
-					return err
-				}
+				exportToDisk(cmd[1])
 			}
 		case "peak":
-			err = retrieve("", true)
-			if err != nil {
-				return err
-			}
+			retrieve()
 		case "remove":
 			err = remove()
 			if err != nil {
@@ -139,7 +133,7 @@ func importFromDisk(path string) {
 	}
 
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Identifier: ")
+	identifier := input.SecureInput("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -162,11 +156,12 @@ func importFromDisk(path string) {
 		}
 		return
 	}
+	defer f.Close()
 
-	chunkCount := 0
+	chunkIndex := 0
 	buffer := make([]byte, 1024)
 	for {
-		_, err := f.Read(buffer)
+		b, err := f.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -175,8 +170,11 @@ func importFromDisk(path string) {
 			return
 		}
 
+		data := make([]byte, b)
+		copy(data, buffer[:b])
+
 		// Pad data and wipe the buffer.
-		data, err := crypto.Pad(buffer, 1025)
+		data, err = crypto.Pad(data, 1025)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -184,33 +182,110 @@ func importFromDisk(path string) {
 		memory.Wipe(buffer)
 
 		// Save it and wipe plaintext.
-		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, chunkCount), crypto.Encrypt(data, masterKey))
+		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, chunkIndex), crypto.Encrypt(data, masterKey))
 		memory.Wipe(data)
 
 		// Increment counter.
-		chunkCount++
+		chunkIndex++
 	}
 
 	fmt.Println("+ Imported successfully.")
 }
 
-func retrieve(path string, peak bool) error {
+func exportToDisk(path string) {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Identifier: ")
+	identifier := input.SecureInput("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
-	// Grab all the pieces.
-	var plaintext []byte
+	// Check if this entry exists.
+	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
+	if !coffer.Exists(derivedIdentifierN) {
+		fmt.Println("! This entry does not exist")
+		return
+	}
+
+	// Atempt to open the file now.
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
+	if err != nil {
+		if os.IsExist(err) {
+			fmt.Printf("! %s already exists; cannot overwrite\n", path)
+		} else if os.IsPermission(err) {
+			fmt.Printf("! Insufficient permissions to open %s\n", path)
+		} else {
+			fmt.Println(err)
+		}
+		return
+	}
+	defer f.Close()
+
+	// It exists, proceed.
 	for n := 0; true; n++ {
 		// Derive derived_identifier[n]
-		ct, exists := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
-		if exists == false {
-			// This one doesn't exist.
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		if ct == nil {
+			// This one doesn't exist. //EOF
 			break
 		}
+
+		// Decrypt this slice.
+		pt := crypto.Decrypt(ct, masterKey)
+
+		// Unpad this slice and wipe old one.
+		unpadded, e := crypto.Unpad(pt)
+		if e != nil {
+			fmt.Println(e)
+			return
+		}
+		memory.Wipe(pt)
+
+		// Write to file and wipe plaintext.
+		f.Write(unpadded)
+		memory.Wipe(unpadded)
+	}
+
+	fmt.Printf("+ Saved to %s\n", path)
+}
+
+func retrieve() {
+	// Prompt the user for the identifier.
+	identifier := input.SecureInput("- Secure identifier: ")
+
+	// Derive the secure values for this "branch".
+	fmt.Println("+ Generating root key...")
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+	/*
+		c := make(chan []byte)
+		if !peak {
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
+			if err != nil {
+				if os.IsExist(err) {
+					fmt.Printf("! %s already exists; cannot overwrite\n", path)
+				} else if os.IsPermission(err) {
+					fmt.Printf("! Insufficient permissions to open %s\n", path)
+				} else {
+					fmt.Println(err)
+				}
+				return
+			}
+			defer f.Close()
+
+			go func() {
+				for {
+					b := <-c
+					if b == nil {
+						break
+					}
+					f.Write(b)
+				}
+			}()
+		}*/
+
+	for n := 0; true; n++ {
+		// Derive derived_identifier[n]
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
 
 		// Decrypt this slice.
 		pt := crypto.Decrypt(ct, masterKey)
@@ -218,36 +293,26 @@ func retrieve(path string, peak bool) error {
 		// Unpad this slice.
 		unpadded, e := crypto.Unpad(pt)
 		if e != nil {
-			return e
+			fmt.Println(e)
+			return
 		}
 
-		// Append this slice of plaintext to the rest of it.
-		plaintext = append(plaintext, unpadded...)
+		//if peak {
+		fmt.Print(string(unpadded))
+		//} else {
+		//	c <- unpadded
+		//}
 
 		// Wipe the plaintext slice.
 		memory.Wipe(unpadded)
 	}
 
-	if len(plaintext) == 0 {
-		fmt.Println("! There is nothing stored here")
-		return nil
-	}
-
-	fmt.Printf(`
------BEGIN DATA-----
-%s
------END DATA-----
-`, plaintext)
-
-	// Wipe the plaintext.
-	memory.Wipe(plaintext)
-
-	return nil
+	//c <- nil
 }
 
 func remove() error {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Identifier: ")
+	identifier := input.SecureInput("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")

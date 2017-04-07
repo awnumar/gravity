@@ -81,7 +81,7 @@ func Save(identifier, ciphertext []byte) {
 }
 
 // Retrieve retrieves a secret from the database.
-func Retrieve(identifier []byte) ([]byte, bool) {
+func Retrieve(identifier []byte) []byte {
 	var ciphertext []byte
 
 	// Attempt to retrieve the ciphertext from the database.
@@ -90,19 +90,12 @@ func Retrieve(identifier []byte) ([]byte, bool) {
 		bucket := tx.Bucket([]byte("coffer"))
 
 		// Attempt to locate and grab the data from the coffer.
-		ct := bucket.Get(identifier)
-		if ct != nil {
-			ciphertext = append(ciphertext, ct...)
-		}
+		ciphertext = append(ciphertext, bucket.Get(identifier)...)
 
 		return nil
 	})
 
-	if ciphertext == nil {
-		return ciphertext, false
-	}
-
-	return ciphertext, true
+	return ciphertext
 }
 
 // Delete deletes an entry from the database.
