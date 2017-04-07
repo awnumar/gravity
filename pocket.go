@@ -99,7 +99,7 @@ exit          - Exit the program.`
 				exportToDisk(cmd[1])
 			}
 		case "peak":
-			retrieve()
+			peak()
 		case "remove":
 			err = remove()
 			if err != nil {
@@ -249,65 +249,49 @@ func exportToDisk(path string) {
 	fmt.Printf("+ Saved to %s\n", path)
 }
 
-func retrieve() {
+func peak() {
 	// Prompt the user for the identifier.
 	identifier := input.SecureInput("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
 	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
-	/*
-		c := make(chan []byte)
-		if !peak {
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
-			if err != nil {
-				if os.IsExist(err) {
-					fmt.Printf("! %s already exists; cannot overwrite\n", path)
-				} else if os.IsPermission(err) {
-					fmt.Printf("! Insufficient permissions to open %s\n", path)
-				} else {
-					fmt.Println(err)
-				}
-				return
-			}
-			defer f.Close()
 
-			go func() {
-				for {
-					b := <-c
-					if b == nil {
-						break
-					}
-					f.Write(b)
-				}
-			}()
-		}*/
+	// Check if this entry exists.
+	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
+	if !coffer.Exists(derivedIdentifierN) {
+		fmt.Println("! This entry does not exist")
+		return
+	}
+
+	// It exists, proceed.
+	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
 	for n := 0; true; n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		if ct == nil {
+			// This one doesn't exist. //EOF
+			break
+		}
 
 		// Decrypt this slice.
 		pt := crypto.Decrypt(ct, masterKey)
 
-		// Unpad this slice.
+		// Unpad this slice and wipe old one.
 		unpadded, e := crypto.Unpad(pt)
 		if e != nil {
 			fmt.Println(e)
 			return
 		}
+		memory.Wipe(pt)
 
-		//if peak {
+		// Write to file and wipe plaintext.
 		fmt.Print(string(unpadded))
-		//} else {
-		//	c <- unpadded
-		//}
-
-		// Wipe the plaintext slice.
 		memory.Wipe(unpadded)
 	}
 
-	//c <- nil
+	fmt.Println("-----END PLAINTEXT-----")
 }
 
 func remove() error {
