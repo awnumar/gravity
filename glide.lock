@@ -1,8 +1,23 @@
-hash: 29ed0a4003b0b334f72f33402c061d548e95b2e020890ceb1c9b269fc2c0d3d0
-updated: 2017-03-10T19:53:33.743556929Z
+hash: 91b32d3f761555c1f7f85bbc89efdd9ddc89da649d1fe264ebea631bbe52d756
+updated: 2017-04-08T21:22:42.180442254+01:00
 imports:
-- name: github.com/boltdb/bolt
-  version: 583e8937c61f1af6513608ccc75c97b6abdf4ff9
+- name: github.com/golang/snappy
+  version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/syndtr/goleveldb
+  version: 3c5717caf1475fd25964109a0fc640bd150fce43
+  subpackages:
+  - leveldb
+  - leveldb/cache
+  - leveldb/comparer
+  - leveldb/errors
+  - leveldb/filter
+  - leveldb/iterator
+  - leveldb/journal
+  - leveldb/memdb
+  - leveldb/opt
+  - leveldb/storage
+  - leveldb/table
+  - leveldb/util
 - name: golang.org/x/crypto
   version: dc137beb6cce2043eb6b5f223ab8bf51c32459f4
   subpackages:
