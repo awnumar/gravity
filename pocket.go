@@ -157,8 +157,8 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
-	chunkIndex := 0
 	buffer := make([]byte, 4095)
+	chunkIndex, totalImportedBytes := 0, 0
 	for {
 		b, err := f.Read(buffer)
 		if err != nil {
@@ -168,6 +168,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
+		totalImportedBytes += b
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -188,7 +189,7 @@ func importFromDisk(path string) {
 		chunkIndex++
 
 		// Output progress.
-		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(chunkIndex*4096)/float64(info.Size())*100)), info.Size())
+		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(totalImportedBytes)/float64(info.Size())*100)), info.Size())
 	}
 
 	fmt.Println("\n+ Imported successfully.")
@@ -224,6 +225,7 @@ func exportToDisk(path string) {
 	defer f.Close()
 
 	// It exists, proceed.
+	totalExportedBytes := 0
 	for n := 0; true; n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
@@ -241,6 +243,7 @@ func exportToDisk(path string) {
 			fmt.Println(e)
 			return
 		}
+		totalExportedBytes += len(unpadded)
 		memory.Wipe(pt)
 
 		// Write to file and wipe plaintext.
@@ -248,7 +251,7 @@ func exportToDisk(path string) {
 		memory.Wipe(unpadded)
 
 		// Output progress.
-		fmt.Printf("\r+ Exported %d bytes...", (n+1)*4096)
+		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
 	}
 
 	fmt.Printf("\n+ Saved to %s\n", path)
