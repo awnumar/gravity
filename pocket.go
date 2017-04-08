@@ -146,7 +146,6 @@ func importFromDisk(path string) {
 		return
 	}
 
-	fmt.Println("+ Importing", path)
 	f, err := os.Open(path)
 	if err != nil {
 		if os.IsPermission(err) {
@@ -158,8 +157,8 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
-	chunkIndex := 0
 	buffer := make([]byte, 4095)
+	chunkIndex, totalImportedBytes := 0, 0
 	for {
 		b, err := f.Read(buffer)
 		if err != nil {
@@ -169,6 +168,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
+		totalImportedBytes += b
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -187,9 +187,12 @@ func importFromDisk(path string) {
 
 		// Increment counter.
 		chunkIndex++
+
+		// Output progress.
+		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(totalImportedBytes)/float64(info.Size())*100)), info.Size())
 	}
 
-	fmt.Println("+ Imported successfully.")
+	fmt.Println("\n+ Imported successfully.")
 }
 
 func exportToDisk(path string) {
@@ -222,6 +225,7 @@ func exportToDisk(path string) {
 	defer f.Close()
 
 	// It exists, proceed.
+	totalExportedBytes := 0
 	for n := 0; true; n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
@@ -239,14 +243,18 @@ func exportToDisk(path string) {
 			fmt.Println(e)
 			return
 		}
+		totalExportedBytes += len(unpadded)
 		memory.Wipe(pt)
 
 		// Write to file and wipe plaintext.
 		f.Write(unpadded)
 		memory.Wipe(unpadded)
+
+		// Output progress.
+		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
 	}
 
-	fmt.Printf("+ Saved to %s\n", path)
+	fmt.Printf("\n+ Saved to %s\n", path)
 }
 
 func peak() {
@@ -369,9 +377,9 @@ func decoys() {
 		// Save to the database.
 		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
 
-		// Increment counter.
+		// Increment counter and display progress.
 		count++
-		fmt.Printf("\r+ Added %d/%d (%d%%)", count, numberOfDecoys, int(math.Floor(float64(count)/float64(numberOfDecoys)*100)))
+		fmt.Printf("\r+ Added %d%% of %d decoys...", int(math.Floor(float64(count)/float64(numberOfDecoys)*100)), numberOfDecoys)
 	}
 	fmt.Println("") // For formatting.
 }
