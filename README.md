@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="130" />
-  <h3 align="center">Pocket (beta)</h3>
-  <p align="center">A utility to protect data with deniable encryption.</p>
+  <img src="https://cdn.rawgit.com/libeclipse/tranquil/master/tranquil.svg" height="130" />
+  <h3 align="center">Tranquil (beta)</h3>
+  <p align="center">Confidentiality includes deniability.</p>
   <p align="center">
-    <a href="https://travis-ci.org/libeclipse/pocket"><img src="https://travis-ci.org/libeclipse/pocket.svg?branch=master"></a>
-    <a href="https://ci.appveyor.com/project/libeclipse/pocket/branch/master"><img src="https://ci.appveyor.com/api/projects/status/s2enb60sa9asjg87/branch/master?svg=true"></a>
+    <a href="https://travis-ci.org/libeclipse/tranquil"><img src="https://travis-ci.org/libeclipse/tranquil.svg?branch=master"></a>
+    <a href="https://ci.appveyor.com/project/libeclipse/tranquil/branch/master"><img src="https://ci.appveyor.com/api/projects/status/cm3cc244ct0yt92s/branch/master?svg=true"></a>
     <a href="https://dependencyci.com/github/libeclipse/pocket"><img src="https://dependencyci.com/github/libeclipse/pocket/badge"></a>
-    <a href="https://goreportcard.com/report/github.com/libeclipse/pocket"><img src="https://goreportcard.com/badge/github.com/libeclipse/pocket"></a>
+    <a href="https://goreportcard.com/report/github.com/libeclipse/tranquil"><img src="https://goreportcard.com/badge/github.com/libeclipse/tranquil"></a>
   </p>
 </p>
 
