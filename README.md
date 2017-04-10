@@ -5,7 +5,7 @@
   <p align="center">
     <a href="https://travis-ci.org/libeclipse/tranquil"><img src="https://travis-ci.org/libeclipse/tranquil.svg?branch=master"></a>
     <a href="https://ci.appveyor.com/project/libeclipse/tranquil/branch/master"><img src="https://ci.appveyor.com/api/projects/status/cm3cc244ct0yt92s/branch/master?svg=true"></a>
-    <a href="https://dependencyci.com/github/libeclipse/pocket"><img src="https://dependencyci.com/github/libeclipse/pocket/badge"></a>
+    <a href="https://dependencyci.com/github/libeclipse/tranquil"><img src="https://dependencyci.com/github/libeclipse/tranquil/badge"></a>
     <a href="https://goreportcard.com/report/github.com/libeclipse/tranquil"><img src="https://goreportcard.com/badge/github.com/libeclipse/tranquil"></a>
   </p>
 </p>
