@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://cdn.rawgit.com/libeclipse/tranquil/master/tranquil.svg" height="200" />
+  <img src="tranquil.png" height="130" />
   <h3 align="center">Tranquil (beta)</h3>
   <p align="center">Confidentiality includes deniability.</p>
   <p align="center">
