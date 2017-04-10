@@ -20,9 +20,11 @@ Put simply, that is what Tranquil gives you.
 
 While other encryption programs concentrate on hiding the content of data, Tranquil also hides the fact that the data even exists.
 
-It is impossible to differentiate between real and random data in the database, and the two can exist in any proportion. This makes it possible for you to add your own decoy data that you would disclose as real if forced to do so.
+The way data is stored makes it impossible to differentiate between real and random data in the database, and the two can exist in any proportion. This makes it possible for you to add your own decoy data that you would disclose as real if forced to do so.
 
 An attacker cannot ascertain which data is real, so she cannot know for certain if the decrypted entries compose the entirety of the database. Therefore you have plausible deniability and a deniable encryption scheme.
+
+The complete protocol can be found [here](PROTOCOL).
 
 ## Installation
 
