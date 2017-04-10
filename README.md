@@ -1,7 +1,7 @@
 <p align="center">
   <img src="tranquil.png" height="140" />
   <h3 align="center">Tranquil (beta)</h3>
-  <p align="center">Confidentiality includes deniability.</p>
+  <p align="center">An encryption program that prioritises deniability.</p>
   <p align="center">
     <a href="https://travis-ci.org/libeclipse/tranquil"><img src="https://travis-ci.org/libeclipse/tranquil.svg?branch=master"></a>
     <a href="https://ci.appveyor.com/project/libeclipse/tranquil/branch/master"><img src="https://ci.appveyor.com/api/projects/status/cm3cc244ct0yt92s/branch/master?svg=true"></a>
