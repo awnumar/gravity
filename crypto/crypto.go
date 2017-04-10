@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/libeclipse/pocket/memory"
+	"github.com/libeclipse/tranquil/memory"
 
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/nacl/secretbox"

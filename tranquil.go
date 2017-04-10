@@ -12,10 +12,10 @@ import (
 
 	"golang.org/x/crypto/blake2b"
 
-	"github.com/libeclipse/pocket/coffer"
-	"github.com/libeclipse/pocket/crypto"
-	"github.com/libeclipse/pocket/input"
-	"github.com/libeclipse/pocket/memory"
+	"github.com/libeclipse/tranquil/coffer"
+	"github.com/libeclipse/tranquil/crypto"
+	"github.com/libeclipse/tranquil/input"
+	"github.com/libeclipse/tranquil/memory"
 )
 
 var (
@@ -55,19 +55,6 @@ func main() {
 
 func cli() error {
 	var err error
-
-	banner := `
-                                  ▄▄
-                                  ██                    ██
-    ██▄███▄    ▄████▄    ▄█████▄  ██ ▄██▀    ▄████▄   ███████
-    ██▀  ▀██  ██▀  ▀██  ██▀    ▀  ██▄██     ██▄▄▄▄██    ██
-    ██    ██  ██    ██  ██        ██▀██▄    ██▀▀▀▀▀▀    ██
-    ███▄▄██▀  ▀██▄▄██▀  ▀██▄▄▄▄█  ██  ▀█▄   ▀██▄▄▄▄█    ██▄▄▄
-    ██ ▀▀▀      ▀▀▀▀      ▀▀▀▀▀   ▀▀   ▀▀▀    ▀▀▀▀▀      ▀▀▀▀
-    ██
-                        The guardian of super-secret things.
-`
-	fmt.Println(banner)
 
 	help := `import [path] - Import a new file to the database.
 export [path] - Retrieve data from the database and export to a file.

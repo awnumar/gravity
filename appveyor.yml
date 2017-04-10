@@ -2,7 +2,7 @@ version: '{build}'
 
 platform: Any CPU
 
-clone_folder: c:\go\src\github.com\libeclipse\pocket
+clone_folder: c:\go\src\github.com\libeclipse\tranquil
 
 environment:
   GOPATH: c:\go

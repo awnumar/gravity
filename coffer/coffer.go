@@ -21,18 +21,18 @@ func Setup() error {
 	}
 
 	// Check if we've done this before.
-	if _, err = os.Stat(user.HomeDir + "/.pocket"); err != nil {
+	if _, err = os.Stat(user.HomeDir + "/.tranquil"); err != nil {
 		// Apparently we haven't.
 
 		// Create a directory to store our stuff in.
-		err = os.Mkdir(user.HomeDir+"/.pocket", 0700)
+		err = os.Mkdir(user.HomeDir+"/.tranquil", 0700)
 		if err != nil {
 			return err
 		}
 	}
 
 	// Open the database file.
-	Coffer, err = leveldb.OpenFile(user.HomeDir+"/.pocket/coffer", nil)
+	Coffer, err = leveldb.OpenFile(user.HomeDir+"/.tranquil/coffer", nil)
 	if err != nil {
 		return err
 	}

@@ -1,5 +1,5 @@
-package: github.com/libeclipse/pocket
-homepage: https://github.com/libeclipse/pocket
+package: github.com/libeclipse/tranquil
+homepage: https://github.com/libeclipse/tranquil
 license: GPL-3.0
 owners:
 - name: Awn
