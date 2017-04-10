@@ -12,10 +12,10 @@ import (
 
 	"golang.org/x/crypto/blake2b"
 
-	"github.com/libeclipse/pocket/coffer"
-	"github.com/libeclipse/pocket/crypto"
-	"github.com/libeclipse/pocket/input"
-	"github.com/libeclipse/pocket/memory"
+	"github.com/libeclipse/tranquil/coffer"
+	"github.com/libeclipse/tranquil/crypto"
+	"github.com/libeclipse/tranquil/input"
+	"github.com/libeclipse/tranquil/memory"
 )
 
 var (
