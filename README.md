@@ -32,7 +32,7 @@ Simply run:
 
 `$ go get github.com/libeclipse/tranquil`
 
-This will fetch, compile, and install Tranquil automatically. If you have `$GOPATH` in your PATH, you should be able to run Pocket with a simple:
+This will fetch, compile, and install Tranquil automatically. If you have `$GOPATH` in your PATH, you should be able to run it with a simple:
 
 `$ tranquil`
 
