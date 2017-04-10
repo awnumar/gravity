@@ -56,19 +56,6 @@ func main() {
 func cli() error {
 	var err error
 
-	banner := `
-                                  ▄▄
-                                  ██                    ██
-    ██▄███▄    ▄████▄    ▄█████▄  ██ ▄██▀    ▄████▄   ███████
-    ██▀  ▀██  ██▀  ▀██  ██▀    ▀  ██▄██     ██▄▄▄▄██    ██
-    ██    ██  ██    ██  ██        ██▀██▄    ██▀▀▀▀▀▀    ██
-    ███▄▄██▀  ▀██▄▄██▀  ▀██▄▄▄▄█  ██  ▀█▄   ▀██▄▄▄▄█    ██▄▄▄
-    ██ ▀▀▀      ▀▀▀▀      ▀▀▀▀▀   ▀▀   ▀▀▀    ▀▀▀▀▀      ▀▀▀▀
-    ██
-                        The guardian of super-secret things.
-`
-	fmt.Println(banner)
-
 	help := `import [path] - Import a new file to the database.
 export [path] - Retrieve data from the database and export to a file.
 peak          - Grab data from the database and print it to the screen.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="tranquil.png" height="130" />
+  <img src="tranquil.png" height="140" />
   <h3 align="center">Tranquil (beta)</h3>
   <p align="center">Confidentiality includes deniability.</p>
   <p align="center">
@@ -12,23 +12,29 @@
 
 ---
 
-Whether you want to encrypt your super-secret files, store your super-secret passwords, save some super-secret strings, log a super-secret diary entry, or have something to look at in wonder -- pocket has you covered.
+Plausible deniability is defined as ***a condition in which a subject can safely and believably deny knowledge of any particular truth that may exist so as to shield the subject from any responsibility associated with the knowledge of such truth***.
+
+Put simply, that is what Tranquil gives you.
 
 ## How it works
 
-On a high-level, Pocket does some [magic](/PROTOCOL) to store your data in such a way that nobody can get the length, type, or content of it; even if they have the right password. They won't even be sure that it actually exists! (Plausible deniability is a wonderful thing.)
+Instead of pasting the [protocol](PROTOCOL) here in words, here is a short deductive argument that should get the point across:
 
-The data is all stored in a single database, side-by-side with some optional decoy entries. Along with the multiple-password support, this allows for proper deniable encryption. Just add some legit-looking entries under an alternate password, throw in a few thousand decoys, and there you have it. If you're ever compelled to give up your keys, simply give up the alternate password and identifiers.
+* It is impossible to differentiate between real and random data in the database, and the two can exist in any proportion.
+* You can add your own decoy data that you would disclose as the real data if forced to do so.
+
+* If an attacker cannot ascertain which data is real, she cannot know for certain if the decrypted entries compose the entirety of the database.
+* Therefore you have plausible deniability and a deniable encryption scheme.
 
 ## Installation
 
 Simply run:
 
-`$ go get github.com/libeclipse/pocket`
+`$ go get github.com/libeclipse/tranquil`
 
-This will fetch, compile, and install Pocket automatically. If you have `$GOPATH` in your PATH, you should be able to run Pocket with a simple:
+This will fetch, compile, and install Tranquil automatically. If you have `$GOPATH` in your PATH, you should be able to run Pocket with a simple:
 
-`$ pocket`
+`$ tranquil`
 
 ## Responsible disclosure
 
