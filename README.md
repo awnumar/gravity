@@ -12,7 +12,7 @@
 
 ---
 
-Plausible deniability is defined as ***a condition in which a subject can safely and believably deny knowledge of any particular truth that may exist so as to shield the subject from any responsibility associated with the knowledge of such truth***.
+Plausible deniability is defined as *a condition in which a subject can safely and believably deny knowledge of any particular truth that may exist so as to shield the subject from any responsibility associated with the knowledge of such truth*.
 
 Put simply, that is what Tranquil gives you.
 
