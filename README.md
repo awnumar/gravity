@@ -16,13 +16,25 @@ Plausible deniability is defined as *a condition in which a subject can safely a
 
 We think that's a beautiful idea, and so, that is what Tranquil gives you.
 
-## How it works
+## What it does
 
-While other encryption programs concentrate on hiding the content of data, Tranquil also hides the fact that the data even exists.
+**Tranquil hides the length, content, and existence of data...**
 
-The way data is stored makes it impossible to differentiate between real and random data in the database, and the two can exist in any proportion. This makes it possible for you to add your own decoy data that you would disclose as real if forced to do so.
+To achieve this, Tranquil stores data in fixed-sized entries. Each entry is not differentiable from any other entry, and this property is exploited to hide the existence of the data.
 
-An attacker cannot ascertain which data is real, so she cannot know for certain if the decrypted entries compose the entirety of the database. Therefore you have plausible deniability and a deniable encryption scheme.
+You are able to generate and add as many random entries as you like, and so---since no one would ever know if you did---you can claim that any data that is in the database is composed of decoys. All data can be decoys, so an adversary cannot be sure that there is any real data.
+
+**...even if the master password is leaked.**
+
+An attacker would also need access to the secure *identifier* for the ciphertext that they want.
+
+Both the master password together with the identifier are needed to locate the correct ciphertext amongst the entries, and also to derive the encrypton key to unlock the data.
+
+**And there is deniable encryption too.**
+
+You are able to use any master password for an entry, and under each master password you can store as many ciphertexts are you'd like.
+
+So if you pick a second *decoy* master password and store a bunch of legitimate-looking entries under it, then---if you are ever forced to disclose your keys---you can give up this decoy master password and its identifiers. The rest of the data in the database is simply composed of random decoys added by Tranquil. \*wink wink\*
 
 The complete protocol can be found [here](PROTOCOL).
 
