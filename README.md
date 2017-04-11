@@ -20,21 +20,21 @@ We think that's a beautiful idea, and so, that is what Tranquil gives you.
 
 **Tranquil hides the length, content, and existence of data...**
 
-To achieve this, Tranquil stores data in fixed-sized entries. Each entry is not differentiable from any other entry, and this property is exploited to hide the existence of the data.
+To achieve this, Tranquil stores data in fixed-sized entries, each indifferentiable from any other. You are able to generate and add as many random entries as you like, and so---since no one would ever know if you did---you can claim that any data that is in the database is composed of decoys.
 
-You are able to generate and add as many random entries as you like, and so---since no one would ever know if you did---you can claim that any data that is in the database is composed of decoys. All data can be decoys, so an adversary cannot be sure that there is any real data.
+All data can be decoys, so an adversary cannot be sure that there is any real data.
 
-**...even if the master password is leaked.**
+**...even if the master password is breached.**
 
 An attacker would also need access to the secure *identifier* for the ciphertext that they want.
 
-Both the master password together with the identifier are needed to locate the correct ciphertext amongst the entries, and also to derive the encrypton key to unlock the data.
+Both the master password together with the identifier are needed to locate the correct ciphertext amongst the entries and also to derive the encryption key to unlock the data.
 
 **And there is deniable encryption too.**
 
-You are able to use any master password for an entry, and under each master password you can store as many ciphertexts are you'd like.
+You are able to use any master password for an entry, and under each master password you can store as many ciphertexts as you'd like.
 
-So if you pick a second *decoy* master password and store a bunch of legitimate-looking entries under it, then---if you are ever forced to disclose your keys---you can give up this decoy master password and its identifiers. The rest of the data in the database is simply composed of random decoys added by Tranquil. \*wink wink\*
+So if you pick a second *decoy* master password and store a bunch of legitimate-looking entries under it, then---if you are ever forced to disclose your keys---you can give up this decoy master password and its identifiers. The rest of the data in the database is simply composed of random decoys added by Tranquil. (\*wink wink\*)
 
 The complete protocol can be found [here](PROTOCOL).
 
