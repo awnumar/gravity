@@ -30,7 +30,7 @@ An attacker would also need access to the secure *identifier* for the ciphertext
 
 Both the master password together with the identifier are needed to locate the correct ciphertext amongst the entries and also to derive the encryption key to unlock the data.
 
-**And there is deniable encryption too.**
+**And of course: deniable encryption.**
 
 You are able to use any master password for an entry, and under each master password you can store as many ciphertexts as you'd like.
 
