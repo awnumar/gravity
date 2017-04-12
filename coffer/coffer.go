@@ -4,12 +4,12 @@ import (
 	"os"
 	"os/user"
 
-	"github.com/boltdb/bolt"
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 var (
 	// Coffer is a pointer to the database object.
-	Coffer *bolt.DB
+	Coffer *leveldb.DB
 )
 
 // Setup sets up the environment.
@@ -32,83 +32,39 @@ func Setup() error {
 	}
 
 	// Open the database file.
-	db, err := bolt.Open(user.HomeDir+"/.tranquil/coffer.bolt", 0700, nil)
+	Coffer, err = leveldb.OpenFile(user.HomeDir+"/.tranquil/coffer", nil)
 	if err != nil {
 		return err
 	}
-	Coffer = db
-
-	// Create the bucket to guarantee it exists.
-	Coffer.Update(func(tx *bolt.Tx) error {
-		tx.CreateBucketIfNotExists([]byte("coffer"))
-		return nil
-	})
 
 	return nil
 }
 
 // Exists checks if an entry exists and returns true or false.
 func Exists(identifier []byte) bool {
-	exists := false
+	_, err := Coffer.Get(identifier, nil)
+	if err != nil {
+		return false
+	}
 
-	Coffer.View(func(tx *bolt.Tx) error {
-		// Grab the bucket that we'll be using.
-		bucket := tx.Bucket([]byte("coffer"))
-
-		// Attempt to locate the entry.
-		ct := bucket.Get(identifier)
-		if ct != nil {
-			exists = true
-		}
-
-		return nil
-	})
-
-	return exists
+	return true
 }
 
 // Save saves a secret to the database.
 func Save(identifier, ciphertext []byte) {
-	Coffer.Update(func(tx *bolt.Tx) error {
-		// Grab the bucket that we'll be using.
-		bucket := tx.Bucket([]byte("coffer"))
-
-		// Save the identifier:ciphertext pair to the coffer.
-		bucket.Put(identifier, ciphertext)
-
-		return nil
-	})
+	Coffer.Put(identifier, ciphertext, nil)
 }
 
 // Retrieve retrieves a secret from the database.
 func Retrieve(identifier []byte) []byte {
-	var ciphertext []byte
+	data, _ := Coffer.Get(identifier, nil)
 
-	// Attempt to retrieve the ciphertext from the database.
-	Coffer.View(func(tx *bolt.Tx) error {
-		// Grab the bucket that we'll be using.
-		bucket := tx.Bucket([]byte("coffer"))
-
-		// Attempt to locate and grab the data from the coffer.
-		ciphertext = append(ciphertext, bucket.Get(identifier)...)
-
-		return nil
-	})
-
-	return ciphertext
+	return data
 }
 
 // Delete deletes an entry from the database.
 func Delete(identifier []byte) {
-	Coffer.Update(func(tx *bolt.Tx) error {
-		// Grab the bucket that we'll be using.
-		bucket := tx.Bucket([]byte("coffer"))
-
-		// Delete the entry.
-		bucket.Delete(identifier)
-
-		return nil
-	})
+	Coffer.Delete(identifier, nil)
 }
 
 // Close closes the database object.
