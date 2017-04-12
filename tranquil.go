@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"os/signal"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 
 	"golang.org/x/crypto/blake2b"
 
+	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/tranquil/coffer"
 	"github.com/libeclipse/tranquil/crypto"
 	"github.com/libeclipse/tranquil/input"
@@ -144,8 +144,16 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
+	// Create and configure the progress bar object.
+	bar := pb.New64(info.Size()).Prefix("+ Importing ")
+	bar.ShowCounters = false
+	bar.ShowTimeLeft = true
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
+
+	chunkIndex := 0
 	buffer := make([]byte, 4095)
-	chunkIndex, totalImportedBytes := 0, 0
 	for {
 		b, err := f.Read(buffer)
 		if err != nil {
@@ -155,7 +163,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
-		totalImportedBytes += b
+		bar.Add(b)
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -174,12 +182,8 @@ func importFromDisk(path string) {
 
 		// Increment counter.
 		chunkIndex++
-
-		// Output progress.
-		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(totalImportedBytes)/float64(info.Size())*100)), info.Size())
 	}
-
-	fmt.Println("\n+ Imported successfully.")
+	bar.FinishPrint("+ Imported successfully.")
 }
 
 func exportToDisk(path string) {
@@ -344,7 +348,13 @@ func decoys() {
 		fmt.Println("! Input must be an integer")
 	}
 
-	count := 0
+	// Create and configure the progress bar object.
+	bar := pb.New(numberOfDecoys).Prefix("+ Adding ")
+	bar.ShowCounters = false
+	bar.ShowTimeLeft = true
+	bar.ShowSpeed = true
+	bar.Start()
+
 	for i := 0; i < numberOfDecoys; i++ {
 		// Get some random bytes.
 		randomBytes := crypto.GenerateRandomBytes(64)
@@ -364,9 +374,8 @@ func decoys() {
 		// Save to the database.
 		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
 
-		// Increment counter and display progress.
-		count++
-		fmt.Printf("\r+ Added %d%% of %d decoys...", int(math.Floor(float64(count)/float64(numberOfDecoys)*100)), numberOfDecoys)
+		// Increment progress bar.
+		bar.Increment()
 	}
-	fmt.Println("") // For formatting.
+	bar.FinishPrint(fmt.Sprintf("+ Added %d decoys.", numberOfDecoys))
 }
