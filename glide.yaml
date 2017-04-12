@@ -4,7 +4,7 @@ license: GPL-3.0
 owners:
 - name: Awn
   email: libeclipse@gmail.com
-homepage: https://cryptolosophy.io
+  homepage: https://cryptolosophy.io
 import:
 - package: github.com/cheggaaa/pb
   version: ~1.0.13
