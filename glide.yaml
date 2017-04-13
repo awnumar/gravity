@@ -3,7 +3,7 @@ homepage: https://github.com/libeclipse/tranquil
 license: GPL-3.0
 owners:
 - name: Awn
-  email: libeclipse@gmail.com
+  email: awn@cryptolosophy.io
   homepage: https://cryptolosophy.io
 import:
 - package: github.com/cheggaaa/pb
