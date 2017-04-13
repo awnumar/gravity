@@ -16,6 +16,7 @@ import (
 	"github.com/libeclipse/tranquil/crypto"
 	"github.com/libeclipse/tranquil/input"
 	"github.com/libeclipse/tranquil/memory"
+	"github.com/libeclipse/tranquil/output"
 )
 
 var (
@@ -211,33 +212,22 @@ func exportToDisk(path string) {
 	}
 	defer f.Close()
 
-	// It exists, proceed.
 	totalExportedBytes := 0
-	for n := 0; true; n++ {
-		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
-		if ct == nil {
-			// This one doesn't exist. //EOF
+	chunksChan := output.PipeFullEntry(rootIdentifier, masterKey)
+	for {
+		// Get chunk of data and check for EOF.
+		chunk := <-chunksChan
+		if chunk == nil {
+			// EOF.
 			break
 		}
 
-		// Decrypt this slice.
-		pt := crypto.Decrypt(ct, masterKey)
-
-		// Unpad this slice and wipe old one.
-		unpadded, e := crypto.Unpad(pt)
-		if e != nil {
-			fmt.Println(e)
-			return
-		}
-		totalExportedBytes += len(unpadded)
-		memory.Wipe(pt)
-
-		// Write to file and wipe plaintext.
-		f.Write(unpadded)
-		memory.Wipe(unpadded)
+		// Write and wipe data.
+		f.Write(chunk)
+		memory.Wipe(chunk)
 
 		// Output progress.
+		totalExportedBytes += len(chunk)
 		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
 	}
 
@@ -262,28 +252,18 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	for n := 0; true; n++ {
-		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
-		if ct == nil {
-			// This one doesn't exist. //EOF
+	chunksChan := output.PipeFullEntry(rootIdentifier, masterKey)
+	for {
+		// Get chunk of data and check for EOF.
+		chunk := <-chunksChan
+		if chunk == nil {
+			// EOF.
 			break
 		}
 
-		// Decrypt this slice.
-		pt := crypto.Decrypt(ct, masterKey)
-
-		// Unpad this slice and wipe old one.
-		unpadded, e := crypto.Unpad(pt)
-		if e != nil {
-			fmt.Println(e)
-			return
-		}
-		memory.Wipe(pt)
-
-		// Write to file and wipe plaintext.
-		fmt.Print(string(unpadded))
-		memory.Wipe(unpadded)
+		// Write and wipe data.
+		fmt.Print(string(chunk))
+		memory.Wipe(chunk)
 	}
 
 	fmt.Println("-----END PLAINTEXT-----")
