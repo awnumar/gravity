@@ -2,55 +2,8 @@ package crypto
 
 import (
 	"bytes"
-	"encoding/base64"
 	"testing"
 )
-
-var (
-	scryptCost = map[string]int{"N": 18, "r": 8, "p": 1}
-)
-
-func TestGenerateRandomBytes(t *testing.T) {
-	randomBytes := GenerateRandomBytes(32)
-	if len(randomBytes) != 32 {
-		t.Error("Expected length to be 32; got", len(randomBytes))
-	}
-}
-
-func TestDecrypt(t *testing.T) {
-	keySlice, _ := base64.StdEncoding.DecodeString("JNut6eJfb6ySwOac7FHe3bsSU75FpL/o776VD+oYWxk=")
-	ciphertext, _ := base64.StdEncoding.DecodeString("5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw=")
-
-	// Correct key
-	var key [32]byte
-	copy(key[:], keySlice)
-	plaintext := Decrypt(ciphertext, &key)
-	if !bytes.Equal(plaintext, []byte("test")) {
-		t.Error("Expected plaintext to be `test`; got", plaintext)
-	}
-
-	// Incorrect key
-	var incorrectKey [32]byte
-	copy(incorrectKey[:], []byte("yellow submarine"))
-	plaintext = Decrypt(ciphertext, &incorrectKey)
-	if plaintext != nil {
-		t.Error("Expected plaintext to be nil; got", plaintext)
-	}
-}
-
-func TestEncryptionCycle(t *testing.T) {
-	plaintext := []byte("this is a test plaintext")
-
-	var key [32]byte
-	copy(key[:], []byte("yellow submarine"))
-
-	ciphertext := Encrypt(plaintext, &key)
-	decrypted := Decrypt(ciphertext, &key)
-
-	if !bytes.Equal(decrypted, plaintext) {
-		t.Error("Decrypted != Plaintext; decrypted =", string(decrypted))
-	}
-}
 
 func TestPad(t *testing.T) {
 	text := []byte("yellow submarine") // 16 bytes
