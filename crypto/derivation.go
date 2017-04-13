@@ -10,22 +10,25 @@ import (
 
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
 func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
-	// Concatenate the inputs.
-	concatenatedValues := append(masterPassword, identifier...)
+	// Allocate and protect memory for the concatenated values, and append the values to it.
+	concatenatedValues := make([]byte, len(masterPassword)+len(identifier))
 	memory.Protect(concatenatedValues)
+	concatenatedValues = append(masterPassword, identifier...)
 
-	// Allocate and protect memory for the output of the hash function.
+	// Allocate and protect memory for the output of the hash function, and put the output into it.
 	rootKeySlice := make([]byte, 64)
 	memory.Protect(rootKeySlice)
+	rootKeySlice, _ = scrypt.Key(
+		concatenatedValues,       // Input data.
+		[]byte(""),               // Salt.
+		1<<uint(costFactor["N"]), // Scrypt parameter N.
+		costFactor["r"],          // Scrypt parameter r.
+		costFactor["p"],          // Scrypt parameter p.
+		64)                       // Output hash length.
 
-	// Allocate and protect memory for the 32 byte array that we'll return.
+	// Allocate a protected array to hold the key, and copy the key into it.
 	var masterKey [32]byte
 	memory.Protect(masterKey[:])
-
-	// Derive rootKey.
-	rootKeySlice, _ = scrypt.Key(concatenatedValues, []byte(""), 1<<uint(costFactor["N"]), costFactor["r"], costFactor["p"], 64)
-
-	// Copy to the 32 byte array.
 	copy(masterKey[:], rootKeySlice[0:32])
 
 	// Slice and return respective values.
