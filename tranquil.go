@@ -321,7 +321,7 @@ func decoys() {
 		if err == nil {
 			break
 		}
-		fmt.Println("! stdin must be an integer")
+		fmt.Println("! Input must be an integer")
 	}
 
 	count := 0
