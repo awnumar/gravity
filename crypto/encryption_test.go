@@ -13,7 +13,10 @@ func TestDecrypt(t *testing.T) {
 	// Correct key
 	var key [32]byte
 	copy(key[:], keySlice)
-	plaintext := Decrypt(ciphertext, &key)
+	plaintext, err := Decrypt(ciphertext, &key)
+	if err != nil {
+		t.Error("Unexpected err:", err)
+	}
 	if !bytes.Equal(plaintext, []byte("test")) {
 		t.Error("Expected plaintext to be `test`; got", plaintext)
 	}
@@ -21,7 +24,10 @@ func TestDecrypt(t *testing.T) {
 	// Incorrect key
 	var incorrectKey [32]byte
 	copy(incorrectKey[:], []byte("yellow submarine"))
-	plaintext = Decrypt(ciphertext, &incorrectKey)
+	plaintext, err = Decrypt(ciphertext, &incorrectKey)
+	if err == nil {
+		t.Error("Expected error; got nil")
+	}
 	if plaintext != nil {
 		t.Error("Expected plaintext to be nil; got", plaintext)
 	}
@@ -34,7 +40,10 @@ func TestEncryptionCycle(t *testing.T) {
 	copy(key[:], []byte("yellow submarine"))
 
 	ciphertext := Encrypt(plaintext, &key)
-	decrypted := Decrypt(ciphertext, &key)
+	decrypted, err := Decrypt(ciphertext, &key)
+	if err != nil {
+		t.Error("Unexpected err:", err)
+	}
 
 	if !bytes.Equal(decrypted, plaintext) {
 		t.Error("Decrypted != Plaintext; decrypted =", string(decrypted))

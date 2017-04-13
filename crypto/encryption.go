@@ -1,6 +1,10 @@
 package crypto
 
-import "golang.org/x/crypto/nacl/secretbox"
+import (
+	"errors"
+
+	"golang.org/x/crypto/nacl/secretbox"
+)
 
 // Encrypt takes a plaintext and a 32 byte key, encrypts the plaintext with
 // said key using xSalsa20 with a Poly1305 MAC, and returns the ciphertext.
@@ -18,14 +22,17 @@ func Encrypt(plaintext []byte, key *[32]byte) []byte {
 
 // Decrypt takes a ciphertext and a 32 byte key, decrypts the ciphertext with
 // said key, and then returns the plaintext.
-func Decrypt(ciphertext []byte, key *[32]byte) []byte {
+func Decrypt(ciphertext []byte, key *[32]byte) ([]byte, error) {
 	// Grab the nonce from the ciphertext and store it in an array.
 	var nonce [24]byte
 	copy(nonce[:], ciphertext[:24])
 
 	// Decrypt the ciphertext and store the result.
-	plaintext, _ := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
+	plaintext, okay := secretbox.Open([]byte{}, ciphertext[24:], &nonce, key)
+	if !okay {
+		return nil, errors.New("! Decryption failed; data is likely corrupted")
+	}
 
 	// Return the resulting plaintext.
-	return plaintext
+	return plaintext, nil
 }
