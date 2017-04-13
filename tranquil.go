@@ -12,10 +12,11 @@ import (
 	"golang.org/x/crypto/blake2b"
 
 	"github.com/cheggaaa/pb"
+	"github.com/libeclipse/tranquil/auxiliary"
 	"github.com/libeclipse/tranquil/coffer"
 	"github.com/libeclipse/tranquil/crypto"
-	"github.com/libeclipse/tranquil/input"
 	"github.com/libeclipse/tranquil/memory"
+	"github.com/libeclipse/tranquil/stdin"
 )
 
 var (
@@ -63,14 +64,14 @@ remove        - Remove some previously stored data from the database.
 decoys        - Add a variable amount of random decoy data.
 exit          - Exit the program.`
 
-	masterPassword, err = input.GetMasterPassword()
+	masterPassword, err = stdin.GetMasterPassword()
 	if err != nil {
 		return err
 	}
 	fmt.Println("") // For formatting.
 
 	for {
-		cmd := strings.Split(strings.TrimSpace(input.Input("$ ")), " ")
+		cmd := strings.Split(strings.TrimSpace(stdin.Standard("$ ")), " ")
 
 		switch cmd[0] {
 		case "import":
@@ -120,7 +121,7 @@ func importFromDisk(path string) {
 	}
 
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -188,7 +189,7 @@ func importFromDisk(path string) {
 
 func exportToDisk(path string) {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -215,33 +216,22 @@ func exportToDisk(path string) {
 	}
 	defer f.Close()
 
-	// It exists, proceed.
 	totalExportedBytes := 0
-	for n := 0; true; n++ {
-		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
-		if ct == nil {
-			// This one doesn't exist. //EOF
+	chunksChan := auxiliary.PipeFullEntry(rootIdentifier, masterKey)
+	for {
+		// Get chunk of data and check for EOF.
+		chunk := <-chunksChan
+		if chunk == nil {
+			// EOF.
 			break
 		}
 
-		// Decrypt this slice.
-		pt := crypto.Decrypt(ct, masterKey)
-
-		// Unpad this slice and wipe old one.
-		unpadded, e := crypto.Unpad(pt)
-		if e != nil {
-			fmt.Println(e)
-			return
-		}
-		totalExportedBytes += len(unpadded)
-		memory.Wipe(pt)
-
-		// Write to file and wipe plaintext.
-		f.Write(unpadded)
-		memory.Wipe(unpadded)
+		// Write and wipe data.
+		f.Write(chunk)
+		memory.Wipe(chunk)
 
 		// Output progress.
+		totalExportedBytes += len(chunk)
 		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
 	}
 
@@ -250,7 +240,7 @@ func exportToDisk(path string) {
 
 func peak() {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -266,28 +256,18 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	for n := 0; true; n++ {
-		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
-		if ct == nil {
-			// This one doesn't exist. //EOF
+	chunksChan := auxiliary.PipeFullEntry(rootIdentifier, masterKey)
+	for {
+		// Get chunk of data and check for EOF.
+		chunk := <-chunksChan
+		if chunk == nil {
+			// EOF.
 			break
 		}
 
-		// Decrypt this slice.
-		pt := crypto.Decrypt(ct, masterKey)
-
-		// Unpad this slice and wipe old one.
-		unpadded, e := crypto.Unpad(pt)
-		if e != nil {
-			fmt.Println(e)
-			return
-		}
-		memory.Wipe(pt)
-
-		// Write to file and wipe plaintext.
-		fmt.Print(string(unpadded))
-		memory.Wipe(unpadded)
+		// Write and wipe data.
+		fmt.Print(string(chunk))
+		memory.Wipe(chunk)
 	}
 
 	fmt.Println("-----END PLAINTEXT-----")
@@ -295,7 +275,7 @@ func peak() {
 
 func remove() error {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -341,7 +321,7 @@ func decoys() {
 
 	// Get the number of decoys to add as an int.
 	for {
-		numberOfDecoys, err = strconv.Atoi(input.Input("How many decoys do you want to add? "))
+		numberOfDecoys, err = strconv.Atoi(stdin.Standard("How many decoys do you want to add? "))
 		if err == nil {
 			break
 		}

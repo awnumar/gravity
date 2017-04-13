@@ -1,4 +1,4 @@
-package input
+package stdin
 
 import (
 	"bufio"
@@ -15,8 +15,8 @@ import (
 // GetMasterPassword takes the masterPassword from the user while doing all of the verifying stuff.
 func GetMasterPassword() ([]byte, error) {
 	// Prompt user for password and confirmation.
-	masterPassword := SecureInput("- Master password: ")
-	confirmPassword := SecureInput("- Confirm password: ")
+	masterPassword := Secure("- Master password: ")
+	confirmPassword := Secure("- Confirm password: ")
 
 	// Check if password matches confirmation.
 	if !bytes.Equal(masterPassword, confirmPassword) {
@@ -27,8 +27,8 @@ func GetMasterPassword() ([]byte, error) {
 	return masterPassword, nil
 }
 
-// Input reads from stdin while echoing back.
-func Input(prompt string) string {
+// Standard reads from stdin while echoing back.
+func Standard(prompt string) string {
 	// Output prompt.
 	fmt.Print(prompt)
 
@@ -42,8 +42,8 @@ func Input(prompt string) string {
 	return scanner.Text()
 }
 
-// SecureInput gets input without echoing and returns a byte slice.
-func SecureInput(prompt string) []byte {
+// Secure gets input without echoing and returns a byte slice.
+func Secure(prompt string) []byte {
 	// Output prompt.
 	fmt.Print(prompt)
 

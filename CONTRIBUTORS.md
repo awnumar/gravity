@@ -3,7 +3,7 @@
 * **[dotcppfile](https://github.com/dotcppfile)**
 
   * Co-designed the protocol.
-  * Worked on the LightDB implementation.
+  * Worked on the LevelDB implementation.
   * Code review.
 
 * **[Kevin Spinar](https://github.com/alipha)**
