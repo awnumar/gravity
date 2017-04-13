@@ -12,10 +12,10 @@ import (
 
 	"golang.org/x/crypto/blake2b"
 
+	"github.com/libeclipse/tranquil/auxiliary"
 	"github.com/libeclipse/tranquil/coffer"
 	"github.com/libeclipse/tranquil/crypto"
 	"github.com/libeclipse/tranquil/memory"
-	"github.com/libeclipse/tranquil/output"
 	"github.com/libeclipse/tranquil/stdin"
 )
 
@@ -213,7 +213,7 @@ func exportToDisk(path string) {
 	defer f.Close()
 
 	totalExportedBytes := 0
-	chunksChan := output.PipeFullEntry(rootIdentifier, masterKey)
+	chunksChan := auxiliary.PipeFullEntry(rootIdentifier, masterKey)
 	for {
 		// Get chunk of data and check for EOF.
 		chunk := <-chunksChan
@@ -252,7 +252,7 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	chunksChan := output.PipeFullEntry(rootIdentifier, masterKey)
+	chunksChan := auxiliary.PipeFullEntry(rootIdentifier, masterKey)
 	for {
 		// Get chunk of data and check for EOF.
 		chunk := <-chunksChan
