@@ -12,7 +12,6 @@ import (
 	"golang.org/x/crypto/blake2b"
 
 	"github.com/cheggaaa/pb"
-	"github.com/libeclipse/tranquil/auxiliary"
 	"github.com/libeclipse/tranquil/coffer"
 	"github.com/libeclipse/tranquil/crypto"
 	"github.com/libeclipse/tranquil/memory"
@@ -217,21 +216,35 @@ func exportToDisk(path string) {
 	defer f.Close()
 
 	totalExportedBytes := 0
-	chunksChan := auxiliary.PipeFullEntry(rootIdentifier, masterKey)
-	for {
-		// Get chunk of data and check for EOF.
-		chunk := <-chunksChan
-		if chunk == nil {
-			// EOF.
+	for n := 0; true; n++ {
+		// Derive derived_identifier[n]
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		if ct == nil {
+			// This one doesn't exist. //EOF
 			break
 		}
 
+		// Decrypt this slice.
+		pt, err := crypto.Decrypt(ct, masterKey)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// Unpad this slice and wipe old one.
+		unpadded, e := crypto.Unpad(pt)
+		if e != nil {
+			fmt.Println(e)
+			return
+		}
+		totalExportedBytes += len(unpadded)
+		memory.Wipe(pt)
+
 		// Write and wipe data.
-		f.Write(chunk)
-		memory.Wipe(chunk)
+		f.Write(unpadded)
+		memory.Wipe(unpadded)
 
 		// Output progress.
-		totalExportedBytes += len(chunk)
 		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
 	}
 
@@ -256,18 +269,32 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	chunksChan := auxiliary.PipeFullEntry(rootIdentifier, masterKey)
-	for {
-		// Get chunk of data and check for EOF.
-		chunk := <-chunksChan
-		if chunk == nil {
-			// EOF.
+	for n := 0; true; n++ {
+		// Derive derived_identifier[n]
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		if ct == nil {
+			// This one doesn't exist. //EOF
 			break
 		}
 
+		// Decrypt this slice.
+		pt, err := crypto.Decrypt(ct, masterKey)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		// Unpad this slice and wipe old one.
+		unpadded, e := crypto.Unpad(pt)
+		if e != nil {
+			fmt.Println(e)
+			return
+		}
+		memory.Wipe(pt)
+
 		// Write and wipe data.
-		fmt.Print(string(chunk))
-		memory.Wipe(chunk)
+		fmt.Print(string(unpadded))
+		memory.Wipe(unpadded)
 	}
 
 	fmt.Println("-----END PLAINTEXT-----")
