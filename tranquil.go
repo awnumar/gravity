@@ -14,9 +14,9 @@ import (
 
 	"github.com/libeclipse/tranquil/coffer"
 	"github.com/libeclipse/tranquil/crypto"
-	"github.com/libeclipse/tranquil/input"
 	"github.com/libeclipse/tranquil/memory"
 	"github.com/libeclipse/tranquil/output"
+	"github.com/libeclipse/tranquil/stdin"
 )
 
 var (
@@ -64,14 +64,14 @@ remove        - Remove some previously stored data from the database.
 decoys        - Add a variable amount of random decoy data.
 exit          - Exit the program.`
 
-	masterPassword, err = input.GetMasterPassword()
+	masterPassword, err = stdin.GetMasterPassword()
 	if err != nil {
 		return err
 	}
 	fmt.Println("") // For formatting.
 
 	for {
-		cmd := strings.Split(strings.TrimSpace(input.Input("$ ")), " ")
+		cmd := strings.Split(strings.TrimSpace(stdin.Standard("$ ")), " ")
 
 		switch cmd[0] {
 		case "import":
@@ -121,7 +121,7 @@ func importFromDisk(path string) {
 	}
 
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -185,7 +185,7 @@ func importFromDisk(path string) {
 
 func exportToDisk(path string) {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -236,7 +236,7 @@ func exportToDisk(path string) {
 
 func peak() {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -271,7 +271,7 @@ func peak() {
 
 func remove() error {
 	// Prompt the user for the identifier.
-	identifier := input.SecureInput("- Secure identifier: ")
+	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
@@ -317,11 +317,11 @@ func decoys() {
 
 	// Get the number of decoys to add as an int.
 	for {
-		numberOfDecoys, err = strconv.Atoi(input.Input("How many decoys do you want to add? "))
+		numberOfDecoys, err = strconv.Atoi(stdin.Standard("How many decoys do you want to add? "))
 		if err == nil {
 			break
 		}
-		fmt.Println("! Input must be an integer")
+		fmt.Println("! stdin must be an integer")
 	}
 
 	count := 0
