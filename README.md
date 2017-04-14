@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="dissident.png" height="140" />
+  <img src="https://cdn.rawgit.com/libeclipse/pocket/master/pocket.svg" height="140" />
   <h3 align="center">Dissident (beta)</h3>
   <p align="center">An encryption program that prioritises deniability.</p>
   <p align="center">
