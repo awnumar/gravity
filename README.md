@@ -4,7 +4,7 @@
   <p align="center">An encryption program that prioritises deniability.</p>
   <p align="center">
     <a href="https://travis-ci.org/libeclipse/dissident"><img src="https://travis-ci.org/libeclipse/dissident.svg?branch=master"></a>
-    <a href="https://ci.appveyor.com/project/libeclipse/dissident/branch/master"><img src="https://ci.appveyor.com/api/projects/status/cm3cc244ct0yt92s/branch/master?svg=true"></a>
+    <a href="https://ci.appveyor.com/project/libeclipse/dissident/branch/master"><img src="https://ci.appveyor.com/api/projects/status/9v38wh14fa6klc7v/branch/master?svg=true"></a>
     <a href="https://dependencyci.com/github/libeclipse/dissident"><img src="https://dependencyci.com/github/libeclipse/dissident/badge"></a>
     <a href="https://goreportcard.com/report/github.com/libeclipse/dissident"><img src="https://goreportcard.com/badge/github.com/libeclipse/dissident"></a>
   </p>
