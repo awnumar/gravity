@@ -1,5 +1,5 @@
-package: github.com/libeclipse/tranquil
-homepage: https://github.com/libeclipse/tranquil
+package: github.com/libeclipse/dissident
+homepage: https://github.com/libeclipse/dissident
 license: GPL-3.0
 owners:
 - name: Awn

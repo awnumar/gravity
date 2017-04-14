@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/libeclipse/tranquil/coffer"
-	"github.com/libeclipse/tranquil/memory/memlock"
+	"github.com/libeclipse/dissident/coffer"
+	"github.com/libeclipse/dissident/memory/memlock"
 )
 
 var (

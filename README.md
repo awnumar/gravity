@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="tranquil.png" height="140" />
-  <h3 align="center">Tranquil (beta)</h3>
+  <img src="dissident.png" height="140" />
+  <h3 align="center">Dissident (beta)</h3>
   <p align="center">An encryption program that prioritises deniability.</p>
   <p align="center">
-    <a href="https://travis-ci.org/libeclipse/tranquil"><img src="https://travis-ci.org/libeclipse/tranquil.svg?branch=master"></a>
-    <a href="https://ci.appveyor.com/project/libeclipse/tranquil/branch/master"><img src="https://ci.appveyor.com/api/projects/status/cm3cc244ct0yt92s/branch/master?svg=true"></a>
-    <a href="https://dependencyci.com/github/libeclipse/tranquil"><img src="https://dependencyci.com/github/libeclipse/tranquil/badge"></a>
-    <a href="https://goreportcard.com/report/github.com/libeclipse/tranquil"><img src="https://goreportcard.com/badge/github.com/libeclipse/tranquil"></a>
+    <a href="https://travis-ci.org/libeclipse/dissident"><img src="https://travis-ci.org/libeclipse/dissident.svg?branch=master"></a>
+    <a href="https://ci.appveyor.com/project/libeclipse/dissident/branch/master"><img src="https://ci.appveyor.com/api/projects/status/cm3cc244ct0yt92s/branch/master?svg=true"></a>
+    <a href="https://dependencyci.com/github/libeclipse/dissident"><img src="https://dependencyci.com/github/libeclipse/dissident/badge"></a>
+    <a href="https://goreportcard.com/report/github.com/libeclipse/dissident"><img src="https://goreportcard.com/badge/github.com/libeclipse/dissident"></a>
   </p>
 </p>
 
@@ -14,13 +14,13 @@
 
 Plausible deniability is defined as *a condition in which a subject can safely and believably deny knowledge of any particular truth that may exist so as to shield the subject from any responsibility associated with the knowledge of such truth*.
 
-We think that's a beautiful idea, and so, that is what Tranquil gives you.
+We think that's a beautiful idea, and so, that is what Dissident gives you.
 
 ## What it does
 
-**Tranquil hides the length, content, and existence of data...**
+**Dissident hides the length, content, and existence of data...**
 
-To achieve this, Tranquil stores data in fixed-sized entries, each indifferentiable from any other. You are able to generate and add as many random entries as you like, and so---since no one would ever know if you did---you can claim that any data that is in the database is composed of decoys.
+To achieve this, Dissident stores data in fixed-sized entries, each indifferentiable from any other. You are able to generate and add as many random entries as you like, and so---since no one would ever know if you did---you can claim that any data that is in the database is composed of decoys.
 
 All data can be decoys, so an adversary cannot be sure that there is any real data.
 
@@ -34,7 +34,7 @@ Both the master password together with the identifier are needed to locate the c
 
 You are able to use any master password for an entry, and under each master password you can store as many ciphertexts as you'd like.
 
-So if you pick a second *decoy* master password and store a bunch of legitimate-looking entries under it, then---if you are ever forced to disclose your keys---you can give up this decoy master password and its identifiers. The rest of the data in the database is simply composed of random decoys added by Tranquil. (\*wink wink\*)
+So if you pick a second *decoy* master password and store a bunch of legitimate-looking entries under it, then---if you are ever forced to disclose your keys---you can give up this decoy master password and its identifiers. The rest of the data in the database is simply composed of random decoys added by Dissident. (\*wink wink\*)
 
 The complete protocol can be found [here](PROTOCOL).
 
@@ -42,11 +42,11 @@ The complete protocol can be found [here](PROTOCOL).
 
 Simply run:
 
-`$ go get github.com/libeclipse/tranquil`
+`$ go get github.com/libeclipse/dissident`
 
-This will fetch, compile, and install Tranquil automatically. If you have `$GOPATH` in your PATH, you should be able to run it with a simple:
+This will fetch, compile, and install Dissident automatically. If you have `$GOPATH` in your PATH, you should be able to run it with a simple:
 
-`$ tranquil`
+`$ dissident`
 
 ## Responsible disclosure
 

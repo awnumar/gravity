@@ -3,7 +3,7 @@ package crypto
 import (
 	"encoding/binary"
 
-	"github.com/libeclipse/tranquil/memory"
+	"github.com/libeclipse/dissident/memory"
 	"golang.org/x/crypto/blake2b"
 	"golang.org/x/crypto/scrypt"
 )
