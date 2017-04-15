@@ -11,13 +11,12 @@ import (
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
 func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
 	// Allocate and protect memory for the concatenated values, and append the values to it.
-	concatenatedValues := make([]byte, len(masterPassword)+len(identifier))
-	memory.Protect(concatenatedValues)
-	concatenatedValues = append(masterPassword, identifier...)
+	concatenatedValues := memory.MakeProtected(len(masterPassword) + len(identifier))
+	copy(concatenatedValues[:len(masterPassword)], masterPassword)
+	copy(concatenatedValues[len(masterPassword):], identifier)
 
 	// Allocate and protect memory for the output of the hash function, and put the output into it.
-	rootKeySlice := make([]byte, 64)
-	memory.Protect(rootKeySlice)
+	rootKeySlice := memory.MakeProtected(64)
 	rootKeySlice, _ = scrypt.Key(
 		concatenatedValues,       // Input data.
 		[]byte(""),               // Salt.

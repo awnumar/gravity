@@ -144,8 +144,9 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
+	var chunkIndex uint64
+	totalImportedBytes := 0
 	buffer := make([]byte, 4095)
-	chunkIndex, totalImportedBytes := 0, 0
 	for {
 		b, err := f.Read(buffer)
 		if err != nil {
@@ -211,8 +212,9 @@ func exportToDisk(path string) {
 	}
 	defer f.Close()
 
+	var n uint64
 	totalExportedBytes := 0
-	for n := 0; true; n++ {
+	for n = 0; true; n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
 		if ct == nil {
@@ -265,7 +267,8 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	for n := 0; true; n++ {
+	var n uint64
+	for n = 0; true; n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
 		if ct == nil {
@@ -306,7 +309,8 @@ func remove() error {
 
 	// Delete all the pieces.
 	count := 0
-	for n := 0; true; n++ {
+	var n uint64
+	for n = 0; true; n++ {
 		// Get the DeriveIdentifierN for this n.
 		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
 
