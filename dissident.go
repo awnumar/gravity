@@ -212,11 +212,10 @@ func exportToDisk(path string) {
 	}
 	defer f.Close()
 
-	var n uint64
 	totalExportedBytes := 0
-	for n = 0; true; n++ {
+	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
 		if ct == nil {
 			// This one doesn't exist. //EOF
 			break
@@ -267,10 +266,9 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	var n uint64
-	for n = 0; true; n++ {
+	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
 		if ct == nil {
 			// This one doesn't exist. //EOF
 			break
@@ -309,10 +307,9 @@ func remove() error {
 
 	// Delete all the pieces.
 	count := 0
-	var n uint64
-	for n = 0; true; n++ {
+	for n := new(uint64); true; *n++ {
 		// Get the DeriveIdentifierN for this n.
-		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
+		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, *n)
 
 		// Check if it exists.
 		if coffer.Exists(derivedIdentifierN) {
