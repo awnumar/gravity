@@ -70,6 +70,16 @@ func Cleanup() {
 	lockers.Wait()
 }
 
+// MakeProtected creates a byte slice of length l, but protects it before returning.
+func MakeProtected(l int) []byte {
+	// Create a byte slice of length l and protect it.
+	b := make([]byte, l)
+	Protect(b)
+
+	// Return the created slice.
+	return b
+}
+
 // Wipe takes a byte slice and zeroes it out.
 func Wipe(b []byte) {
 	for i := 0; i < len(b); i++ {

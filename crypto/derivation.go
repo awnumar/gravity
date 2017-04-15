@@ -36,13 +36,18 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 }
 
 // DeriveIdentifierN derives a value for derivedIdentifier for a value of `n`.
-func DeriveIdentifierN(rootIdentifier []byte, n int) []byte {
+func DeriveIdentifierN(rootIdentifier []byte, n uint64) []byte {
 	// Convert n to a byte slice.
-	byteN := make([]byte, 4)
-	binary.LittleEndian.PutUint32(byteN, uint32(n))
+	byteN := make([]byte, 8)
+	binary.LittleEndian.PutUint64(byteN, n)
+
+	// Append the uint64 to the root identifier.
+	hashArg := memory.MakeProtected(32)
+	copy(hashArg, rootIdentifier)
+	hashArg = append(hashArg, byteN...)
 
 	// Derive derivedIdentifier.
-	derivedIdentifier := blake2b.Sum256(append(rootIdentifier, byteN...))
+	derivedIdentifier := blake2b.Sum256(hashArg)
 
 	// Return as slice instead of array.
 	return derivedIdentifier[:]

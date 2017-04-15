@@ -35,6 +35,15 @@ func TestLocking(t *testing.T) {
 	}
 }
 
+func TestMakeProtected(t *testing.T) {
+	b := MakeProtected(32)
+
+	// Test if its length is really 32.
+	if len(b) != 32 {
+		t.Error("len(b) != 32")
+	}
+}
+
 func TestWipe(t *testing.T) {
 	// Declare specimen byte slice.
 	b := []byte("yellow submarine")
