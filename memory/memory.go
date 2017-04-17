@@ -5,8 +5,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/libeclipse/tranquil/coffer"
-	"github.com/libeclipse/tranquil/memory/memlock"
+	"github.com/libeclipse/dissident/coffer"
+	"github.com/libeclipse/dissident/memory/memlock"
 )
 
 var (
@@ -68,6 +68,16 @@ func Cleanup() {
 
 	// Wait for them all to finish.
 	lockers.Wait()
+}
+
+// MakeProtected creates a byte slice of length l, but protects it before returning.
+func MakeProtected(l int) []byte {
+	// Create a byte slice of length l and protect it.
+	b := make([]byte, l)
+	Protect(b)
+
+	// Return the created slice.
+	return b
 }
 
 // Wipe takes a byte slice and zeroes it out.

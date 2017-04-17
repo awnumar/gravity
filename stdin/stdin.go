@@ -7,7 +7,7 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/libeclipse/tranquil/memory"
+	"github.com/libeclipse/dissident/memory"
 
 	"golang.org/x/crypto/ssh/terminal"
 )

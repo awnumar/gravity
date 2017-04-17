@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/libeclipse/tranquil/memory"
+	"github.com/libeclipse/dissident/memory"
 )
 
 // GenerateRandomBytes generates cryptographically secure random bytes.

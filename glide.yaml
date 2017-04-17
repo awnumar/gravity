@@ -1,13 +1,15 @@
-package: github.com/libeclipse/tranquil
-homepage: https://github.com/libeclipse/tranquil
+package: github.com/libeclipse/dissident
+homepage: https://github.com/libeclipse/dissident
 license: GPL-3.0
 owners:
 - name: Awn
-  email: awn@cryptolosophy.io
+  email: libeclipse@gmail.com
   homepage: https://cryptolosophy.io
 import:
+- package: github.com/Jeffail/gabs
+  version: ^1.0.0
 - package: github.com/cheggaaa/pb
-  version: ~1.0.13
+  version: ^1.0.13
 - package: github.com/syndtr/goleveldb
   subpackages:
   - leveldb
