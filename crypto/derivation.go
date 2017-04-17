@@ -26,7 +26,7 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 		costFactor["p"],          // Scrypt parameter p.
 		64)                       // Output hash length.
 
-	// Force the Go GC to do its job,
+	// Force the Go GC to do its job.
 	debug.FreeOSMemory()
 
 	// Allocate a protected array to hold the key, and copy the key into it.
