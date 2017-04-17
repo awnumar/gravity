@@ -6,6 +6,8 @@ owners:
   email: libeclipse@gmail.com
   homepage: https://cryptolosophy.io
 import:
+- package: github.com/Jeffail/gabs
+  version: ~1.0.0
 - package: github.com/syndtr/goleveldb
   subpackages:
   - leveldb

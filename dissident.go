@@ -15,6 +15,7 @@ import (
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
 	"github.com/libeclipse/dissident/memory"
+	"github.com/libeclipse/dissident/meta"
 	"github.com/libeclipse/dissident/stdin"
 )
 
@@ -145,7 +146,7 @@ func importFromDisk(path string) {
 	defer f.Close()
 
 	var chunkIndex uint64
-	totalImportedBytes := 0
+	var totalImportedBytes int64
 	buffer := make([]byte, 4095)
 	for {
 		b, err := f.Read(buffer)
@@ -156,7 +157,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
-		totalImportedBytes += b
+		totalImportedBytes += int64(b)
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -179,6 +180,11 @@ func importFromDisk(path string) {
 		// Output progress.
 		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(totalImportedBytes)/float64(info.Size())*100)), info.Size())
 	}
+
+	// Add the metadata to coffer.
+	meta.Create()
+	meta.Set(totalImportedBytes, "length")
+	meta.Save(rootIdentifier, masterKey)
 
 	fmt.Println("\n+ Imported successfully.")
 }

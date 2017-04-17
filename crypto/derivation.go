@@ -52,12 +52,12 @@ func DeriveIdentifierN(rootIdentifier []byte, n uint64) []byte {
 	return derivedIdentifier[:]
 }
 
-// DeriveMetaIdentifierN does the same as DeriveIdentifierN but uses signed 64 bit integers
-// instead of unsigned. The intended purpose is for storing metadata and header information.
-func DeriveMetaIdentifierN(rootIdentifier []byte, n int64) []byte {
+// DeriveMetaIdentifierN does the same as DeriveIdentifierN but uses signed integers instead of
+// unsigned 64 bit unsigned. The intended purpose is for storing metadata and header information.
+func DeriveMetaIdentifierN(rootIdentifier []byte, n int) []byte {
 	// Convert n to a byte slice.
 	byteN := make([]byte, 10)
-	binary.PutVarint(byteN, n)
+	binary.PutVarint(byteN, int64(n))
 
 	// Append the uint64 to the root identifier.
 	hashArg := memory.MakeProtected(32)

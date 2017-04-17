@@ -50,7 +50,7 @@ func TestDeriveMetaIdentifierN(t *testing.T) {
 
 	for i, v := range values {
 		actualValue, _ := base64.StdEncoding.DecodeString(v)
-		if !bytes.Equal(DeriveMetaIdentifierN(rootIdentifier, int64(-i-1)), actualValue) {
+		if !bytes.Equal(DeriveMetaIdentifierN(rootIdentifier, -i-1), actualValue) {
 			t.Errorf("When n=%d, derivedIdentifierN != actualValue", i)
 		}
 	}

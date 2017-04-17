@@ -1,8 +1,10 @@
-hash: 91b32d3f761555c1f7f85bbc89efdd9ddc89da649d1fe264ebea631bbe52d756
-updated: 2017-04-08T21:22:42.180442254+01:00
+hash: c4a748d6c155a01293b84f2032e1c502c08936d7914fd9d5bbd46b94312454c5
+updated: 2017-04-17T13:47:51.052601656+01:00
 imports:
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/Jeffail/gabs
+  version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
 - name: github.com/syndtr/goleveldb
   version: 3c5717caf1475fd25964109a0fc640bd150fce43
   subpackages:
