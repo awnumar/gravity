@@ -146,6 +146,7 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
+
 	// Create and configure the progress bar object.
 	bar := pb.New64(info.Size()).Prefix("+ Importing ")
 	bar.ShowCounters = false
