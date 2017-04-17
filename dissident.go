@@ -182,9 +182,10 @@ func importFromDisk(path string) {
 	}
 
 	// Add the metadata to coffer.
-	meta.Create()
+	meta.New()
 	meta.Set(totalImportedBytes, "length")
 	meta.Save(rootIdentifier, masterKey)
+	meta.Reset()
 
 	fmt.Println("\n+ Imported successfully.")
 }
@@ -218,6 +219,13 @@ func exportToDisk(path string) {
 	}
 	defer f.Close()
 
+	// Get the metadata first.
+	meta.New()
+	meta.Retrieve(rootIdentifier, masterKey)
+	lenData := meta.GetLength("length")
+	meta.Reset()
+
+	// Grab the data.
 	totalExportedBytes := 0
 	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
@@ -248,7 +256,7 @@ func exportToDisk(path string) {
 		memory.Wipe(unpadded)
 
 		// Output progress.
-		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
+		fmt.Printf("\r+ Exported %d%% of %d bytes...", int(math.Floor(float64(totalExportedBytes)/float64(lenData)*100)), lenData)
 	}
 
 	fmt.Printf("\n+ Saved to %s\n", path)
@@ -310,6 +318,9 @@ func remove() error {
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
 	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
+	// Remove all metadata.
+	meta.Remove(rootIdentifier)
 
 	// Delete all the pieces.
 	count := 0
