@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"os/signal"
 	"strconv"
@@ -146,10 +145,15 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
+	// Add the metadata to coffer.
+	fmt.Println("+ Adding metadata...")
+	metadata.New()
+	metadata.Set(info.Size(), "length")
+	metadata.Save(rootIdentifier, masterKey)
+	metadata.Reset()
 
 	// Create and configure the progress bar object.
 	bar := pb.New64(info.Size()).Prefix("+ Importing ")
-	bar.ShowCounters = false
 	bar.ShowTimeLeft = true
 	bar.ShowSpeed = true
 	bar.SetUnits(pb.U_BYTES)
@@ -189,13 +193,6 @@ func importFromDisk(path string) {
 	}
 	bar.Finish()
 
-	// Add the metadata to coffer.
-	fmt.Println("+ Adding metadata...")
-	metadata.New()
-	metadata.Set(info.Size(), "length")
-	metadata.Save(rootIdentifier, masterKey)
-	metadata.Reset()
-
 	fmt.Println("+ Imported successfully.")
 }
 
@@ -234,8 +231,14 @@ func exportToDisk(path string) {
 	lenData := metadata.GetLength("length")
 	metadata.Reset()
 
+	// Create and configure the progress bar object.
+	bar := pb.New64(lenData).Prefix("+ Exporting ")
+	bar.ShowTimeLeft = true
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
+
 	// Grab the data.
-	totalExportedBytes := 0
 	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
@@ -257,18 +260,14 @@ func exportToDisk(path string) {
 			fmt.Println(e)
 			return
 		}
-		totalExportedBytes += len(unpadded)
+		bar.Add(len(unpadded))
 		memory.Wipe(pt)
 
 		// Write and wipe data.
 		f.Write(unpadded)
 		memory.Wipe(unpadded)
-
-		// Output progress.
-		fmt.Printf("\r+ Exported %d%% of %d bytes...", int(math.Floor(float64(totalExportedBytes)/float64(lenData)*100)), lenData)
 	}
-
-	fmt.Printf("\n+ Saved to %s\n", path)
+	bar.FinishPrint(fmt.Sprintf("+ Saved to %s", path))
 }
 
 func peak() {
