@@ -15,7 +15,7 @@ import (
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
 	"github.com/libeclipse/dissident/memory"
-	"github.com/libeclipse/dissident/meta"
+	"github.com/libeclipse/dissident/metadata"
 	"github.com/libeclipse/dissident/stdin"
 )
 
@@ -182,10 +182,10 @@ func importFromDisk(path string) {
 	}
 
 	// Add the metadata to coffer.
-	meta.New()
-	meta.Set(totalImportedBytes, "length")
-	meta.Save(rootIdentifier, masterKey)
-	meta.Reset()
+	metadata.New()
+	metadata.Set(totalImportedBytes, "length")
+	metadata.Save(rootIdentifier, masterKey)
+	metadata.Reset()
 
 	fmt.Println("\n+ Imported successfully.")
 }
@@ -220,10 +220,10 @@ func exportToDisk(path string) {
 	defer f.Close()
 
 	// Get the metadata first.
-	meta.New()
-	meta.Retrieve(rootIdentifier, masterKey)
-	lenData := meta.GetLength("length")
-	meta.Reset()
+	metadata.New()
+	metadata.Retrieve(rootIdentifier, masterKey)
+	lenData := metadata.GetLength("length")
+	metadata.Reset()
 
 	// Grab the data.
 	totalExportedBytes := 0
@@ -320,7 +320,7 @@ func remove() error {
 	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
 	// Remove all metadata.
-	meta.Remove(rootIdentifier)
+	metadata.Remove(rootIdentifier)
 
 	// Delete all the pieces.
 	count := 0
