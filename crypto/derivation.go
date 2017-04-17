@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"encoding/binary"
+	"runtime/debug"
 
 	"github.com/libeclipse/dissident/memory"
 	"golang.org/x/crypto/blake2b"
@@ -11,13 +12,12 @@ import (
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
 func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
 	// Allocate and protect memory for the concatenated values, and append the values to it.
-	concatenatedValues := make([]byte, len(masterPassword)+len(identifier))
-	memory.Protect(concatenatedValues)
-	concatenatedValues = append(masterPassword, identifier...)
+	concatenatedValues := memory.MakeProtected(len(masterPassword) + len(identifier))
+	copy(concatenatedValues[:len(masterPassword)], masterPassword)
+	copy(concatenatedValues[len(masterPassword):], identifier)
 
 	// Allocate and protect memory for the output of the hash function, and put the output into it.
-	rootKeySlice := make([]byte, 64)
-	memory.Protect(rootKeySlice)
+	rootKeySlice := memory.MakeProtected(64)
 	rootKeySlice, _ = scrypt.Key(
 		concatenatedValues,       // Input data.
 		[]byte(""),               // Salt.
@@ -25,6 +25,9 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 		costFactor["r"],          // Scrypt parameter r.
 		costFactor["p"],          // Scrypt parameter p.
 		64)                       // Output hash length.
+
+	// Force the Go GC to do its job.
+	debug.FreeOSMemory()
 
 	// Allocate a protected array to hold the key, and copy the key into it.
 	var masterKey [32]byte
@@ -36,13 +39,37 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 }
 
 // DeriveIdentifierN derives a value for derivedIdentifier for a value of `n`.
-func DeriveIdentifierN(rootIdentifier []byte, n int) []byte {
+func DeriveIdentifierN(rootIdentifier []byte, n uint64) []byte {
 	// Convert n to a byte slice.
-	byteN := make([]byte, 4)
-	binary.LittleEndian.PutUint32(byteN, uint32(n))
+	byteN := make([]byte, 8)
+	binary.LittleEndian.PutUint64(byteN, n)
+
+	// Append the uint64 to the root identifier.
+	hashArg := memory.MakeProtected(32)
+	copy(hashArg, rootIdentifier)
+	hashArg = append(hashArg, byteN...)
 
 	// Derive derivedIdentifier.
-	derivedIdentifier := blake2b.Sum256(append(rootIdentifier, byteN...))
+	derivedIdentifier := blake2b.Sum256(hashArg)
+
+	// Return as slice instead of array.
+	return derivedIdentifier[:]
+}
+
+// DeriveMetaIdentifierN does the same as DeriveIdentifierN but uses signed integers instead of
+// unsigned 64 bit unsigned. The intended purpose is for storing metadata and header information.
+func DeriveMetaIdentifierN(rootIdentifier []byte, n int) []byte {
+	// Convert n to a byte slice.
+	byteN := make([]byte, 10)
+	binary.PutVarint(byteN, int64(n))
+
+	// Append the uint64 to the root identifier.
+	hashArg := memory.MakeProtected(32)
+	copy(hashArg, rootIdentifier)
+	hashArg = append(hashArg, byteN...)
+
+	// Derive derivedIdentifier.
+	derivedIdentifier := blake2b.Sum256(hashArg)
 
 	// Return as slice instead of array.
 	return derivedIdentifier[:]

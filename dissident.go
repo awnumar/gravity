@@ -15,6 +15,7 @@ import (
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
 	"github.com/libeclipse/dissident/memory"
+	"github.com/libeclipse/dissident/metadata"
 	"github.com/libeclipse/dissident/stdin"
 )
 
@@ -144,8 +145,9 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
+	var chunkIndex uint64
+	var totalImportedBytes int64
 	buffer := make([]byte, 4095)
-	chunkIndex, totalImportedBytes := 0, 0
 	for {
 		b, err := f.Read(buffer)
 		if err != nil {
@@ -155,7 +157,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
-		totalImportedBytes += b
+		totalImportedBytes += int64(b)
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -179,7 +181,14 @@ func importFromDisk(path string) {
 		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(totalImportedBytes)/float64(info.Size())*100)), info.Size())
 	}
 
-	fmt.Println("\n+ Imported successfully.")
+	// Add the metadata to coffer.
+	fmt.Println("\n+ Adding metadata...")
+	metadata.New()
+	metadata.Set(totalImportedBytes, "length")
+	metadata.Save(rootIdentifier, masterKey)
+	metadata.Reset()
+
+	fmt.Println("+ Imported successfully.")
 }
 
 func exportToDisk(path string) {
@@ -211,10 +220,17 @@ func exportToDisk(path string) {
 	}
 	defer f.Close()
 
+	// Get the metadata first.
+	metadata.New()
+	metadata.Retrieve(rootIdentifier, masterKey)
+	lenData := metadata.GetLength("length")
+	metadata.Reset()
+
+	// Grab the data.
 	totalExportedBytes := 0
-	for n := 0; true; n++ {
+	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
 		if ct == nil {
 			// This one doesn't exist. //EOF
 			break
@@ -241,7 +257,7 @@ func exportToDisk(path string) {
 		memory.Wipe(unpadded)
 
 		// Output progress.
-		fmt.Printf("\r+ Exported %d bytes...", totalExportedBytes)
+		fmt.Printf("\r+ Exported %d%% of %d bytes...", int(math.Floor(float64(totalExportedBytes)/float64(lenData)*100)), lenData)
 	}
 
 	fmt.Printf("\n+ Saved to %s\n", path)
@@ -265,9 +281,9 @@ func peak() {
 	// It exists, proceed.
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
-	for n := 0; true; n++ {
+	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, n))
+		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
 		if ct == nil {
 			// This one doesn't exist. //EOF
 			break
@@ -304,11 +320,14 @@ func remove() error {
 	fmt.Println("+ Generating root key...")
 	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
+	// Remove all metadata.
+	metadata.Remove(rootIdentifier)
+
 	// Delete all the pieces.
 	count := 0
-	for n := 0; true; n++ {
+	for n := new(uint64); true; *n++ {
 		// Get the DeriveIdentifierN for this n.
-		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, n)
+		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, *n)
 
 		// Check if it exists.
 		if coffer.Exists(derivedIdentifierN) {

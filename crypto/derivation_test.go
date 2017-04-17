@@ -28,13 +28,29 @@ func TestDeriveIdentifierN(t *testing.T) {
 	rootIdentifier, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
 
 	values := []string{
-		"hZlSQx9fRk9njp7F1NEs+uVowIU/7DcCXZiuW3kAG2g=",
-		"PT3TYsQ23cJaxhi250QKdUMVUGGEoddspT9nAeSFoj0=",
-		"jKNwKnosCmInggyaqFX/OWehVjtWIywjiyTvgCRZ+T8="}
+		"pA095wqN05ms+VQVq+BjIowWQcL6NDw9DbcfMrzTYuk=",
+		"iJ+nOpssBHjQYEooof4Ka6BtfXgsA3OZRkLUcNQ/u5Y=",
+		"msqNW6pT9+EhpPuo76/tObIcFyqkj+w/0raBsja+Q6I="}
 
 	for i, v := range values {
 		actualValue, _ := base64.StdEncoding.DecodeString(v)
-		if !bytes.Equal(DeriveIdentifierN(rootIdentifier, i), actualValue) {
+		if !bytes.Equal(DeriveIdentifierN(rootIdentifier, uint64(i)), actualValue) {
+			t.Errorf("When n=%d, derivedIdentifierN != actualValue", i)
+		}
+	}
+}
+
+func TestDeriveMetaIdentifierN(t *testing.T) {
+	rootIdentifier, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
+
+	values := []string{
+		"/Om2e4K6GuC8HVsUcNoIAQtxbXRjZU6XVW6MRjrXVwU=",
+		"TQkDMuXFyJfkR4dzRitLVS106s+/8GP9FHBtw6X0nHc=",
+		"OKmgv/NCwMUm5TbrDNXV+PPGk6XEc1IhWzhSqEMawzQ="}
+
+	for i, v := range values {
+		actualValue, _ := base64.StdEncoding.DecodeString(v)
+		if !bytes.Equal(DeriveMetaIdentifierN(rootIdentifier, -i-1), actualValue) {
 			t.Errorf("When n=%d, derivedIdentifierN != actualValue", i)
 		}
 	}
