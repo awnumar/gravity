@@ -182,13 +182,13 @@ func importFromDisk(path string) {
 	}
 
 	// Add the metadata to coffer.
-	fmt.Println("\n+ Adding metadata...")
+	fmt.Println("+ Adding metadata...")
 	metadata.New()
 	metadata.Set(totalImportedBytes, "length")
 	metadata.Save(rootIdentifier, masterKey)
 	metadata.Reset()
 
-	fmt.Println("+ Imported successfully.")
+	fmt.Println("\n+ Imported successfully.")
 }
 
 func exportToDisk(path string) {
