@@ -40,7 +40,7 @@ func Get(path string) interface{} {
 func GetLength(path string) int64 {
 	value := metaObj.Path(path).Data()
 	if value == nil {
-		fmt.Println("! No length field found")
+		fmt.Println("! No length field found; was importing interrupted?")
 		memory.SafeExit(1)
 	}
 

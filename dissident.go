@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"os/signal"
 	"strconv"
@@ -12,6 +11,7 @@ import (
 
 	"golang.org/x/crypto/blake2b"
 
+	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
 	"github.com/libeclipse/dissident/memory"
@@ -145,8 +145,22 @@ func importFromDisk(path string) {
 	}
 	defer f.Close()
 
+	// Add the metadata to coffer.
+	fmt.Println("+ Adding metadata...")
+	metadata.New()
+	metadata.Set(info.Size(), "length")
+	metadata.Save(rootIdentifier, masterKey)
+	metadata.Reset()
+
+	// Create and configure the progress bar object.
+	bar := pb.New64(info.Size()).Prefix("+ Importing ")
+	bar.ShowTimeLeft = true
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
+
+	// Import the data.
 	var chunkIndex uint64
-	var totalImportedBytes int64
 	buffer := make([]byte, 4095)
 	for {
 		b, err := f.Read(buffer)
@@ -157,7 +171,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
-		totalImportedBytes += int64(b)
+		bar.Add(b)
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -176,17 +190,8 @@ func importFromDisk(path string) {
 
 		// Increment counter.
 		chunkIndex++
-
-		// Output progress.
-		fmt.Printf("\r+ Imported %d%% of %d bytes...", int(math.Floor(float64(totalImportedBytes)/float64(info.Size())*100)), info.Size())
 	}
-
-	// Add the metadata to coffer.
-	fmt.Println("\n+ Adding metadata...")
-	metadata.New()
-	metadata.Set(totalImportedBytes, "length")
-	metadata.Save(rootIdentifier, masterKey)
-	metadata.Reset()
+	bar.Finish()
 
 	fmt.Println("+ Imported successfully.")
 }
@@ -226,8 +231,14 @@ func exportToDisk(path string) {
 	lenData := metadata.GetLength("length")
 	metadata.Reset()
 
+	// Create and configure the progress bar object.
+	bar := pb.New64(lenData).Prefix("+ Exporting ")
+	bar.ShowTimeLeft = true
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
+
 	// Grab the data.
-	totalExportedBytes := 0
 	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
@@ -249,18 +260,14 @@ func exportToDisk(path string) {
 			fmt.Println(e)
 			return
 		}
-		totalExportedBytes += len(unpadded)
+		bar.Add(len(unpadded))
 		memory.Wipe(pt)
 
 		// Write and wipe data.
 		f.Write(unpadded)
 		memory.Wipe(unpadded)
-
-		// Output progress.
-		fmt.Printf("\r+ Exported %d%% of %d bytes...", int(math.Floor(float64(totalExportedBytes)/float64(lenData)*100)), lenData)
 	}
-
-	fmt.Printf("\n+ Saved to %s\n", path)
+	bar.FinishPrint(fmt.Sprintf("+ Saved to %s", path))
 }
 
 func peak() {
@@ -370,7 +377,13 @@ func decoys() {
 		fmt.Println("! Input must be an integer")
 	}
 
-	count := 0
+	// Create and configure the progress bar object.
+	bar := pb.New(numberOfDecoys).Prefix("+ Adding ")
+	bar.ShowCounters = false
+	bar.ShowTimeLeft = true
+	bar.ShowSpeed = true
+	bar.Start()
+
 	for i := 0; i < numberOfDecoys; i++ {
 		// Get some random bytes.
 		randomBytes := crypto.GenerateRandomBytes(64)
@@ -390,9 +403,8 @@ func decoys() {
 		// Save to the database.
 		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
 
-		// Increment counter and display progress.
-		count++
-		fmt.Printf("\r+ Added %d%% of %d decoys...", int(math.Floor(float64(count)/float64(numberOfDecoys)*100)), numberOfDecoys)
+		// Increment progress bar.
+		bar.Increment()
 	}
-	fmt.Println("") // For formatting.
+	bar.FinishPrint(fmt.Sprintf("+ Added %d decoys.", numberOfDecoys))
 }
