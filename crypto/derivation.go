@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"encoding/binary"
+	"runtime/debug"
 
 	"github.com/libeclipse/dissident/memory"
 	"golang.org/x/crypto/blake2b"
@@ -24,6 +25,9 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 		costFactor["r"],          // Scrypt parameter r.
 		costFactor["p"],          // Scrypt parameter p.
 		64)                       // Output hash length.
+
+	// Force the Go GC to do its job,
+	debug.FreeOSMemory()
 
 	// Allocate a protected array to hold the key, and copy the key into it.
 	var masterKey [32]byte
