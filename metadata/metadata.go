@@ -14,7 +14,7 @@ var (
 )
 
 // New creates a blank json object to hold the metadata
-// and sets the globally accessable variable to it.
+// and sets the globally accessible variable to it.
 func New() {
 	metaObj = gabs.New()
 }
