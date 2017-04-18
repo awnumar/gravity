@@ -267,7 +267,13 @@ func exportToDisk(path string) {
 		f.Write(unpadded)
 		memory.Wipe(unpadded)
 	}
+
 	bar.FinishPrint(fmt.Sprintf("+ Saved to %s", path))
+
+	// Compare length in metadata to actual exported length.
+	if bar.Get() != lenData {
+		fmt.Println("! Data incomplete; database may be corrupt")
+	}
 }
 
 func peak() {
@@ -286,8 +292,16 @@ func peak() {
 	}
 
 	// It exists, proceed.
+
+	// Get the metadata first.
+	metadata.New()
+	metadata.Retrieve(rootIdentifier, masterKey)
+	lenData := metadata.GetLength("length")
+	metadata.Reset()
+
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
+	var totalExportedBytes int64
 	for n := new(uint64); true; *n++ {
 		// Derive derived_identifier[n]
 		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
@@ -309,6 +323,7 @@ func peak() {
 			fmt.Println(e)
 			return
 		}
+		totalExportedBytes += int64(len(unpadded))
 		memory.Wipe(pt)
 
 		// Write and wipe data.
@@ -317,6 +332,11 @@ func peak() {
 	}
 
 	fmt.Println("-----END PLAINTEXT-----")
+
+	// Compare length in metadata to actual exported length.
+	if totalExportedBytes != lenData {
+		fmt.Println("! Data incomplete; database may be corrupt")
+	}
 }
 
 func remove() error {
