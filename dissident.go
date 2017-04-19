@@ -3,20 +3,21 @@ package main
 import (
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
 	"syscall"
 
-	"golang.org/x/crypto/blake2b"
-
 	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
+	"github.com/libeclipse/dissident/disk"
 	"github.com/libeclipse/dissident/memory"
 	"github.com/libeclipse/dissident/metadata"
 	"github.com/libeclipse/dissident/stdin"
+	"github.com/libeclipse/dissident/ui"
 )
 
 var (
@@ -89,10 +90,7 @@ exit          - Exit the program.`
 		case "peak":
 			peak()
 		case "remove":
-			err = remove()
-			if err != nil {
-				return err
-			}
+			remove()
 		case "decoys":
 			decoys()
 		case "exit":
@@ -105,13 +103,9 @@ exit          - Exit the program.`
 
 func importFromDisk(path string) {
 	// Handle the file.
-	info, err := os.Stat(path)
+	info, err := disk.GetFileInfo(path)
 	if err != nil {
-		if os.IsNotExist(err) {
-			fmt.Printf("! %s does not exist\n", path)
-		} else {
-			fmt.Println(err)
-		}
+		fmt.Println(err)
 		return
 	}
 
@@ -134,13 +128,9 @@ func importFromDisk(path string) {
 		return
 	}
 
-	f, err := os.Open(path)
+	f, err := disk.OpenFileRead(path)
 	if err != nil {
-		if os.IsPermission(err) {
-			fmt.Printf("! Insufficient permissions to open %s\n", path)
-		} else {
-			fmt.Println(err)
-		}
+		fmt.Println(err)
 		return
 	}
 	defer f.Close()
@@ -152,12 +142,8 @@ func importFromDisk(path string) {
 	metadata.Save(rootIdentifier, masterKey)
 	metadata.Reset()
 
-	// Create and configure the progress bar object.
-	bar := pb.New64(info.Size()).Prefix("+ Importing ")
-	bar.ShowTimeLeft = true
-	bar.ShowSpeed = true
-	bar.SetUnits(pb.U_BYTES)
-	bar.Start()
+	// Start the progress bar.
+	bar := ui.StartBar(info.Size(), "+ Importing ", pb.U_BYTES, true, true)
 
 	// Import the data.
 	var chunkIndex uint64
@@ -171,7 +157,7 @@ func importFromDisk(path string) {
 			fmt.Println(err)
 			return
 		}
-		bar.Add(b)
+		bar.Add(b) // Increment the progress bar.
 
 		data := make([]byte, b)
 		copy(data, buffer[:b])
@@ -191,6 +177,7 @@ func importFromDisk(path string) {
 		// Increment counter.
 		chunkIndex++
 	}
+	// We're done. End the progress bar.
 	bar.Finish()
 
 	fmt.Println("+ Imported successfully.")
@@ -212,15 +199,9 @@ func exportToDisk(path string) {
 	}
 
 	// Atempt to open the file now.
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
+	f, err := disk.OpenFileAppend(path)
 	if err != nil {
-		if os.IsExist(err) {
-			fmt.Printf("! %s already exists; cannot overwrite\n", path)
-		} else if os.IsPermission(err) {
-			fmt.Printf("! Insufficient permissions to open %s\n", path)
-		} else {
-			fmt.Println(err)
-		}
+		fmt.Println(err)
 		return
 	}
 	defer f.Close()
@@ -231,12 +212,8 @@ func exportToDisk(path string) {
 	lenData := metadata.GetLength("length")
 	metadata.Reset()
 
-	// Create and configure the progress bar object.
-	bar := pb.New64(lenData).Prefix("+ Exporting ")
-	bar.ShowTimeLeft = true
-	bar.ShowSpeed = true
-	bar.SetUnits(pb.U_BYTES)
-	bar.Start()
+	// Start the progress bar object.
+	bar := ui.StartBar(lenData, "+ Exporting ", pb.U_BYTES, true, true)
 
 	// Grab the data.
 	for n := new(uint64); true; *n++ {
@@ -260,14 +237,14 @@ func exportToDisk(path string) {
 			fmt.Println(e)
 			return
 		}
-		bar.Add(len(unpadded))
+		bar.Add(len(unpadded)) // Increment the progress bar.
 		memory.Wipe(pt)
 
 		// Write and wipe data.
 		f.Write(unpadded)
 		memory.Wipe(unpadded)
 	}
-
+	// We're done. End the progress bar.
 	bar.FinishPrint(fmt.Sprintf("+ Saved to %s", path))
 
 	// Compare length in metadata to actual exported length.
@@ -339,13 +316,31 @@ func peak() {
 	}
 }
 
-func remove() error {
+func remove() {
 	// Prompt the user for the identifier.
 	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
-	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+
+	// Check if this entry exists.
+	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
+	if !coffer.Exists(derivedIdentifierN) {
+		fmt.Println("! There is nothing here to remove")
+		return
+	}
+
+	// Get the metadata first.
+	metadata.New()
+	metadata.Retrieve(rootIdentifier, masterKey)
+	lenData := metadata.GetLength("length")
+	metadata.Reset()
+
+	// Start the progress bar.
+	bar := ui.StartBar(int64(math.Ceil(float64(lenData)/4096)), "+ Removing ", pb.U_NO, false, false)
+	bar.ShowCounters = false
+	bar.Start()
 
 	// Remove all metadata.
 	metadata.Remove(rootIdentifier)
@@ -363,15 +358,12 @@ func remove() error {
 		} else {
 			break
 		}
-	}
 
-	if count != 0 {
-		fmt.Println("+ Successfully removed data.")
-	} else {
-		fmt.Println("! There is nothing here to remove")
+		// Increment progress bar.
+		bar.Increment()
 	}
-
-	return nil
+	// We're done. End the progress bar.
+	bar.FinishPrint("+ Successfully removed data.")
 }
 
 func decoys() {
@@ -398,30 +390,14 @@ func decoys() {
 	}
 
 	// Create and configure the progress bar object.
-	bar := pb.New(numberOfDecoys).Prefix("+ Adding ")
-	bar.ShowCounters = false
-	bar.ShowTimeLeft = true
-	bar.ShowSpeed = true
-	bar.Start()
+	bar := ui.StartBar(int64(numberOfDecoys), "+ Adding ", pb.U_NO, true, true)
 
 	for i := 0; i < numberOfDecoys; i++ {
-		// Get some random bytes.
-		randomBytes := crypto.GenerateRandomBytes(64)
-
-		// Allocate 32 bytes as the key.
-		var key [32]byte
-		masterPassword := randomBytes[0:32]
-		copy(key[:], masterPassword)
-
-		// Allocate 32 bytes as the identifier.
-		identifier := randomBytes[32:64]
-		hashedIdentifier := blake2b.Sum256(identifier)
-
-		// Allocate 32 bytes as the plaintext.
-		plaintext := make([]byte, 4096)
+		// Generate the decoy.
+		identifier, ciphertext := crypto.GenDecoy()
 
 		// Save to the database.
-		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
+		coffer.Save(identifier, ciphertext)
 
 		// Increment progress bar.
 		bar.Increment()
