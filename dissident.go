@@ -13,8 +13,8 @@ import (
 	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
+	"github.com/libeclipse/dissident/data"
 	"github.com/libeclipse/dissident/memory"
-	"github.com/libeclipse/dissident/metadata"
 	"github.com/libeclipse/dissident/stdin"
 )
 
@@ -143,10 +143,10 @@ func importFromDisk(path string) {
 
 	// Add the metadata to coffer.
 	fmt.Println("+ Adding metadata...")
-	metadata.New()
-	metadata.Set(info.Size(), "length")
-	metadata.Save(rootIdentifier, masterKey)
-	metadata.Reset()
+	data.NewMetadataObj()
+	data.SetMetaValue(info.Size(), "length")
+	data.SaveMetadata(rootIdentifier, masterKey)
+	data.ResetMetaDataObj()
 
 	// Start the progress bar.
 	bar := pb.New64(info.Size()).Prefix("+ Importing ")
@@ -222,10 +222,10 @@ func exportToDisk(path string) {
 	defer f.Close()
 
 	// Get the metadata first.
-	metadata.New()
-	metadata.Retrieve(rootIdentifier, masterKey)
-	lenData := metadata.GetLength("length")
-	metadata.Reset()
+	data.NewMetadataObj()
+	data.RetrieveMetadata(rootIdentifier, masterKey)
+	lenData := data.GetMetaLength("length")
+	data.ResetMetaDataObj()
 
 	// Start the progress bar object.
 	bar := pb.New64(lenData).Prefix("+ Exporting ")
@@ -289,10 +289,10 @@ func peak() {
 	// It exists, proceed.
 
 	// Get the metadata first.
-	metadata.New()
-	metadata.Retrieve(rootIdentifier, masterKey)
-	lenData := metadata.GetLength("length")
-	metadata.Reset()
+	data.NewMetadataObj()
+	data.RetrieveMetadata(rootIdentifier, masterKey)
+	lenData := data.GetMetaLength("length")
+	data.ResetMetaDataObj()
 
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
@@ -350,10 +350,10 @@ func remove() {
 	}
 
 	// Get the metadata first.
-	metadata.New()
-	metadata.Retrieve(rootIdentifier, masterKey)
-	lenData := metadata.GetLength("length")
-	metadata.Reset()
+	data.NewMetadataObj()
+	data.RetrieveMetadata(rootIdentifier, masterKey)
+	lenData := data.GetMetaLength("length")
+	data.ResetMetaDataObj()
 
 	// Start the progress bar.
 	bar := pb.New64(int64(math.Ceil(float64(lenData) / 4096))).Prefix("+ Removing ")
@@ -362,7 +362,7 @@ func remove() {
 	bar.Start()
 
 	// Remove all metadata.
-	metadata.Remove(rootIdentifier)
+	data.RemoveMetadata(rootIdentifier)
 
 	// Delete all the pieces.
 	count := 0
