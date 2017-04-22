@@ -16,15 +16,15 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 	copy(concatenatedValues[:len(masterPassword)], masterPassword)
 	copy(concatenatedValues[len(masterPassword):], identifier)
 
-	// Allocate and protect memory for the output of the hash function, and put the output into it.
-	rootKeySlice := memory.MakeProtected(64)
-	rootKeySlice, _ = scrypt.Key(
+	// Derive the rootKey and then protect it.
+	rootKeySlice, _ := scrypt.Key(
 		concatenatedValues,       // Input data.
 		[]byte(""),               // Salt.
 		1<<uint(costFactor["N"]), // Scrypt parameter N.
 		costFactor["r"],          // Scrypt parameter r.
 		costFactor["p"],          // Scrypt parameter p.
 		64)                       // Output hash length.
+	memory.Protect(rootKeySlice)
 
 	// Force the Go GC to do its job.
 	debug.FreeOSMemory()
