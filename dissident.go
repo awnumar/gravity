@@ -13,11 +13,9 @@ import (
 	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
-	"github.com/libeclipse/dissident/disk"
 	"github.com/libeclipse/dissident/memory"
 	"github.com/libeclipse/dissident/metadata"
 	"github.com/libeclipse/dissident/stdin"
-	"github.com/libeclipse/dissident/ui"
 )
 
 var (
@@ -103,9 +101,13 @@ exit          - Exit the program.`
 
 func importFromDisk(path string) {
 	// Handle the file.
-	info, err := disk.GetFileInfo(path)
+	info, err := os.Stat(path)
 	if err != nil {
-		fmt.Println(err)
+		if os.IsNotExist(err) {
+			fmt.Printf("! %s does not exist\n", path)
+		} else {
+			fmt.Println(err)
+		}
 		return
 	}
 
@@ -128,9 +130,13 @@ func importFromDisk(path string) {
 		return
 	}
 
-	f, err := disk.OpenFileRead(path)
+	f, err := os.Open(path)
 	if err != nil {
-		fmt.Println(err)
+		if os.IsPermission(err) {
+			fmt.Printf("! Insufficient permissions to open %s\n", path)
+		} else {
+			fmt.Println(err)
+		}
 		return
 	}
 	defer f.Close()
@@ -143,7 +149,10 @@ func importFromDisk(path string) {
 	metadata.Reset()
 
 	// Start the progress bar.
-	bar := ui.StartBar(info.Size(), "+ Importing ", pb.U_BYTES, true, true)
+	bar := pb.New64(info.Size()).Prefix("+ Importing ")
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
 
 	// Import the data.
 	var chunkIndex uint64
@@ -199,9 +208,15 @@ func exportToDisk(path string) {
 	}
 
 	// Atempt to open the file now.
-	f, err := disk.OpenFileAppend(path)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
 	if err != nil {
-		fmt.Println(err)
+		if os.IsExist(err) {
+			fmt.Printf("! %s already exists; cannot overwrite\n", path)
+		} else if os.IsPermission(err) {
+			fmt.Printf("! Insufficient permissions to open %s\n", path)
+		} else {
+			fmt.Println(err)
+		}
 		return
 	}
 	defer f.Close()
@@ -213,7 +228,10 @@ func exportToDisk(path string) {
 	metadata.Reset()
 
 	// Start the progress bar object.
-	bar := ui.StartBar(lenData, "+ Exporting ", pb.U_BYTES, true, true)
+	bar := pb.New64(lenData).Prefix("+ Exporting ")
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_BYTES)
+	bar.Start()
 
 	// Grab the data.
 	for n := new(uint64); true; *n++ {
@@ -338,8 +356,9 @@ func remove() {
 	metadata.Reset()
 
 	// Start the progress bar.
-	bar := ui.StartBar(int64(math.Ceil(float64(lenData)/4096)), "+ Removing ", pb.U_NO, false, false)
+	bar := pb.New64(int64(math.Ceil(float64(lenData) / 4096))).Prefix("+ Removing ")
 	bar.ShowCounters = false
+	bar.SetUnits(pb.U_NO)
 	bar.Start()
 
 	// Remove all metadata.
@@ -390,7 +409,10 @@ func decoys() {
 	}
 
 	// Create and configure the progress bar object.
-	bar := ui.StartBar(int64(numberOfDecoys), "+ Adding ", pb.U_NO, true, true)
+	bar := pb.New64(int64(numberOfDecoys)).Prefix("+ Adding ")
+	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_NO)
+	bar.Start()
 
 	for i := 0; i < numberOfDecoys; i++ {
 		// Generate the decoy.
