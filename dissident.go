@@ -2,20 +2,17 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
 	"syscall"
 
-	"golang.org/x/crypto/blake2b"
-
 	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
+	"github.com/libeclipse/dissident/data"
 	"github.com/libeclipse/dissident/memory"
-	"github.com/libeclipse/dissident/metadata"
 	"github.com/libeclipse/dissident/stdin"
 )
 
@@ -89,10 +86,7 @@ exit          - Exit the program.`
 		case "peak":
 			peak()
 		case "remove":
-			err = remove()
-			if err != nil {
-				return err
-			}
+			remove()
 		case "decoys":
 			decoys()
 		case "exit":
@@ -134,65 +128,14 @@ func importFromDisk(path string) {
 		return
 	}
 
-	f, err := os.Open(path)
-	if err != nil {
-		if os.IsPermission(err) {
-			fmt.Printf("! Insufficient permissions to open %s\n", path)
-		} else {
-			fmt.Println(err)
-		}
-		return
-	}
-	defer f.Close()
-
 	// Add the metadata to coffer.
 	fmt.Println("+ Adding metadata...")
-	metadata.New()
-	metadata.Set(info.Size(), "length")
-	metadata.Save(rootIdentifier, masterKey)
-	metadata.Reset()
+	data.MetaSetLength(info.Size(), rootIdentifier, masterKey)
 
-	// Create and configure the progress bar object.
-	bar := pb.New64(info.Size()).Prefix("+ Importing ")
-	bar.ShowTimeLeft = true
-	bar.ShowSpeed = true
-	bar.SetUnits(pb.U_BYTES)
-	bar.Start()
+	// Import this entry from disk.
+	data.ImportData(path, info.Size(), rootIdentifier, masterKey)
 
-	// Import the data.
-	var chunkIndex uint64
-	buffer := make([]byte, 4095)
-	for {
-		b, err := f.Read(buffer)
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			fmt.Println(err)
-			return
-		}
-		bar.Add(b)
-
-		data := make([]byte, b)
-		copy(data, buffer[:b])
-
-		// Pad data and wipe the buffer.
-		data, err = crypto.Pad(data, 4096)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		memory.Wipe(buffer)
-
-		// Save it and wipe plaintext.
-		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, chunkIndex), crypto.Encrypt(data, masterKey))
-		memory.Wipe(data)
-
-		// Increment counter.
-		chunkIndex++
-	}
-	bar.Finish()
-
+	// Output status message.
 	fmt.Println("+ Imported successfully.")
 }
 
@@ -211,69 +154,8 @@ func exportToDisk(path string) {
 		return
 	}
 
-	// Atempt to open the file now.
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
-	if err != nil {
-		if os.IsExist(err) {
-			fmt.Printf("! %s already exists; cannot overwrite\n", path)
-		} else if os.IsPermission(err) {
-			fmt.Printf("! Insufficient permissions to open %s\n", path)
-		} else {
-			fmt.Println(err)
-		}
-		return
-	}
-	defer f.Close()
-
-	// Get the metadata first.
-	metadata.New()
-	metadata.Retrieve(rootIdentifier, masterKey)
-	lenData := metadata.GetLength("length")
-	metadata.Reset()
-
-	// Create and configure the progress bar object.
-	bar := pb.New64(lenData).Prefix("+ Exporting ")
-	bar.ShowTimeLeft = true
-	bar.ShowSpeed = true
-	bar.SetUnits(pb.U_BYTES)
-	bar.Start()
-
-	// Grab the data.
-	for n := new(uint64); true; *n++ {
-		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
-		if ct == nil {
-			// This one doesn't exist. //EOF
-			break
-		}
-
-		// Decrypt this slice.
-		pt, err := crypto.Decrypt(ct, masterKey)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		// Unpad this slice and wipe old one.
-		unpadded, e := crypto.Unpad(pt)
-		if e != nil {
-			fmt.Println(e)
-			return
-		}
-		bar.Add(len(unpadded))
-		memory.Wipe(pt)
-
-		// Write and wipe data.
-		f.Write(unpadded)
-		memory.Wipe(unpadded)
-	}
-
-	bar.FinishPrint(fmt.Sprintf("+ Saved to %s", path))
-
-	// Compare length in metadata to actual exported length.
-	if bar.Get() != lenData {
-		fmt.Println("! Data incomplete; database may be corrupt")
-	}
+	// Export the entry.
+	data.ExportData(path, rootIdentifier, masterKey)
 }
 
 func peak() {
@@ -291,87 +173,27 @@ func peak() {
 		return
 	}
 
-	// It exists, proceed.
-
-	// Get the metadata first.
-	metadata.New()
-	metadata.Retrieve(rootIdentifier, masterKey)
-	lenData := metadata.GetLength("length")
-	metadata.Reset()
-
-	fmt.Println("\n-----BEGIN PLAINTEXT-----")
-
-	var totalExportedBytes int64
-	for n := new(uint64); true; *n++ {
-		// Derive derived_identifier[n]
-		ct := coffer.Retrieve(crypto.DeriveIdentifierN(rootIdentifier, *n))
-		if ct == nil {
-			// This one doesn't exist. //EOF
-			break
-		}
-
-		// Decrypt this slice.
-		pt, err := crypto.Decrypt(ct, masterKey)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		// Unpad this slice and wipe old one.
-		unpadded, e := crypto.Unpad(pt)
-		if e != nil {
-			fmt.Println(e)
-			return
-		}
-		totalExportedBytes += int64(len(unpadded))
-		memory.Wipe(pt)
-
-		// Write and wipe data.
-		fmt.Print(string(unpadded))
-		memory.Wipe(unpadded)
-	}
-
-	fmt.Println("-----END PLAINTEXT-----")
-
-	// Compare length in metadata to actual exported length.
-	if totalExportedBytes != lenData {
-		fmt.Println("! Data incomplete; database may be corrupt")
-	}
+	// It exists, proceed to get data.
+	data.ViewData(rootIdentifier, masterKey)
 }
 
-func remove() error {
+func remove() {
 	// Prompt the user for the identifier.
 	identifier := stdin.Secure("- Secure identifier: ")
 
 	// Derive the secure values for this "branch".
 	fmt.Println("+ Generating root key...")
-	_, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
+	masterKey, rootIdentifier := crypto.DeriveSecureValues(masterPassword, identifier, scryptCost)
 
-	// Remove all metadata.
-	metadata.Remove(rootIdentifier)
-
-	// Delete all the pieces.
-	count := 0
-	for n := new(uint64); true; *n++ {
-		// Get the DeriveIdentifierN for this n.
-		derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, *n)
-
-		// Check if it exists.
-		if coffer.Exists(derivedIdentifierN) {
-			coffer.Delete(derivedIdentifierN)
-			count++
-		} else {
-			break
-		}
-	}
-
-	if count != 0 {
-		fmt.Println("+ Successfully removed data.")
-	} else {
+	// Check if this entry exists.
+	derivedIdentifierN := crypto.DeriveIdentifierN(rootIdentifier, 0)
+	if !coffer.Exists(derivedIdentifierN) {
 		fmt.Println("! There is nothing here to remove")
+		return
 	}
 
-	return nil
+	// Remove the data.
+	data.RemoveData(rootIdentifier, masterKey)
 }
 
 func decoys() {
@@ -398,30 +220,17 @@ func decoys() {
 	}
 
 	// Create and configure the progress bar object.
-	bar := pb.New(numberOfDecoys).Prefix("+ Adding ")
-	bar.ShowCounters = false
-	bar.ShowTimeLeft = true
+	bar := pb.New64(int64(numberOfDecoys)).Prefix("+ Adding ")
 	bar.ShowSpeed = true
+	bar.SetUnits(pb.U_NO)
 	bar.Start()
 
 	for i := 0; i < numberOfDecoys; i++ {
-		// Get some random bytes.
-		randomBytes := crypto.GenerateRandomBytes(64)
-
-		// Allocate 32 bytes as the key.
-		var key [32]byte
-		masterPassword := randomBytes[0:32]
-		copy(key[:], masterPassword)
-
-		// Allocate 32 bytes as the identifier.
-		identifier := randomBytes[32:64]
-		hashedIdentifier := blake2b.Sum256(identifier)
-
-		// Allocate 32 bytes as the plaintext.
-		plaintext := make([]byte, 4096)
+		// Generate the decoy.
+		identifier, ciphertext := crypto.GenDecoy()
 
 		// Save to the database.
-		coffer.Save(hashedIdentifier[:], crypto.Encrypt(plaintext, &key))
+		coffer.Save(identifier, ciphertext)
 
 		// Increment progress bar.
 		bar.Increment()
