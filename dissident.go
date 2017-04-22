@@ -130,10 +130,7 @@ func importFromDisk(path string) {
 
 	// Add the metadata to coffer.
 	fmt.Println("+ Adding metadata...")
-	data.NewMetadataObj()
-	data.SetMetaValue(info.Size(), "length")
-	data.SaveMetadata(rootIdentifier, masterKey)
-	data.ResetMetaDataObj()
+	data.MetaSetLength(info.Size(), rootIdentifier, masterKey)
 
 	// Import this entry from disk.
 	data.ImportData(path, info.Size(), rootIdentifier, masterKey)

@@ -85,10 +85,7 @@ func ExportData(path string, rootIdentifier []byte, masterKey *[32]byte) {
 	defer f.Close()
 
 	// Get the metadata first.
-	NewMetadataObj()
-	RetrieveMetadata(rootIdentifier, masterKey)
-	lenData := GetMetaLength("length")
-	ResetMetaDataObj()
+	lenData := MetaGetLength("length", rootIdentifier, masterKey)
 
 	// Start the progress bar object.
 	bar := pb.New64(lenData).Prefix("+ Exporting ")
@@ -137,10 +134,7 @@ func ExportData(path string, rootIdentifier []byte, masterKey *[32]byte) {
 // ViewData grabs the data from coffer and writes it to stdout.
 func ViewData(rootIdentifier []byte, masterKey *[32]byte) {
 	// Get the metadata first.
-	NewMetadataObj()
-	RetrieveMetadata(rootIdentifier, masterKey)
-	lenData := GetMetaLength("length")
-	ResetMetaDataObj()
+	lenData := MetaGetLength("length", rootIdentifier, masterKey)
 
 	fmt.Println("\n-----BEGIN PLAINTEXT-----")
 
@@ -185,10 +179,7 @@ func ViewData(rootIdentifier []byte, masterKey *[32]byte) {
 // RemoveData removes data from coffer.
 func RemoveData(rootIdentifier []byte, masterKey *[32]byte) {
 	// Get the metadata first.
-	NewMetadataObj()
-	RetrieveMetadata(rootIdentifier, masterKey)
-	lenData := GetMetaLength("length")
-	ResetMetaDataObj()
+	lenData := MetaGetLength("length", rootIdentifier, masterKey)
 
 	// Start the progress bar.
 	bar := pb.New64(int64(math.Ceil(float64(lenData) / 4096))).Prefix("+ Removing ")
@@ -197,7 +188,7 @@ func RemoveData(rootIdentifier []byte, masterKey *[32]byte) {
 	bar.Start()
 
 	// Remove all metadata.
-	RemoveMetadata(rootIdentifier)
+	MetaRemoveData(rootIdentifier)
 
 	// Delete all the pieces.
 	count := 0

@@ -13,31 +13,19 @@ var (
 	metaObj *gabs.Container
 )
 
-// NewMetadataObj creates a blank json object to hold the metadata
-// and sets the globally accessible variable to it.
-func NewMetadataObj() {
+// MetaSetLength sets the length field of an entry to the supplied value.
+func MetaSetLength(length int64, rootIdentifier []byte, masterKey *[32]byte) {
 	metaObj = gabs.New()
+	metaObj.SetP(length, "length")
+	MetaSaveData(rootIdentifier, masterKey)
 }
 
-// ResetMetaDataObj is an alias for NewMetadataObj(). It is used to reset
-// the JSON object, removing all stored data.
-func ResetMetaDataObj() {
-	NewMetadataObj()
-}
+// MetaGetLength retrieves the length of this data and returns it.
+func MetaGetLength(path string, rootIdentifier []byte, masterKey *[32]byte) int64 {
+	metaObj = gabs.New()
 
-// SetMetaValue adds a value to metadata at the supplied path.
-func SetMetaValue(value interface{}, path string) {
-	metaObj.SetP(value, path)
-}
+	MetaRetrieveData(rootIdentifier, masterKey)
 
-// GetMetaValue gets a value from the metaObj at a path and returns it.
-func GetMetaValue(path string) interface{} {
-	value := metaObj.Path(path).Data()
-	return value
-}
-
-// GetMetaLength retrieves the length of this data and returns it.
-func GetMetaLength(path string) int64 {
 	value := metaObj.Path(path).Data()
 	if value == nil {
 		fmt.Println("! No length field found; was importing interrupted?")
@@ -47,15 +35,10 @@ func GetMetaLength(path string) int64 {
 	return int64(value.(float64))
 }
 
-// ExportMetaBytes returns the JSON object in bytes.
-func ExportMetaBytes() []byte {
-	return []byte(metaObj.String())
-}
-
-// SaveMetadata saves the metadata to the database.
-func SaveMetadata(rootIdentifier []byte, masterKey *[32]byte) {
+// MetaSaveData saves the metadata to the database.
+func MetaSaveData(rootIdentifier []byte, masterKey *[32]byte) {
 	// Grab the metadata as bytes.
-	data := ExportMetaBytes()
+	data := []byte(metaObj.String())
 
 	var chunk []byte
 	for i := 0; i < len(data); i += 4095 {
@@ -79,8 +62,8 @@ func SaveMetadata(rootIdentifier []byte, masterKey *[32]byte) {
 	}
 }
 
-// RetrieveMetadata gets the metadata from the database and returns
-func RetrieveMetadata(rootIdentifier []byte, masterKey *[32]byte) {
+// MetaRetrieveData gets the metadata from the database and returns
+func MetaRetrieveData(rootIdentifier []byte, masterKey *[32]byte) {
 	// Declare variable to hold all of this metadata.
 	var data []byte
 
@@ -125,8 +108,8 @@ func RetrieveMetadata(rootIdentifier []byte, masterKey *[32]byte) {
 	metaObj = metadataObj
 }
 
-// RemoveMetadata deletes all the metadata related to an entry.
-func RemoveMetadata(rootIdentifier []byte) {
+// MetaRemoveData deletes all the metadata related to an entry.
+func MetaRemoveData(rootIdentifier []byte) {
 	for n := -1; true; n-- {
 		// Get the DeriveIdentifierN for this n.
 		derivedMetaIdentifierN := crypto.DeriveMetaIdentifierN(rootIdentifier, n)
