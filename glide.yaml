@@ -1,15 +1,14 @@
-package: github.com/libeclipse/dissident
-homepage: https://github.com/libeclipse/dissident
-license: GPL-3.0
-owners:
-- name: Awn
-  email: awn@cryptolosophy.io
-  homepage: https://cryptolosophy.io
+package: .
 import:
 - package: github.com/Jeffail/gabs
-  version: ^1.0.0
 - package: github.com/cheggaaa/pb
-  version: ^1.0.13
+- package: github.com/libeclipse/dissident
+  subpackages:
+  - coffer
+  - crypto
+  - data
+  - stdin
+- package: github.com/libeclipse/memguard
 - package: github.com/syndtr/goleveldb
   subpackages:
   - leveldb
@@ -19,7 +18,3 @@ import:
   - nacl/secretbox
   - scrypt
   - ssh/terminal
-- package: golang.org/x/sys
-  subpackages:
-  - unix
-  - windows
