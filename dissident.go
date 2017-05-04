@@ -3,17 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
 	"github.com/libeclipse/dissident/data"
-	"github.com/libeclipse/dissident/memory"
 	"github.com/libeclipse/dissident/stdin"
+	"github.com/libeclipse/memguard"
 )
 
 var (
@@ -33,22 +31,15 @@ func main() {
 	}
 	defer coffer.Close()
 
-	// CleanupMemory in case of Ctrl+C
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		memory.SafeExit(0)
-	}()
+	// Cleanup memory when exiting.
+	memguard.CatchInterrupt(func() {})
+	defer memguard.DestroyAll()
 
 	// Launch CLI.
 	err = cli()
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	// Zero out and unlock any protected memory.
-	memory.Cleanup()
 }
 
 func cli() error {

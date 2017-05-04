@@ -7,22 +7,25 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/libeclipse/dissident/memory"
+	"github.com/libeclipse/memguard"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 // GetMasterPassword takes the masterPassword from the user while doing all of the verifying stuff.
-func GetMasterPassword() ([]byte, error) {
+func GetMasterPassword() (*memguard.LockedBuffer, error) {
 	// Prompt user for password and confirmation.
 	masterPassword := Secure("- Master password: ")
 	confirmPassword := Secure("- Confirm password: ")
 
 	// Check if password matches confirmation.
-	if !bytes.Equal(masterPassword, confirmPassword) {
+	if !bytes.Equal(masterPassword.Buffer, confirmPassword.Buffer) {
 		fmt.Println("! Passwords do not match")
 		return GetMasterPassword()
 	}
+
+	// We no longer need this.
+	confirmPassword.Destroy()
 
 	return masterPassword, nil
 }
@@ -43,17 +46,23 @@ func Standard(prompt string) string {
 }
 
 // Secure gets input without echoing and returns a byte slice.
-func Secure(prompt string) []byte {
+func Secure(prompt string) *memguard.LockedBuffer {
 	// Output prompt.
 	fmt.Print(prompt)
 
 	// Get input without echoing back.
-	input, err := terminal.ReadPassword(int(syscall.Stdin))
+	rawinput, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		fmt.Println(err)
-		memory.SafeExit(1)
+		memguard.SafeExit(1)
 	}
-	memory.Protect(input)
+
+	// Secure the input value.
+	input, err := memguard.NewFromBytes(rawinput)
+	if err != nil {
+		fmt.Println(err)
+		memguard.SafeExit(1)
+	}
 
 	// Output a newline for formatting.
 	fmt.Println()

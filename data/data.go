@@ -9,7 +9,7 @@ import (
 	"github.com/cheggaaa/pb"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
-	"github.com/libeclipse/dissident/memory"
+	"github.com/libeclipse/memguard"
 )
 
 // ImportData reads a file from the disk and imports it.
@@ -55,11 +55,11 @@ func ImportData(path string, fileSize int64, rootIdentifier []byte, masterKey *[
 			fmt.Println(err)
 			return
 		}
-		memory.Wipe(buffer)
+		memguard.WipeBytes(buffer)
 
 		// Save it and wipe plaintext.
 		coffer.Save(crypto.DeriveIdentifierN(rootIdentifier, chunkIndex), crypto.Encrypt(data, masterKey))
-		memory.Wipe(data)
+		memguard.WipeBytes(data)
 
 		// Increment counter.
 		chunkIndex++
@@ -116,11 +116,11 @@ func ExportData(path string, rootIdentifier []byte, masterKey *[32]byte) {
 			return
 		}
 		bar.Add(len(unpadded)) // Increment the progress bar.
-		memory.Wipe(pt)
+		memguard.WipeBytes(pt)
 
 		// Write and wipe data.
 		f.Write(unpadded)
-		memory.Wipe(unpadded)
+		memguard.WipeBytes(unpadded)
 	}
 	// We're done. End the progress bar.
 	bar.FinishPrint(fmt.Sprintf("+ Saved to %s", path))
@@ -161,11 +161,11 @@ func ViewData(rootIdentifier []byte, masterKey *[32]byte) {
 			return
 		}
 		totalExportedBytes += int64(len(unpadded))
-		memory.Wipe(pt)
+		memguard.WipeBytes(pt)
 
 		// Write and wipe data.
 		fmt.Print(string(unpadded))
-		memory.Wipe(unpadded)
+		memguard.WipeBytes(unpadded)
 	}
 
 	fmt.Println("-----END PLAINTEXT-----")

@@ -6,7 +6,7 @@ import (
 	"github.com/Jeffail/gabs"
 	"github.com/libeclipse/dissident/coffer"
 	"github.com/libeclipse/dissident/crypto"
-	"github.com/libeclipse/dissident/memory"
+	"github.com/libeclipse/memguard"
 )
 
 var (
@@ -29,7 +29,7 @@ func MetaGetLength(path string, rootIdentifier []byte, masterKey *[32]byte) int6
 	value := metaObj.Path(path).Data()
 	if value == nil {
 		fmt.Println("! No length field found; was importing interrupted?")
-		memory.SafeExit(1)
+		memguard.SafeExit(1)
 	}
 
 	return int64(value.(float64))
@@ -54,7 +54,7 @@ func MetaSaveData(rootIdentifier []byte, masterKey *[32]byte) {
 		padded, err := crypto.Pad(chunk, 4096)
 		if err != nil {
 			fmt.Println(err)
-			memory.SafeExit(1)
+			memguard.SafeExit(1)
 		}
 
 		// Save it to the database.
@@ -78,14 +78,14 @@ func MetaRetrieveData(rootIdentifier []byte, masterKey *[32]byte) {
 		pt, err := crypto.Decrypt(ct, masterKey)
 		if err != nil {
 			fmt.Println(err)
-			memory.SafeExit(1)
+			memguard.SafeExit(1)
 		}
 
 		// Unpad this slice.
 		unpadded, e := crypto.Unpad(pt)
 		if e != nil {
 			fmt.Println(e)
-			memory.SafeExit(1)
+			memguard.SafeExit(1)
 		}
 
 		// Append this chunk to the metadata.
@@ -101,7 +101,7 @@ func MetaRetrieveData(rootIdentifier []byte, masterKey *[32]byte) {
 	metadataObj, err := gabs.ParseJSON(data)
 	if err != nil {
 		fmt.Println(err)
-		memory.SafeExit(1)
+		memguard.SafeExit(1)
 	}
 
 	// That went well. Set the global var to that object.

@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/libeclipse/dissident/memory"
+	"github.com/libeclipse/memguard"
 )
 
 // GenerateRandomBytes generates cryptographically secure random bytes.
@@ -16,7 +16,7 @@ func GenerateRandomBytes(n int) []byte {
 	_, err := rand.Read(b)
 	if err != nil {
 		fmt.Println(err)
-		memory.SafeExit(1)
+		memguard.SafeExit(1)
 	}
 
 	// Return the CSPR bytes.

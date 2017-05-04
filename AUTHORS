@@ -1,0 +1,16 @@
+# This is the official list of Dissident authors for copyright purposes.
+
+# Names should be added to this file as
+#   Name or Organization <email address> [github]
+#       - Contribution
+# The email address is not required for organizations.
+
+Awn Umar <awn@cryptolosophy.io> [libeclipse]
+    - Main developer.
+
+dotcppfile <dotcppfile@gmail.com> [dotcppfile]
+    - Co-designed the protocol.
+    - Worked on the LevelDB implementation.
+
+Kevin Spinar <redacted> [alipha]
+    - Suggested using counters to store data across multiple entries.
