@@ -4,16 +4,18 @@ import (
 	"bytes"
 	"encoding/base64"
 	"testing"
+
+	"github.com/libeclipse/memguard"
 )
 
 func TestDecrypt(t *testing.T) {
 	keySlice, _ := base64.StdEncoding.DecodeString("JNut6eJfb6ySwOac7FHe3bsSU75FpL/o776VD+oYWxk=")
 	ciphertext, _ := base64.StdEncoding.DecodeString("5yiWqYEPgy9CbwMlJVxm3ge4h97X7Ptmvz6M3XLE2fLWpCo3F+VdcvU+Vrw=")
 
+	key, _ := memguard.NewFromBytes(keySlice, false)
+
 	// Correct key
-	var key [32]byte
-	copy(key[:], keySlice)
-	plaintext, err := Decrypt(ciphertext, &key)
+	plaintext, err := Decrypt(ciphertext, key)
 	if err != nil {
 		t.Error("Unexpected err:", err)
 	}
@@ -22,9 +24,8 @@ func TestDecrypt(t *testing.T) {
 	}
 
 	// Incorrect key
-	var incorrectKey [32]byte
-	copy(incorrectKey[:], []byte("yellow submarine"))
-	plaintext, err = Decrypt(ciphertext, &incorrectKey)
+	key.Copy([]byte("lel"))
+	plaintext, err = Decrypt(ciphertext, key)
 	if err == nil {
 		t.Error("Expected error; got nil")
 	}
@@ -36,11 +37,10 @@ func TestDecrypt(t *testing.T) {
 func TestEncryptionCycle(t *testing.T) {
 	plaintext := []byte("this is a test plaintext")
 
-	var key [32]byte
-	copy(key[:], []byte("yellow submarine"))
+	key, _ := memguard.New(32, false)
 
-	ciphertext := Encrypt(plaintext, &key)
-	decrypted, err := Decrypt(ciphertext, &key)
+	ciphertext := Encrypt(plaintext, key)
+	decrypted, err := Decrypt(ciphertext, key)
 	if err != nil {
 		t.Error("Unexpected err:", err)
 	}

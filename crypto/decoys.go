@@ -1,6 +1,9 @@
 package crypto
 
-import "golang.org/x/crypto/blake2b"
+import (
+	"github.com/libeclipse/memguard"
+	"golang.org/x/crypto/blake2b"
+)
 
 // GenDecoy generates and returns a single decoy.
 func GenDecoy() (id, ct []byte) {
@@ -8,9 +11,8 @@ func GenDecoy() (id, ct []byte) {
 	randomBytes := GenerateRandomBytes(64)
 
 	// Allocate 32 bytes as the key.
-	var key [32]byte
-	masterPassword := randomBytes[0:32]
-	copy(key[:], masterPassword)
+	key, _ := memguard.New(32, false)
+	key.Copy(randomBytes[0:32])
 
 	// Allocate 32 bytes as the identifier.
 	identifier := randomBytes[32:64]
@@ -21,7 +23,7 @@ func GenDecoy() (id, ct []byte) {
 
 	// Encrypt/derive the final values.
 	id = hashedIdentifier[:]
-	ct = Encrypt(plaintext, &key)
+	ct = Encrypt(plaintext, key)
 
 	// Return the decoy to the caller.
 	return

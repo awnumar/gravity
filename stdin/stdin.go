@@ -21,6 +21,8 @@ func GetMasterPassword() (*memguard.LockedBuffer, error) {
 	// Check if password matches confirmation.
 	if !bytes.Equal(masterPassword.Buffer, confirmPassword.Buffer) {
 		fmt.Println("! Passwords do not match")
+		masterPassword.Destroy()
+		confirmPassword.Destroy()
 		return GetMasterPassword()
 	}
 
@@ -58,7 +60,7 @@ func Secure(prompt string) *memguard.LockedBuffer {
 	}
 
 	// Secure the input value.
-	input, err := memguard.NewFromBytes(rawinput)
+	input, err := memguard.NewFromBytes(rawinput, false)
 	if err != nil {
 		fmt.Println(err)
 		memguard.SafeExit(1)

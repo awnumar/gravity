@@ -14,13 +14,13 @@ import (
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
 func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
 	// Allocate and protect memory for the concatenated values, and append the values to it.
-	concatenatedValues, err := memguard.New(len(masterPassword) + len(identifier))
+	concatenatedValues, err := memguard.New(len(masterPassword)+len(identifier), false)
 	if err != nil {
 		fmt.Println(err)
 		memguard.SafeExit(1)
 	}
-	copy(concatenatedValues.Buffer[:len(masterPassword)], masterPassword)
-	copy(concatenatedValues.Buffer[len(masterPassword):], identifier)
+	concatenatedValues.Copy(masterPassword)
+	concatenatedValues.CopyAt(identifier, len(masterPassword))
 
 	// Derive the rootKey and then protect it.
 	rootKeySlice, _ := scrypt.Key(
@@ -30,7 +30,7 @@ func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string
 		costFactor["r"],           // Scrypt parameter r.
 		costFactor["p"],           // Scrypt parameter p.
 		64)                        // Output hash length.
-	rootKey, _ := memguard.NewFromBytes(rootKeySlice)
+	rootKey, _ := memguard.NewFromBytes(rootKeySlice, false)
 
 	// Force the Go GC to do its job.
 	debug.FreeOSMemory()
@@ -49,7 +49,7 @@ func DeriveIdentifierN(rootIdentifier []byte, n uint64) []byte {
 	binary.LittleEndian.PutUint64(byteN, n)
 
 	// Append the uint64 to the root identifier.
-	hashArg, _ := memguard.New(40)
+	hashArg, _ := memguard.New(40, false)
 	hashArg.Copy(rootIdentifier)
 	copy(hashArg.Buffer[32:40], byteN)
 
@@ -68,9 +68,9 @@ func DeriveMetaIdentifierN(rootIdentifier []byte, n int) []byte {
 	binary.PutVarint(byteN, int64(n))
 
 	// Append the uint64 to the root identifier.
-	hashArg, _ := memguard.New(42)
+	hashArg, _ := memguard.New(42, false)
 	hashArg.Copy(rootIdentifier)
-	copy(hashArg.Buffer[32:42], byteN)
+	hashArg.CopyAt(byteN, 32)
 
 	// Derive derivedIdentifier.
 	derivedIdentifier := blake2b.Sum256(hashArg.Buffer)
