@@ -1,0 +1,66 @@
+hash: 8d44d0d5244f293416528973e238ec4f2af73869dc3d06d789a4dbde1af05288
+updated: 2017-06-03T14:40:04.297394206+01:00
+imports:
+- name: github.com/alexbrainman/winapi
+  version: c959b37223f62e4581a4a58da7816cf962aeb906
+- name: github.com/cheggaaa/pb
+  version: 180c76fdb3025713f501cd481e47810a9c715bd7
+- name: github.com/golang/snappy
+  version: 553a641470496b2327abcac10b36396bd98e45c9
+- name: github.com/Jeffail/gabs
+  version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
+- name: github.com/libeclipse/memguard
+  version: 79d54e0bde799a6e8285546a0ae53383fc796103
+  subpackages:
+  - memcall
+- name: github.com/mattn/go-colorable
+  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
+  repo: https://github.com/mattn/go-colorable
+- name: github.com/mattn/go-isatty
+  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
+  repo: https://github.com/mattn/go-isatty
+- name: github.com/syndtr/goleveldb
+  version: 3c5717caf1475fd25964109a0fc640bd150fce43
+  subpackages:
+  - leveldb
+  - leveldb/cache
+  - leveldb/comparer
+  - leveldb/errors
+  - leveldb/filter
+  - leveldb/iterator
+  - leveldb/journal
+  - leveldb/memdb
+  - leveldb/opt
+  - leveldb/storage
+  - leveldb/table
+  - leveldb/util
+- name: golang.org/x/crypto
+  version: dc137beb6cce2043eb6b5f223ab8bf51c32459f4
+  subpackages:
+  - blake2b
+  - nacl/secretbox
+  - pbkdf2
+  - poly1305
+  - salsa20/salsa
+  - scrypt
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: e24f485414aeafb646f6fca458b0bf869c0880a1
+  subpackages:
+  - unix
+  - windows
+- name: gopkg.in/cheggaaa/pb.v2
+  version: 180c76fdb3025713f501cd481e47810a9c715bd7
+  subpackages:
+  - termutil
+- name: gopkg.in/fatih/color.v1
+  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
+- name: gopkg.in/mattn/go-colorable.v0
+  version: d228849504861217f796da67fae4f6e347643f15
+- name: gopkg.in/mattn/go-isatty.v0
+  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
+- name: gopkg.in/mattn/go-runewidth.v0
+  version: 9e777a8366cce605130a531d2cd6363d07ad7317
+- name: gopkg.in/VividCortex/ewma.v1
+  version: 2f8aa9741ab4b5b80945c750b871131b88ef5b7f
+testImports: []
