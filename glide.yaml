@@ -9,9 +9,9 @@ import:
 - package: github.com/Jeffail/gabs
   version: "1.0"
 - package: github.com/cheggaaa/pb
-  version: ^2.0.1
+  version: ^2.0.4
 - package: github.com/libeclipse/memguard
-  version: ^0.5.1
+  version: ^0.5.2
 - package: github.com/syndtr/goleveldb
   subpackages:
   - leveldb

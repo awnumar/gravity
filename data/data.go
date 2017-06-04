@@ -13,7 +13,7 @@ import (
 )
 
 // ImportData reads a file from the disk and imports it.
-func ImportData(path string, fileSize int64, rootIdentifier []byte, masterKey *[32]byte) {
+func ImportData(path string, fileSize int64, rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	// Open the file.
 	f, err := os.Open(path)
 	if err != nil {
@@ -69,7 +69,7 @@ func ImportData(path string, fileSize int64, rootIdentifier []byte, masterKey *[
 }
 
 // ExportData exports data from coffer to the disk.
-func ExportData(path string, rootIdentifier []byte, masterKey *[32]byte) {
+func ExportData(path string, rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	// Atempt to open the file now.
 	f, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_EXCL, 0666)
 	if err != nil {
@@ -132,7 +132,7 @@ func ExportData(path string, rootIdentifier []byte, masterKey *[32]byte) {
 }
 
 // ViewData grabs the data from coffer and writes it to stdout.
-func ViewData(rootIdentifier []byte, masterKey *[32]byte) {
+func ViewData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	// Get the metadata first.
 	lenData := MetaGetLength("length", rootIdentifier, masterKey)
 
@@ -177,7 +177,7 @@ func ViewData(rootIdentifier []byte, masterKey *[32]byte) {
 }
 
 // RemoveData removes data from coffer.
-func RemoveData(rootIdentifier []byte, masterKey *[32]byte) {
+func RemoveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	// Get the metadata first.
 	lenData := MetaGetLength("length", rootIdentifier, masterKey)
 

@@ -14,14 +14,14 @@ var (
 )
 
 // MetaSetLength sets the length field of an entry to the supplied value.
-func MetaSetLength(length int64, rootIdentifier []byte, masterKey *[32]byte) {
+func MetaSetLength(length int64, rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	metaObj = gabs.New()
 	metaObj.SetP(length, "length")
 	MetaSaveData(rootIdentifier, masterKey)
 }
 
 // MetaGetLength retrieves the length of this data and returns it.
-func MetaGetLength(path string, rootIdentifier []byte, masterKey *[32]byte) int64 {
+func MetaGetLength(path string, rootIdentifier []byte, masterKey *memguard.LockedBuffer) int64 {
 	metaObj = gabs.New()
 
 	MetaRetrieveData(rootIdentifier, masterKey)
@@ -36,7 +36,7 @@ func MetaGetLength(path string, rootIdentifier []byte, masterKey *[32]byte) int6
 }
 
 // MetaSaveData saves the metadata to the database.
-func MetaSaveData(rootIdentifier []byte, masterKey *[32]byte) {
+func MetaSaveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	// Grab the metadata as bytes.
 	data := []byte(metaObj.String())
 
@@ -63,7 +63,7 @@ func MetaSaveData(rootIdentifier []byte, masterKey *[32]byte) {
 }
 
 // MetaRetrieveData gets the metadata from the database and returns
-func MetaRetrieveData(rootIdentifier []byte, masterKey *[32]byte) {
+func MetaRetrieveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 	// Declare variable to hold all of this metadata.
 	var data []byte
 
