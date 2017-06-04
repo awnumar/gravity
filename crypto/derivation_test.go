@@ -27,7 +27,8 @@ func TestDeriveSecureValues(t *testing.T) {
 }
 
 func TestDeriveIdentifierN(t *testing.T) {
-	rootIdentifier, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
+	rootIdentifierBytes, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
+	rootIdentifier, _ := memguard.NewFromBytes(rootIdentifierBytes, false)
 
 	values := []string{
 		"pA095wqN05ms+VQVq+BjIowWQcL6NDw9DbcfMrzTYuk=",
@@ -43,7 +44,8 @@ func TestDeriveIdentifierN(t *testing.T) {
 }
 
 func TestDeriveMetaIdentifierN(t *testing.T) {
-	rootIdentifier, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
+	rootIdentifierBytes, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
+	rootIdentifier, _ := memguard.NewFromBytes(rootIdentifierBytes, false)
 
 	values := []string{
 		"/Om2e4K6GuC8HVsUcNoIAQtxbXRjZU6XVW6MRjrXVwU=",
