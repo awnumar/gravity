@@ -4,22 +4,24 @@ import (
 	"bytes"
 	"encoding/base64"
 	"testing"
+
+	"github.com/libeclipse/memguard"
 )
 
 func TestDeriveSecureValues(t *testing.T) {
-	masterPassword := []byte("yellow submarine")
-	identifier := []byte("yellow submarine")
+	masterPassword, _ := memguard.NewFromBytes([]byte("yellow submarine"), false)
+	identifier, _ := memguard.NewFromBytes([]byte("yellow submarine"), false)
 
 	masterKey, rootIdentifier := DeriveSecureValues(masterPassword, identifier, map[string]int{"N": 18, "r": 16, "p": 1})
 
 	actualMasterKey, _ := base64.StdEncoding.DecodeString("IQ0m0/Z7Oy/rvm67Pi0nj2Zk8N0u0Ba+t/uyhPVxTF8=")
 	actualRootIdentifier, _ := base64.StdEncoding.DecodeString("FIRp7dJQ2RvA7jsQX1DFWxxit6t9ERMyCSloA8iRmU4=")
 
-	if !bytes.Equal(masterKey[:], actualMasterKey) {
+	if !bytes.Equal(masterKey.Buffer, actualMasterKey) {
 		t.Error("Derived master key != actual value")
 	}
 
-	if !bytes.Equal(rootIdentifier, actualRootIdentifier) {
+	if !bytes.Equal(rootIdentifier.Buffer, actualRootIdentifier) {
 		t.Error("Derived root identifier != actual value")
 	}
 }

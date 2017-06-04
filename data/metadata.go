@@ -14,14 +14,14 @@ var (
 )
 
 // MetaSetLength sets the length field of an entry to the supplied value.
-func MetaSetLength(length int64, rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
+func MetaSetLength(length int64, rootIdentifier, masterKey *memguard.LockedBuffer) {
 	metaObj = gabs.New()
 	metaObj.SetP(length, "length")
 	MetaSaveData(rootIdentifier, masterKey)
 }
 
 // MetaGetLength retrieves the length of this data and returns it.
-func MetaGetLength(path string, rootIdentifier []byte, masterKey *memguard.LockedBuffer) int64 {
+func MetaGetLength(path string, rootIdentifier, masterKey *memguard.LockedBuffer) int64 {
 	metaObj = gabs.New()
 
 	MetaRetrieveData(rootIdentifier, masterKey)
@@ -36,7 +36,7 @@ func MetaGetLength(path string, rootIdentifier []byte, masterKey *memguard.Locke
 }
 
 // MetaSaveData saves the metadata to the database.
-func MetaSaveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
+func MetaSaveData(rootIdentifier, masterKey *memguard.LockedBuffer) {
 	// Grab the metadata as bytes.
 	data := []byte(metaObj.String())
 
@@ -63,7 +63,7 @@ func MetaSaveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 }
 
 // MetaRetrieveData gets the metadata from the database and returns
-func MetaRetrieveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
+func MetaRetrieveData(rootIdentifier, masterKey *memguard.LockedBuffer) {
 	// Declare variable to hold all of this metadata.
 	var data []byte
 
@@ -109,7 +109,7 @@ func MetaRetrieveData(rootIdentifier []byte, masterKey *memguard.LockedBuffer) {
 }
 
 // MetaRemoveData deletes all the metadata related to an entry.
-func MetaRemoveData(rootIdentifier []byte) {
+func MetaRemoveData(rootIdentifier *memguard.LockedBuffer) {
 	for n := -1; true; n-- {
 		// Get the DeriveIdentifierN for this n.
 		derivedMetaIdentifierN := crypto.DeriveMetaIdentifierN(rootIdentifier, n)
