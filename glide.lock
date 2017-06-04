@@ -1,24 +1,20 @@
-hash: b0910073f49de904259012c80df0e728af7c7607b46279205c6cfe77d4dac0fd
-updated: 2017-06-04T19:00:41.487230162+01:00
+hash: 90e6495f0d00034e52fc06fe3f86fd35cfbca9c43a61395f6c08d21ae9f833ef
+updated: 2017-06-04T19:38:14.132527535+01:00
 imports:
 - name: github.com/alexbrainman/winapi
   version: c959b37223f62e4581a4a58da7816cf962aeb906
 - name: github.com/cheggaaa/pb
-  version: 4a1bf7a97d1348c5b50aabf6e1eb0496ca0a3d33
+  version: f6ccf2184de4dd34495277e38dc19b6e7fbe0ea2
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/Jeffail/gabs
   version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
 - name: github.com/libeclipse/memguard
-  version: 3e638dcc06e268c7763390b23c6a611bc5d92bc7
+  version: 4c4ecbc526cb5a5d7822051b00e082e0a647f89e
   subpackages:
   - memcall
-- name: github.com/mattn/go-colorable
-  version: 5411d3eea5978e6cdc258b30de592b60df6aba96
-  repo: https://github.com/mattn/go-colorable
-- name: github.com/mattn/go-isatty
-  version: 57fdcb988a5c543893cc61bce354a6e24ab70022
-  repo: https://github.com/mattn/go-isatty
+- name: github.com/mattn/go-runewidth
+  version: 14207d285c6c197daabb5c9793d63e7af9ab2d50
 - name: github.com/syndtr/goleveldb
   version: 3c5717caf1475fd25964109a0fc640bd150fce43
   subpackages:
@@ -49,18 +45,4 @@ imports:
   subpackages:
   - unix
   - windows
-- name: gopkg.in/cheggaaa/pb.v2
-  version: 180c76fdb3025713f501cd481e47810a9c715bd7
-  subpackages:
-  - termutil
-- name: gopkg.in/fatih/color.v1
-  version: 570b54cabe6b8eb0bc2dfce68d964677d63b5260
-- name: gopkg.in/mattn/go-colorable.v0
-  version: d228849504861217f796da67fae4f6e347643f15
-- name: gopkg.in/mattn/go-isatty.v0
-  version: fc9e8d8ef48496124e79ae0df75490096eccf6fe
-- name: gopkg.in/mattn/go-runewidth.v0
-  version: 9e777a8366cce605130a531d2cd6363d07ad7317
-- name: gopkg.in/VividCortex/ewma.v1
-  version: 2f8aa9741ab4b5b80945c750b871131b88ef5b7f
 testImports: []

@@ -12,7 +12,7 @@ import (
 )
 
 // DeriveSecureValues derives and returns a masterKey and rootIdentifier.
-func DeriveSecureValues(masterPassword, identifier []byte, costFactor map[string]int) (*[32]byte, []byte) {
+func DeriveSecureValues(masterPassword, identifier *memguard.LockedBuffer, costFactor map[string]int) (*[32]byte, []byte) {
 	// Allocate and protect memory for the concatenated values, and append the values to it.
 	concatenatedValues, err := memguard.New(len(masterPassword)+len(identifier), false)
 	if err != nil {

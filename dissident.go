@@ -19,7 +19,7 @@ var (
 	scryptCost = map[string]int{"N": 18, "r": 16, "p": 1}
 
 	// Store the container ID globally.
-	masterPassword []byte
+	masterPassword *memguard.LockedBuffer
 )
 
 func main() {
