@@ -1,5 +1,5 @@
 hash: b0910073f49de904259012c80df0e728af7c7607b46279205c6cfe77d4dac0fd
-updated: 2017-06-04T16:25:32.981602406+01:00
+updated: 2017-06-04T19:00:41.487230162+01:00
 imports:
 - name: github.com/alexbrainman/winapi
   version: c959b37223f62e4581a4a58da7816cf962aeb906
@@ -10,7 +10,7 @@ imports:
 - name: github.com/Jeffail/gabs
   version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
 - name: github.com/libeclipse/memguard
-  version: 18e20940b5762dced7efd0f8836193fa023f14aa
+  version: 3e638dcc06e268c7763390b23c6a611bc5d92bc7
   subpackages:
   - memcall
 - name: github.com/mattn/go-colorable

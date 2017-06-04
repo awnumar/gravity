@@ -22,17 +22,15 @@ LockedBuffer is a structure that holds secure values. It
 exposes a Mutex, various metadata flags, and a slice that
 maps to the protected memory.
 
+The number of LockedBuffers that you are able to create is
+limited by how much memory your system kernel allows each
+process to mlock/VirtualLock. Therefore you should call
+Destroy on LockedBuffers that you no longer need, or simply
+defer a Destroy call after creating a new LockedBuffer.
+
 The entire memguard API handles and passes around pointers
 to LockedBuffers, and so, for both security and convenience,
 you should refrain from dereferencing a LockedBuffer.
-
-	if LockedBuffer.ReadOnly == true {
-		// Editing this buffer will crash the process.
-	}
-
-	if LockedBuffer.Destroyed == true {
-		// This buffer has been cleaned up and destroyed.
-	}
 
 If an API function that needs to edit a LockedBuffer is given
 one marked as read-only, the call will return an ErrReadOnly.
@@ -52,18 +50,6 @@ type LockedBuffer struct {
 /*
 New creates a new LockedBuffer of a specified length and
 permissions.
-
-The number of LockedBuffers that you are able to create is
-limited by how much memory your system kernel allows each
-process to mlock/VirtualLock. Therefore we recommend calling
-Destroy on LockedBuffers that you no longer need, or simply
-deferring a Destroy call after creating a new LockedBuffer.
-
-	lBuf, err := New(32, false)
-	if err != nil {
-		panic(err)
-	}
-	defer lBuf.Destroy()
 
 If the given length is less than one, the call will return
 an ErrInvalidLength.
@@ -193,9 +179,6 @@ memory as read-only. Any subsequent attempts to write to
 this memory will result in the process crashing with a
 SIGSEGV memory violation.
 
-Calling MarkAsReadOnly on a LockedBuffer that is already
-read-only will result in no changes being made.
-
 To make the memory writable again, MarkAsReadWrite is called.
 */
 func (b *LockedBuffer) MarkAsReadOnly() error {
@@ -227,9 +210,6 @@ func (b *LockedBuffer) MarkAsReadOnly() error {
 /*
 MarkAsReadWrite asks the kernel to mark the LockedBuffer's
 memory as readable and writable.
-
-Calling MarkAsReadWrite on a LockedBuffer that is already
-readable and writable will result in no changes being made.
 
 This method is the counterpart of MarkAsReadOnly.
 */
@@ -339,6 +319,42 @@ func (b *LockedBuffer) MoveAt(buf []byte, offset int) error {
 
 	// Wipe the old bytes.
 	WipeBytes(buf)
+
+	// Everything went well.
+	return nil
+}
+
+/*
+FillRandomBytes fills a LockedBuffer with cryptographically-secure
+pseudo-random bytes.
+*/
+func (b *LockedBuffer) FillRandomBytes() error {
+	// Just call FillRandomBytesAt.
+	return b.FillRandomBytesAt(0, len(b.Buffer))
+}
+
+/*
+FillRandomBytesAt fills a LockedBuffer with cryptographically-secure
+pseudo-random bytes, starting at an offset and ending after a given
+number of bytes.
+*/
+func (b *LockedBuffer) FillRandomBytesAt(offset, length int) error {
+	// Get a mutex lock on this LockedBuffer.
+	b.Lock()
+	defer b.Unlock()
+
+	// Check if it's destroyed.
+	if b.Destroyed {
+		return ErrDestroyed
+	}
+
+	// Check if it's marked as ReadOnly.
+	if b.ReadOnly {
+		return ErrReadOnly
+	}
+
+	// Fill with random bytes.
+	fillRandBytes(b.Buffer[offset : offset+length])
 
 	// Everything went well.
 	return nil
@@ -571,10 +587,6 @@ func LockedBuffers() []*LockedBuffer {
 CatchInterrupt starts a goroutine that monitors for
 interrupt signals. It accepts a function of type func()
 and executes that before calling SafeExit(0).
-
-	memguard.CatchInterrupt(func() {
-		fmt.Println("Interrupt signal received. Exiting...")
-	})
 
 If CatchInterrupt is called multiple times, only the first
 call is executed and all subsequent calls are ignored.
