@@ -2,8 +2,11 @@ package pb
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
+
+	"gopkg.in/fatih/color.v1"
 )
 
 func testState(total, value int64, maxWidth int, bools ...bool) (s *State) {
@@ -30,8 +33,8 @@ func testElementBarString(t *testing.T, state *State, el Element, want string, a
 	if res != want {
 		t.Errorf("Unexpected result: '%s'; want: '%s'", res, want)
 	}
-	if state.IsAdaptiveWidth() && state.AdaptiveElWidth() != state.CellCount(res) {
-		t.Errorf("Unepected width: %d; want: %d", state.CellCount(res), state.AdaptiveElWidth())
+	if state.IsAdaptiveWidth() && state.AdaptiveElWidth() != CellCount(res) {
+		t.Errorf("Unepected width: %d; want: %d", CellCount(res), state.AdaptiveElWidth())
 	}
 }
 
@@ -61,6 +64,15 @@ func TestElementBar(t *testing.T) {
 	// middle
 	testElementBarString(t, testState(100, 50, 10, false, true), ElementBar, "[--->____]")
 	testElementBarString(t, testState(100, 50, 10, false, true), ElementBar, "<--->____>", "<", "", "", "", ">")
+	// finished
+	st := testState(100, 100, 10, false, true)
+	st.finished = true
+	testElementBarString(t, st, ElementBar, "[--------]")
+	// empty color
+	st = testState(100, 50, 10, false, true)
+	st.Set(Terminal, true)
+	color.NoColor = false
+	testElementBarString(t, st, ElementBar, " --->____]", color.RedString("%s", ""))
 	// empty
 	testElementBarString(t, testState(0, 50, 10, false, true), ElementBar, "[________]")
 	// full
@@ -108,7 +120,7 @@ func TestElementBar(t *testing.T) {
 					if we <= 0 {
 						we = 30
 					}
-					if state.CellCount(res) != we {
+					if CellCount(res) != we {
 						t.Errorf("Unexpected len(%d): '%s'", we, res)
 					}
 				}
@@ -119,12 +131,31 @@ func TestElementBar(t *testing.T) {
 
 func TestElementSpeed(t *testing.T) {
 	var state = testState(1000, 0, 0, false)
-	state.ProgressBar.startTime = time.Now()
+	state.time = time.Now()
 	for i := int64(0); i < 10; i++ {
+		state.id = uint64(i) + 1
 		state.current += 42
+		state.time = state.time.Add(time.Second)
+		state.finished = i == 9
+		if state.finished {
+			state.current += 100
+		}
 		r := ElementSpeed(state)
-		if i <= 1 {
-			// do not calc first two results
+		r2 := ElementSpeed(state)
+		if r != r2 {
+			t.Errorf("Must be the same: '%s' vs '%s'", r, r2)
+		}
+		if i < 1 {
+			// do not calc first result
+			if w := "? p/s"; r != w {
+				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
+			}
+		} else if state.finished {
+			if w := "58 p/s"; r != w {
+				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
+			}
+			state.time = state.time.Add(-time.Hour)
+			r = ElementSpeed(state)
 			if w := "? p/s"; r != w {
 				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
 			}
@@ -133,44 +164,48 @@ func TestElementSpeed(t *testing.T) {
 				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
 			}
 		}
-		var add = -time.Second
-		if i > 7 {
-			add = add / 2
-		}
-		getSpeedObj(state).prevTime = time.Now().Add(add)
 	}
 }
 
 func TestElementRemainingTime(t *testing.T) {
-	var state = testState(1000, 0, 0, false)
-	state.ProgressBar.startTime = time.Now()
+	var state = testState(100, 0, 0, false)
+	state.time = time.Now()
+	state.startTime = state.time
 	for i := int64(0); i < 10; i++ {
-		state.current += 42
+		state.id = uint64(i) + 1
+		state.time = state.time.Add(time.Second)
+		state.finished = i == 9
 		r := ElementRemainingTime(state)
-		if i <= 1 {
+		if i < 1 {
 			// do not calc first two results
 			if w := "?"; r != w {
 				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
 			}
+		} else if state.finished {
+			// final elapsed time
+			if w := "10s"; r != w {
+				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
+			}
 		} else {
-			w := fmt.Sprintf("%ds", 22-i)
+			w := fmt.Sprintf("%ds", 10-i)
 			if r != w {
 				t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
 			}
 		}
-		getSpeedObj(state).prevTime = time.Now().Add(-time.Second)
+		state.current += 10
 	}
 }
 
 func TestElementElapsedTime(t *testing.T) {
 	var state = testState(1000, 0, 0, false)
-	state.ProgressBar.startTime = time.Now().Truncate(time.Second)
+	state.startTime = time.Now()
+	state.time = state.startTime
 	for i := int64(0); i < 10; i++ {
 		r := ElementElapsedTime(state)
 		if w := fmt.Sprintf("%ds", i); r != w {
 			t.Errorf("Unexpected result[%d]: '%s' vs '%s'", i, r, w)
 		}
-		state.ProgressBar.startTime = state.ProgressBar.startTime.Add(-time.Second)
+		state.time = state.time.Add(time.Second)
 	}
 }
 
@@ -197,14 +232,14 @@ func TestElementCycle(t *testing.T) {
 
 func TestAdaptiveWrap(t *testing.T) {
 	var state = testState(0, 0, 0, false)
-	state.first = true
+	state.id = 1
 	state.Set("myKey", "my value")
 	el := adaptiveWrap(ElementString)
 	testElementBarString(t, state, el, adElPlaceholder, "myKey")
 	if v := state.recalc[0].ProgressElement(state); v != "my value" {
 		t.Errorf("Unexpected result: %s", v)
 	}
-	state.first = false
+	state.id = 2
 	testElementBarString(t, state, el, adElPlaceholder, "myKey1")
 	state.Set("myKey", "my value1")
 	if v := state.recalc[0].ProgressElement(state); v != "my value1" {
@@ -212,26 +247,32 @@ func TestAdaptiveWrap(t *testing.T) {
 	}
 }
 
+func TestRegisterElement(t *testing.T) {
+	var testEl ElementFunc = func(state *State, args ...string) string {
+		return strings.Repeat("*", state.AdaptiveElWidth())
+	}
+	RegisterElement("testEl", testEl, true)
+	result := ProgressBarTemplate(`{{testEl . }}`).New(0).SetWidth(5).String()
+	if result != "*****" {
+		t.Errorf("Unexpected result: '%v'", result)
+	}
+}
+
 func BenchmarkBar(b *testing.B) {
 	var formats = map[string][]string{
 		"simple":      []string{".", ".", ".", ".", "."},
 		"unicode":     []string{"⚑", "⚒", "⚟", "⟞", "⚐"},
+		"color":       []string{color.RedString("%s", "."), color.RedString("%s", "."), color.RedString("%s", "."), color.RedString("%s", "."), color.RedString("%s", ".")},
 		"long":        []string{"..", "..", "..", "..", ".."},
 		"longunicode": []string{"⚑⚑", "⚒⚒", "⚟⚟", "⟞⟞", "⚐⚐"},
 	}
-	for _, asciiSeq := range []bool{false, true} {
-		for name, args := range formats {
-			state := testState(100, 50, 100, false, true)
-			if asciiSeq {
-				state.Set(Terminal, true)
-				name += "/terminal"
+	for name, args := range formats {
+		state := testState(100, 50, 100, false, true)
+		b.Run(name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				ElementBar(state, args...)
 			}
-			b.Run(name, func(b *testing.B) {
-				b.ReportAllocs()
-				for i := 0; i < b.N; i++ {
-					ElementBar(state, args...)
-				}
-			})
-		}
+		})
 	}
 }

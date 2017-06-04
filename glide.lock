@@ -1,16 +1,16 @@
 hash: fba9af28eec2c71646c5fa8af6fd0937c8200a720c11c9035ad586268e69cc71
-updated: 2017-06-03T15:50:30.817527427+01:00
+updated: 2017-06-04T16:10:39.246316525+01:00
 imports:
 - name: github.com/alexbrainman/winapi
   version: c959b37223f62e4581a4a58da7816cf962aeb906
 - name: github.com/cheggaaa/pb
-  version: 180c76fdb3025713f501cd481e47810a9c715bd7
+  version: 4a1bf7a97d1348c5b50aabf6e1eb0496ca0a3d33
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/Jeffail/gabs
   version: 2a3aa15961d5fee6047b8151b67ac2f08ba2c48c
 - name: github.com/libeclipse/memguard
-  version: d5ba7a7156fba4af56906959f731932b634dc9cd
+  version: 18e20940b5762dced7efd0f8836193fa023f14aa
   subpackages:
   - memcall
 - name: github.com/mattn/go-colorable

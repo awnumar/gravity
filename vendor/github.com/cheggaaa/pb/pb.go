@@ -2,6 +2,7 @@ package pb
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -17,7 +18,7 @@ import (
 )
 
 // Version of ProgressBar library
-const Version = "2.0.1"
+const Version = "2.0.4"
 
 type key int
 
@@ -45,11 +46,39 @@ const (
 	defaultRefreshRate = time.Millisecond * 200
 )
 
+// New creates new ProgressBar object
+func New(total int) *ProgressBar {
+	return New64(int64(total))
+}
+
+// New64 creates new ProgressBar object using int64 as total
+func New64(total int64) *ProgressBar {
+	pb := new(ProgressBar)
+	return pb.SetTotal(total)
+}
+
+// StartNew starts new ProgressBar with Default template
+func StartNew(total int) *ProgressBar {
+	return New(total).Start()
+}
+
+// Start64 starts new ProgressBar with Default template. Using int64 as total.
+func Start64(total int64) *ProgressBar {
+	return New64(total).Start()
+}
+
+var (
+	terminalWidth    = termutil.TerminalWidth
+	isTerminal       = isatty.IsTerminal
+	isCygwinTerminal = isatty.IsCygwinTerminal
+)
+
 // ProgressBar is the main object of bar
 type ProgressBar struct {
 	current, total int64
 	width          int
 	mu             sync.RWMutex
+	rm             sync.Mutex
 	vars           map[interface{}]interface{}
 	elements       map[string]Element
 	output         io.Writer
@@ -81,15 +110,14 @@ func (pb *ProgressBar) configure() {
 	}
 
 	if pb.tmpl == nil {
-		var err error
-		pb.tmpl, err = getTemplate(Default, nil)
-		if err != nil {
-			panic(err)
+		pb.tmpl, pb.err = getTemplate(string(Default))
+		if pb.err != nil {
+			return
 		}
 	}
 	if pb.vars[Terminal] == nil {
 		if f, ok := pb.output.(*os.File); ok {
-			if isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd()) {
+			if isTerminal(f.Fd()) || isCygwinTerminal(f.Fd()) {
 				pb.vars[Terminal] = true
 			}
 		}
@@ -119,9 +147,13 @@ func (pb *ProgressBar) configure() {
 func (pb *ProgressBar) Start() *ProgressBar {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
+	if pb.finish != nil {
+		return pb
+	}
 	pb.configure()
 	pb.finished = false
 	pb.state = nil
+	pb.startTime = time.Now()
 	if st, ok := pb.vars[Static].(bool); ok && st {
 		return pb
 	}
@@ -135,29 +167,39 @@ func (pb *ProgressBar) writer(finish chan struct{}) {
 	for {
 		select {
 		case <-pb.ticker.C:
-			pb.write()
+			pb.write(false)
 		case <-finish:
 			pb.ticker.Stop()
-			pb.write()
+			pb.write(true)
 			finish <- struct{}{}
 			return
 		}
 	}
 }
 
-func (pb *ProgressBar) write() {
-	result := pb.render()
+// Write performs write to the output
+func (pb *ProgressBar) Write() *ProgressBar {
+	pb.mu.RLock()
+	finished := pb.finished
+	pb.mu.RUnlock()
+	pb.write(finished)
+	return pb
+}
+
+func (pb *ProgressBar) write(finish bool) {
+	result, width := pb.render()
 	if pb.Err() != nil {
 		return
 	}
+	if pb.GetBool(Terminal) {
+		if r := (width - CellCount(result)); r > 0 {
+			result += strings.Repeat(" ", r)
+		}
+	}
 	if ret, ok := pb.Get(ReturnSymbol).(string); ok {
-		result += ret
-		if ret == "\r" {
-			pb.mu.RLock()
-			if pb.finished {
-				result += "\n"
-			}
-			pb.mu.RUnlock()
+		result = ret + result
+		if finish && ret == "\r" {
+			result += "\n"
 		}
 	}
 	if pb.GetBool(Color) {
@@ -178,9 +220,15 @@ func (pb *ProgressBar) SetTotal(value int64) *ProgressBar {
 	return pb
 }
 
+// SetCurrent sets the current bar value
 func (pb *ProgressBar) SetCurrent(value int64) *ProgressBar {
 	atomic.StoreInt64(&pb.current, value)
 	return pb
+}
+
+// Current return current bar value
+func (pb *ProgressBar) Current() int64 {
+	return atomic.LoadInt64(&pb.current)
 }
 
 // Add adding given int64 value to bar value
@@ -250,11 +298,20 @@ func (pb *ProgressBar) Width() (width int) {
 	pb.mu.RUnlock()
 	if width <= 0 {
 		var err error
-		if width, err = termutil.TerminalWidth(); err != nil {
+		if width, err = terminalWidth(); err != nil {
 			return defaultBarWidth
 		}
 	}
 	return
+}
+
+func (pb *ProgressBar) SetRefreshRate(dur time.Duration) *ProgressBar {
+	pb.mu.Lock()
+	if dur > 0 {
+		pb.refreshRate = dur
+	}
+	pb.mu.Unlock()
+	return pb
 }
 
 // SetWriter sets the io.Writer. Bar will write in this writer
@@ -262,6 +319,7 @@ func (pb *ProgressBar) Width() (width int) {
 func (pb *ProgressBar) SetWriter(w io.Writer) *ProgressBar {
 	pb.mu.Lock()
 	pb.output = w
+	pb.configured = false
 	pb.configure()
 	pb.mu.Unlock()
 	return pb
@@ -289,52 +347,69 @@ func (pb *ProgressBar) Finish() *ProgressBar {
 		pb.mu.Unlock()
 		return pb
 	}
-	pb.finished = true
 	finishChan := pb.finish
+	pb.finished = true
 	pb.mu.Unlock()
 	if finishChan != nil {
 		finishChan <- struct{}{}
 		<-finishChan
+		pb.mu.Lock()
+		pb.finish = nil
+		pb.mu.Unlock()
 	}
 	return pb
 }
 
-// CellCount calculates string width in cells
-func (pb *ProgressBar) CellCount(s string) int {
-	if pb.GetBool(Terminal) {
-		return cellCountStripASCIISeq(s)
-	}
-	return cellCount(s)
+func (pb *ProgressBar) IsStarted() bool {
+	pb.mu.RLock()
+	defer pb.mu.RUnlock()
+	return pb.finish != nil
 }
 
-// SetTemplate sets ProgressBar tempate string and parse it
-func (pb *ProgressBar) SetTemplate(tmpl string) *ProgressBar {
+// SetTemplateString sets ProgressBar tempate string and parse it
+func (pb *ProgressBar) SetTemplateString(tmpl string) *ProgressBar {
 	pb.mu.Lock()
 	defer pb.mu.Unlock()
-	pb.tmpl, pb.err = getTemplate(tmpl, pb.elements)
+	pb.tmpl, pb.err = getTemplate(tmpl)
 	return pb
 }
 
-func (pb *ProgressBar) render() (result string) {
+// SetTemplateString sets ProgressBarTempate and parse it
+func (pb *ProgressBar) SetTemplate(tmpl ProgressBarTemplate) *ProgressBar {
+	return pb.SetTemplateString(string(tmpl))
+}
+
+func (pb *ProgressBar) render() (result string, width int) {
+	defer func() {
+		if r := recover(); r != nil {
+			pb.SetErr(fmt.Errorf("render panic: %v", r))
+		}
+	}()
+	pb.rm.Lock()
+	defer pb.rm.Unlock()
 	pb.mu.Lock()
 	pb.configure()
 	if pb.state == nil {
-		pb.state = &State{first: true, ProgressBar: pb}
+		pb.state = &State{ProgressBar: pb}
 		pb.buf = bytes.NewBuffer(nil)
-	} else {
-		pb.state.first = false
 	}
+	if pb.startTime.IsZero() {
+		pb.startTime = time.Now()
+	}
+	pb.state.id++
 	pb.state.finished = pb.finished
+	pb.state.time = time.Now()
 	pb.mu.Unlock()
 
 	pb.state.width = pb.Width()
-	pb.state.total = atomic.LoadInt64(&pb.total)
-	pb.state.current = atomic.LoadInt64(&pb.current)
+	width = pb.state.width
+	pb.state.total = pb.Total()
+	pb.state.current = pb.Current()
 	pb.buf.Reset()
 
 	if e := pb.tmpl.Execute(pb.buf, pb.state); e != nil {
 		pb.SetErr(e)
-		return ""
+		return "", 0
 	}
 
 	result = pb.buf.String()
@@ -342,19 +417,26 @@ func (pb *ProgressBar) render() (result string) {
 	aec := len(pb.state.recalc)
 	if aec == 0 {
 		// no adaptive elements
-		// just return result
 		return
 	}
 
-	staticWidth := pb.CellCount(result) - (aec * adElPlaceholderLen)
-	pb.state.adaptiveElWidth = (pb.state.width - staticWidth) / aec
-	for _, el := range pb.state.recalc {
-		result = strings.Replace(result, adElPlaceholder, el.ProgressElement(pb.state), 1)
+	staticWidth := CellCount(result) - (aec * adElPlaceholderLen)
+
+	if pb.state.Width()-staticWidth <= 0 {
+		result = strings.Replace(result, adElPlaceholder, "", -1)
+		result = StripString(result, pb.state.Width())
+	} else {
+		pb.state.adaptiveElWidth = (width - staticWidth) / aec
+		for _, el := range pb.state.recalc {
+			result = strings.Replace(result, adElPlaceholder, el.ProgressElement(pb.state), 1)
+		}
 	}
 	pb.state.recalc = pb.state.recalc[:0]
 	return
 }
 
+// SetErr sets error to the ProgressBar
+// Error will be available over Err()
 func (pb *ProgressBar) SetErr(err error) *ProgressBar {
 	pb.mu.Lock()
 	pb.err = err
@@ -373,7 +455,8 @@ func (pb *ProgressBar) Err() error {
 
 // String return currrent string representation of ProgressBar
 func (pb *ProgressBar) String() string {
-	return pb.render()
+	res, _ := pb.render()
+	return res
 }
 
 // ProgressElement implements Element interface
@@ -389,13 +472,21 @@ func (pb *ProgressBar) ProgressElement(s *State, args ...string) string {
 type State struct {
 	*ProgressBar
 
-	total, current int64
-
+	id                     uint64
+	total, current         int64
 	width, adaptiveElWidth int
-
-	first, finished, adaptive bool
+	finished, adaptive     bool
+	time                   time.Time
 
 	recalc []Element
+}
+
+// Id it's the current state identifier
+// - incremental
+// - starts with 1
+// - resets after finish/start
+func (s *State) Id() uint64 {
+	return s.id
 }
 
 // Total it's bar int64 total
@@ -430,5 +521,10 @@ func (s *State) IsFinished() bool {
 
 // IsFirst return true only in first render
 func (s *State) IsFirst() bool {
-	return s.first
+	return s.id == 1
+}
+
+// Time when state was created
+func (s *State) Time() time.Time {
+	return s.time
 }
