@@ -42,11 +42,15 @@ The complete protocol can be found [here](PROTOCOL).
 
 Simply run:
 
-`$ go get github.com/0xAwn/dissident`
+```
+$ go get github.com/0xAwn/dissident
+```
 
 This will fetch, compile, and install Dissident automatically. If you have `$GOPATH` in your PATH, you should be able to run it with a simple:
 
-`$ dissident`
+```
+$ dissident
+```
 
 ## Responsible disclosure
 
@@ -54,8 +58,8 @@ If you are aware of a security bug, notifying us privately is in the interest of
 
 To do this, please send a PGP encrypted message to my [email](mailto:awn@cryptolosophy.io). My PGP public-key is available on my [keybase](https://keybase.io/awn).
 
-My PGP public-key fingerprint is:
+To import it directly into GPG, run:
 
-> 5469 F4B9 688C 3FEE E105 0CA3 FAEE B039 F313 3EA8
-
-To import it directly into GPG, run `$ curl https://keybase.io/awn/pgp_keys.asc | gpg --import`.
+```
+$ curl https://keybase.io/awn/pgp_keys.asc | gpg --import
+```
