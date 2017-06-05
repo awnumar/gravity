@@ -3,10 +3,10 @@ package data
 import (
 	"fmt"
 
+	"github.com/0xAwn/dissident/coffer"
+	"github.com/0xAwn/dissident/crypto"
+	"github.com/0xAwn/memguard"
 	"github.com/Jeffail/gabs"
-	"github.com/libeclipse/dissident/coffer"
-	"github.com/libeclipse/dissident/crypto"
-	"github.com/libeclipse/memguard"
 )
 
 var (

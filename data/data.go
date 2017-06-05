@@ -6,10 +6,10 @@ import (
 	"math"
 	"os"
 
+	"github.com/0xAwn/dissident/coffer"
+	"github.com/0xAwn/dissident/crypto"
+	"github.com/0xAwn/memguard"
 	"github.com/cheggaaa/pb"
-	"github.com/libeclipse/dissident/coffer"
-	"github.com/libeclipse/dissident/crypto"
-	"github.com/libeclipse/memguard"
 )
 
 // ImportData reads a file from the disk and imports it.

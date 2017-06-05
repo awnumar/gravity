@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 	"fmt"
 
-	"github.com/libeclipse/memguard"
+	"github.com/0xAwn/memguard"
 )
 
 // GenerateRandomBytes generates cryptographically secure random bytes.

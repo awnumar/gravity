@@ -1,7 +1,7 @@
 package crypto
 
 import (
-	"github.com/libeclipse/memguard"
+	"github.com/0xAwn/memguard"
 	"golang.org/x/crypto/blake2b"
 )
 

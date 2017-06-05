@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="https://cdn.rawgit.com/libeclipse/dissident/master/logo.svg" height="140" />
+  <img src="https://cdn.rawgit.com/0xAwn/dissident/master/logo.svg" height="140" />
   <h3 align="center">Dissident (beta)</h3>
   <p align="center">An encryption program that prioritises deniability.</p>
   <p align="center">
-    <a href="https://travis-ci.org/libeclipse/dissident"><img src="https://travis-ci.org/libeclipse/dissident.svg?branch=master"></a>
-    <a href="https://ci.appveyor.com/project/libeclipse/dissident/branch/master"><img src="https://ci.appveyor.com/api/projects/status/9v38wh14fa6klc7v/branch/master?svg=true"></a>
-    <a href="https://dependencyci.com/github/libeclipse/dissident"><img src="https://dependencyci.com/github/libeclipse/dissident/badge"></a>
-    <a href="https://goreportcard.com/report/github.com/libeclipse/dissident"><img src="https://goreportcard.com/badge/github.com/libeclipse/dissident"></a>
+    <a href="https://travis-ci.org/0xAwn/dissident"><img src="https://travis-ci.org/0xAwn/dissident.svg?branch=master"></a>
+    <a href="https://ci.appveyor.com/project/0xAwn/dissident/branch/master"><img src="https://ci.appveyor.com/api/projects/status/9v38wh14fa6klc7v/branch/master?svg=true"></a>
+    <a href="https://dependencyci.com/github/0xAwn/dissident"><img src="https://dependencyci.com/github/0xAwn/dissident/badge"></a>
+    <a href="https://goreportcard.com/report/github.com/0xAwn/dissident"><img src="https://goreportcard.com/badge/github.com/0xAwn/dissident"></a>
   </p>
 </p>
 
@@ -42,7 +42,7 @@ The complete protocol can be found [here](PROTOCOL).
 
 Simply run:
 
-`$ go get github.com/libeclipse/dissident`
+`$ go get github.com/0xAwn/dissident`
 
 This will fetch, compile, and install Dissident automatically. If you have `$GOPATH` in your PATH, you should be able to run it with a simple:
 

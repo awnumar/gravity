@@ -1,0 +1,13 @@
+package: github.com/libeclipse/memguard
+homepage: https://github.com/libeclipse/memguard
+license: Apache-2.0
+owners:
+- name: Awn
+  email: awn@cryptolosophy.io
+  homepage: https://cryptolosophy.io
+import:
+- package: github.com/alexbrainman/winapi
+- package: golang.org/x/sys
+  subpackages:
+  - unix
+  - windows

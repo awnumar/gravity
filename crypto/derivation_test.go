@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/libeclipse/memguard"
+	"github.com/0xAwn/memguard"
 )
 
 func TestDeriveSecureValues(t *testing.T) {

@@ -1,6 +1,8 @@
-hash: 90e6495f0d00034e52fc06fe3f86fd35cfbca9c43a61395f6c08d21ae9f833ef
-updated: 2017-06-04T19:38:14.132527535+01:00
+hash: d5c9dd9ffbae51714f3334bd30b7128173521205d995d5042e4e332e100e9579
+updated: 2017-06-05T18:38:55.103864+01:00
 imports:
+- name: github.com/0xAwn/memguard
+  version: 4c4ecbc526cb5a5d7822051b00e082e0a647f89e
 - name: github.com/alexbrainman/winapi
   version: c959b37223f62e4581a4a58da7816cf962aeb906
 - name: github.com/cheggaaa/pb

@@ -6,12 +6,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/0xAwn/dissident/coffer"
+	"github.com/0xAwn/dissident/crypto"
+	"github.com/0xAwn/dissident/data"
+	"github.com/0xAwn/dissident/stdin"
+	"github.com/0xAwn/memguard"
 	"github.com/cheggaaa/pb"
-	"github.com/libeclipse/dissident/coffer"
-	"github.com/libeclipse/dissident/crypto"
-	"github.com/libeclipse/dissident/data"
-	"github.com/libeclipse/dissident/stdin"
-	"github.com/libeclipse/memguard"
 )
 
 var (
