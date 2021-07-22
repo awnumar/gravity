@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/awnumar/memguard"
-	"github.com/prologic/bitcask"
+	"git.mills.io/prologic/bitcask"
 )
 
 var database = func() *bitcask.Bitcask {
