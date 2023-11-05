@@ -8,7 +8,7 @@ import (
 	"github.com/awnumar/memguard"
 )
 
-func input(prompt string) *memguard.LockedBuffer {
+func input(prompt string) (*memguard.LockedBuffer, error) {
 	fmt.Printf(prompt)
 	return memguard.NewBufferFromReaderUntil(os.Stdin, '\n')
 }

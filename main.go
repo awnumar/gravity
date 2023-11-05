@@ -51,7 +51,11 @@ func main() {
 		fmt.Printf("[i] Encrypting %d files from \"%s\" (%s)\n", len(files), args[2], units.BytesSize(float64(totalSize)))
 
 		// Read key from standard input directly into secure buffer.
-		key := input("[?] Enter master key: ")
+		key, err := input("[?] Enter master key: ")
+		if err != nil {
+			outputError(err)
+			return
+		}
 
 		// Derive root key from user key.
 		fmt.Println("[i] Processing key...")

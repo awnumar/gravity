@@ -1,12 +1,18 @@
 module github.com/awnumar/gravity
 
-go 1.12
+go 1.21
 
 require (
-	github.com/awnumar/memguard v0.19.1
-	github.com/derekparker/trie v0.0.0-20190812220523-e66023ee76eb // indirect
-	github.com/docker/go-units v0.4.0
-	git.mills.io/prologic/bitcask v0.3.3-0.20190814105308-156d29e344a9
-	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4
-	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // indirect
+	github.com/awnumar/memguard v0.22.3
+	github.com/docker/go-units v0.5.0
+	github.com/prologic/bitcask v0.3.10
+	golang.org/x/crypto v0.14.0
+)
+
+require (
+	github.com/awnumar/memcall v0.1.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/plar/go-adaptive-radix-tree v1.0.5 // indirect
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d // indirect
+	golang.org/x/sys v0.14.0 // indirect
 )
